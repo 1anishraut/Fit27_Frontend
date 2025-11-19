@@ -44,6 +44,8 @@ const Plans = () => {
       await axios.delete(BASE_URL + `/plan/delete/${id}`, {
         withCredentials: true,
       });
+          toast.success("Plan deleted successfully!");
+      
       fetchPlans();
     } catch (error) {
       console.error("Delete failed:", error);
@@ -131,7 +133,7 @@ const Plans = () => {
               {/* Total Count Row */}
               <tr className=" font-semibold">
                 <td className="py-2 px-4">Total Plans</td>
-                <td className="py-2 px-4">{plans.length}</td>
+                <td className="py-2 px-4">{plans.length || 0}</td>
                 <td className="py-2 px-4" colSpan={2}></td>
               </tr>
             </tbody>

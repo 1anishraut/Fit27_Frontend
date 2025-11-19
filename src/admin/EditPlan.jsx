@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { BASE_URL } from "../Utils/Constants";
+import { toast } from "react-toastify";
 
 const EditPlan = () => {
   const { id } = useParams();
@@ -69,8 +70,9 @@ const EditPlan = () => {
       await axios.patch(`${BASE_URL}/plan/update/${id}`, formData, {
         withCredentials: true,
       });
-
-      alert("Plan updated successfully");
+          toast.success("Plan updated successfully!");
+      
+      // alert("Plan updated successfully");
       navigate(-1);
     } catch (error) {
       console.error("Update error:", error);

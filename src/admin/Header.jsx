@@ -70,7 +70,7 @@ const Header = () => {
           onClick={() => setOpen(!open)}
         >
           {/* Profile Icon */}
-          <FiUser size={26} className="text-blue-700 border rounded-full p-1" />
+          <FiUser size={26} className="text-blue-700 border rounded-full p-1 bg-black" />
 
           {/* Admin Name */}
           <span className="text-blue-700 font-medium">

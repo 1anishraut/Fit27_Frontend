@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../Utils/Constants";
+import { toast } from "react-toastify";
 
 const CreatePlan = () => {
   const navigate = useNavigate();
@@ -34,7 +35,9 @@ const CreatePlan = () => {
       await axios.post(BASE_URL + "/plan/create", formData, {
         withCredentials: true,
       });
-      console.log("plan created");
+          toast.success("New plan created successfully!");
+      
+      // console.log("plan created");
       
       navigate(-1);
     } catch (error) {

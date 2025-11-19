@@ -3,13 +3,13 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const membersSlice = createSlice({
   name: "members",
-  initialState: null,
+  initialState: [],
   reducers:{
     addMembers: (state, action)=>{
       return action.payload
     },
     removeMembers: (state, action )=>{
-      return null
+      return []
     }
   }
 })
