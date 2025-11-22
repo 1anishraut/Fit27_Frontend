@@ -2,12 +2,13 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../Utils/Constants";
 import { addClasses } from "../Utils/classesSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
 const Classes = () => {
   const dispatch = useDispatch();
+  // const classesData = useSelector((state) => state.classes);
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
@@ -45,6 +46,8 @@ const Classes = () => {
     fetchClasses();
   }, []);
 
+  
+
   return (
     <div className="p-6 min-h-screen">
       <div className="flex justify-between items-center mb-4">
@@ -61,13 +64,13 @@ const Classes = () => {
               <th className="py-2 px-4">Cost</th>
               <th className="py-2 px-4">Active</th>
 
-              <th className="py-2 px-4 text-right">Actions</th>
+              <th className="py-2 px-4 text-right border-r">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {classes.map((plan) => (
-              <tr key={plan._id} className="border-b hover:bg-gray-50">
+              <tr key={plan._id} className="border-b hover:bg-gray-200 cursor-pointer">
                 <td className="py-2 px-4">{plan.name}</td>
                 <td className="py-2 px-4">{plan.capacity}</td>
                 <td className="py-2 px-4">{plan.remainingCapacity}</td>
