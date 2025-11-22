@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 
 body{
   background-color: rgb(247, 245, 245);
@@ -6,4 +10,8 @@ body{
 
 button {
   cursor: pointer;
+}
+/* Dark mode */
+.dark body {
+  @apply bg-[#09090B] text-white;
 }

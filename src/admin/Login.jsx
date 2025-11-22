@@ -10,7 +10,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [managerId, setManagerId] = useState("");
+  const [emailId, setEmailId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -19,7 +19,7 @@ const Login = () => {
     try {
       const res = await axios.post(
         BASE_URL + "/admin/login",
-        { managerId, password },
+        { emailId, password },
         { withCredentials: true }
       );
       dispatch(addAdmin(res?.data));
@@ -46,14 +46,14 @@ const Login = () => {
               className="flex flex-col gap-4 w-96"
             >
               <div className="flex flex-col">
-                <label htmlFor="managerId" className=" mb-2">
+                <label htmlFor="emailId" className=" mb-2">
                   Admin ID
                 </label>
                 <input
                   type="text"
-                  id="managerId"
-                  value={managerId}
-                  onChange={(e) => setManagerId(e.target.value)}
+                  id="emailId"
+                  value={emailId}
+                  onChange={(e) => setEmailId(e.target.value)}
                   className="p-2 border border-gray-300 rounded"
                 />
               </div>

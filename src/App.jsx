@@ -15,6 +15,7 @@ import Feedbacks from "./admin/Feedbacks";
 import CreateMembers from "./admin/CreateMembers";
 import CreatePlan from "./admin/CreatePlan";
 import EditPlan from "./admin/EditPlan";
+import Classes from "./admin/Classes";
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
               <Route path="allDetails" element={<AllDetails />} />
 
               <Route path="plans" element={<Plans />} />
+              <Route path="classes" element={<Classes />} />
               <Route path="feedbacks" element={<Feedbacks />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="createPlan" element={<CreatePlan />} />
