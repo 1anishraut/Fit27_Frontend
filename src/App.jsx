@@ -7,15 +7,18 @@ import { Provider } from "react-redux";
 // import AdminDashboard from "./Components/Admin/AdminDashboard";
 import { PersistGate } from "redux-persist/integration/react";
 import Login from "./admin/Login";
-import AdminLayout from "./admin/AdminLayout";
+import SuperAdminLogin from "./SuperAdmin/Login";
+import SuperAdminLayout from "./SuperAdmin/SuperAdminLayout";
+// import AdminLayout from "./admin/AdminLayout";
 
-import AllDetails from "./admin/AllDetails";
-import Plans from "./admin/Plans";
-import Feedbacks from "./admin/Feedbacks";
-import CreateMembers from "./admin/CreateMembers";
-import CreatePlan from "./admin/CreatePlan";
-import EditPlan from "./admin/EditPlan";
-import Classes from "./admin/Classes";
+// import AllDetails from "./admin/AllDetails";
+// import Plans from "./admin/Plans";
+// import Feedbacks from "./admin/Feedbacks";
+// import CreateMembers from "./admin/CreateMembers";
+// import CreatePlan from "./admin/CreatePlan";
+// import EditPlan from "./admin/EditPlan";
+// import Classes from "./admin/Classes";
+// import CreateClasses from "./admin/CreateClasses";
 
 
 function App() {
@@ -24,6 +27,13 @@ function App() {
       <PersistGate loading={null} persistor={persistor}>
         <BrowserRouter basename="/">
           <Routes>
+            {/* -------- Admin Routes -------- */}
+            <Route path="/superadmin" element={<SuperAdminLogin />} />
+            <Route path="/superadminDashboard" element={<SuperAdminLayout />}>
+              {/* <Route path="allDetails" element={<AllDetails />} /> */}
+              {/* <Route path="plans" element={<Plans />} /> */}
+              
+            </Route>
             {/* -------- Client Routes -------- */}
             <Route path="/" element={""}></Route>
             {/* 
@@ -34,17 +44,18 @@ function App() {
             </Route> */}
 
             {/* -------- Admin Routes -------- */}
-            <Route path="/admin" element={<Login />} />
+            {/* <Route path="/admin" element={<Login />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
 
               <Route path="plans" element={<Plans />} />
               <Route path="classes" element={<Classes />} />
+              <Route path="createClasses" element={<CreateClasses />} />
               <Route path="feedbacks" element={<Feedbacks />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="createPlan" element={<CreatePlan />} />
               <Route path="editPlan/:id" element={<EditPlan />} />
-            </Route>
+            </Route> */}
           </Routes>
         </BrowserRouter>
       </PersistGate>

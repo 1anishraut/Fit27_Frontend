@@ -14,7 +14,7 @@ const AdminLayout = () => {
       <ToastContainer position="top-center" autoClose={3000} />
       <AdminNavbar />
       {/* Main Content */}
-      <div className="scrollbar-hide flex-1 overflow-y-auto  mt-16">
+      <div className="scrollbar-hide flex-1 overflow-y-auto  mt-16 bg-black">
         <Outlet />
       </div>
     </div>

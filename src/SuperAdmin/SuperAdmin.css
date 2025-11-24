@@ -1,0 +1,31 @@
+/* GLOBAL DARK MODE */
+.dark {
+  background-color: #09090B !important;
+  color: #fff !important;
+}
+
+/* Sidebar */
+.dark .sidebar {
+  background-color: #09090B !important;
+  border-color: #1f1f23 !important;
+}
+
+.dark .sidebar-header {
+  border-color: #1f1f23 !important;
+}
+
+.dark .sidebar-menu button,
+.dark .sidebar-menu a {
+  color: #d1d1d1 !important;
+}
+
+.dark .sidebar-menu a:hover,
+.dark .sidebar-menu button:hover {
+  background-color: #1a1a1d !important;
+}
+
+/* Active menu item */
+.dark .active-menu {
+  background-color: #ffffff !important;
+  color: #000 !important;
+}
