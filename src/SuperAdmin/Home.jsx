@@ -2,6 +2,7 @@ import React from "react";
 import StatsGrid from "./Components/StarGrid";
 import EarningsChart from "./Components/EarningsChart";
 import ExpriringSoon from "./Components/ExpiringSoon";
+import Inactive_Total from "./Components/Inactive_Total";
 
 const Home = () => {
   return (
@@ -12,8 +13,8 @@ const Home = () => {
           <ExpriringSoon />
           <EarningsChart />
         </div>
-        <div className="flex border border-red-500">
-          
+        <div className="flex ">
+          <Inactive_Total/>
 
         </div>
       </div>
