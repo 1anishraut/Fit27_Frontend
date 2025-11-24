@@ -1,10 +1,24 @@
-import React from 'react'
-import StatsGrid from './Components/StarGrid'
+import React from "react";
+import StatsGrid from "./Components/StarGrid";
+import EarningsChart from "./Components/EarningsChart";
+import ExpriringSoon from "./Components/ExpiringSoon";
 
 const Home = () => {
   return (
-    <StatsGrid/>
-  )
-}
+    <>
+      <div className="flex flex-col gap-6">
+        <StatsGrid />
+        <div className="flex gap-6">
+          <ExpriringSoon />
+          <EarningsChart />
+        </div>
+        <div className="flex border border-red-500">
+          
 
-export default Home
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Home;
