@@ -9,6 +9,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import Login from "./admin/Login";
 import SuperAdminLogin from "./SuperAdmin/Login";
 import SuperAdminLayout from "./SuperAdmin/SuperAdminLayout";
+import Home from "./SuperAdmin/Home";
 // import AdminLayout from "./admin/AdminLayout";
 
 // import AllDetails from "./admin/AllDetails";
@@ -30,7 +31,7 @@ function App() {
             {/* -------- Admin Routes -------- */}
             <Route path="/superadmin" element={<SuperAdminLogin />} />
             <Route path="/superadminDashboard" element={<SuperAdminLayout />}>
-              {/* <Route path="allDetails" element={<AllDetails />} /> */}
+              <Route path="home" element={<Home />} />
               {/* <Route path="plans" element={<Plans />} /> */}
               
             </Route>

@@ -1,39 +1,30 @@
-// src/components/layout/Header.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FiMenu,
-  FiSearch,
   FiGrid,
   FiMessageSquare,
   FiBell,
   FiUser,
   FiX,
+  FiSun,
+  FiMoon,
 } from "react-icons/fi";
+import logoDark from "../Images/mb_logo_dark.png";
+import logoLight from "../Images/mb_logo_light.png";
+import UserMenu from "./UserMenu";
 
-/**
- * Metronic-like Header (Demo1)
- * - Logo on left
- * - Search (desktop)
- * - Apps / Chat / Notifications / User menus on right
- * - Mobile sheet that slides in (icons + links)
- * - Dark-mode aware (respects document.documentElement.classList)
- *
- * Drop this file in: src/components/layout/Header.jsx
- */
 
-export default function Header({ onToggleSidebar }) {
+export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [theme, setTheme] = useState(
-    typeof window !== "undefined"
-      ? localStorage.getItem("theme") || "light"
-      : "light"
-  );
 
   const location = useLocation();
 
+  // Detect mobile
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
@@ -41,14 +32,7 @@ export default function Header({ onToggleSidebar }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Sync theme with html.dark
-  useEffect(() => {
-    if (theme === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  // Optional: close mobile sheet on route change
+  // Close sheet when navigating
   useEffect(() => {
     setMobileOpen(false);
     setSearchOpen(false);
@@ -56,138 +40,90 @@ export default function Header({ onToggleSidebar }) {
 
   return (
     <>
-    
-
       <header
-        className="fixed top-0 left-0 right-0 z-50 h-16  flex items-center justify-between
-          bg-white dark:bg-[#09090B] border-b dark:border-[#1f1f23] px-4"
+        className="fixed top-0 left-0 right-0 z-50 h-16 
+        flex items-center justify-between bg-white dark:bg-[#09090B]
+        border-b border-gray-300 dark:border-[#1f1f23] px-4"
       >
-        {/* Left: Mobile menu button + Logo */}
+        {/* LEFT */}
         <div className="flex items-center gap-3">
-          {/* Mobile menu button */}
+          {/* Sidebar Toggle */}
           <button
             onClick={() => {
-              if (isMobile && onToggleSidebar) {
-                // If user provided a manual sidebar toggle (optional)
-                onToggleSidebar();
-              } else {
-                // open mobile sheet
+              if (isMobile) {
                 setMobileOpen((s) => !s);
+              } else {
+                setCollapsed((prev) => !prev);
               }
             }}
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-            aria-label="open menu"
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] flex items-center justify-center"
           >
-            <FiMenu size={18} className="text-gray-700 dark:text-gray-200" />
+            <FiMenu className="text-gray-700 dark:text-gray-200" size={18} />
           </button>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-           
-            <span className="hidden md:inline-block text-lg font-semibold dark:text-white">
-              Super Admin
-            </span>
-          </Link>
+          <img
+            src={theme === "dark" ? logoLight : logoDark}
+            alt="logo"
+            className="h-10 w-auto object-contain transition-all"
+          />
+
         </div>
 
-        {/* Center: Search (desktop) */}
-        {/* <div className="flex-1 flex items-center justify-center">
-          <div className="hidden lg:flex items-center w-full max-w-2xl">
-            <div
-              className="relative w-full"
-              title="Search (click the icon to open)"
-            >
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full border rounded-full py-2 pl-10 pr-4 text-sm bg-gray-50 border-gray-200 dark:bg-[#0e0e10] dark:border-[#1f1f23] dark:text-gray-200"
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-                <FiSearch />
-              </div>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Right: Icons */}
+        {/* RIGHT */}
         <div className="flex items-center gap-2">
-          {/* Apps */}
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-            aria-label="open apps"
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
           >
             <FiGrid className="text-gray-700 dark:text-gray-200" />
           </button>
 
-          {/* Chat */}
-          <button
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-            aria-label="chat"
-          >
+          <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]">
             <FiMessageSquare className="text-gray-700 dark:text-gray-200" />
           </button>
 
-          {/* Notifications */}
           <div className="relative">
-            <button
-              className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-              aria-label="notifications"
-            >
+            <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]">
               <FiBell className="text-gray-700 dark:text-gray-200" />
             </button>
-            {/* small badge */}
-            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
               3
             </span>
           </div>
 
-          {/* Theme toggle (keeps in sync with sidebar) */}
+          {/* THEME TOGGLE */}
           <button
-            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-            aria-label="toggle theme"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
           >
             {theme === "dark" ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
-                  fill="currentColor"
-                />
-              </svg>
+              <FiSun size={18} className="text-yellow-300" />
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <FiMoon size={18} className="text-gray-700" />
             )}
           </button>
 
-          {/* User */}
+          {/* USER MENU DROPDOWN */}
           <div className="relative">
             <button
-              className="flex items-center gap-2 p-1 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23] transition"
-              aria-label="open user menu"
+              onClick={() => setUserMenuOpen((prev) => !prev)}
+              className="flex items-center gap-2 p-1 rounded hover:bg-gray-300 dark:hover:bg-[#1f1f23] transition"
             >
-              <img
-                src="/media/avatars/300-1.png"
-                alt="avatar"
-                className="h-8 w-8 rounded-full object-cover"
-              />
+              <FiUser className="text-gray-700 dark:text-gray-200" />
               <span className="hidden md:inline text-sm dark:text-gray-200">
-                Admin
+                Welcome, Super Admin
               </span>
             </button>
+
+            {userMenuOpen && (
+              <UserMenu onClose={() => setUserMenuOpen(false)} />
+            )}
           </div>
         </div>
       </header>
 
-      {/* Mobile sheet / overlay */}
+      {/* MOBILE SLIDE SIDEBAR */}
       <div
         className={`fixed inset-0 z-50 lg:hidden transition-opacity ${
           mobileOpen
@@ -195,94 +131,127 @@ export default function Header({ onToggleSidebar }) {
             : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* overlay */}
         <div
-          className={`absolute inset-0 bg-black/40 ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className="absolute inset-0 bg-black/40"
           onClick={() => setMobileOpen(false)}
         />
 
         <aside
-          className={`absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-[#09090B] border-r dark:border-[#1f1f23] transform transition-transform ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`absolute left-0 top-0 bottom-0 w-64 
+    bg-white dark:bg-[#09090B] border-r border-gray-300 dark:border-[#1f1f23]
+    transform transition-transform 
+    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="h-16 flex items-center justify-between px-4 border-b dark:border-[#1f1f23]">
-            <div className="flex items-center gap-3">
-              <img src="/media/app/mini-logo.svg" alt="logo" className="h-8" />
-              <span className="text-sm font-semibold dark:text-white">
-                Super Admin
-              </span>
-            </div>
-            <button
-              className="p-2"
-              onClick={() => setMobileOpen(false)}
-              aria-label="close"
-            >
+          {/* HEADER */}
+          <div className="h-16 flex items-center justify-between px-4 border-b border-gray-300 dark:border-[#1f1f23]">
+            <span className="text-sm font-semibold dark:text-white">
+              Super Admin
+            </span>
+
+            <button className="p-2" onClick={() => setMobileOpen(false)}>
               <FiX className="text-gray-700 dark:text-gray-200" />
             </button>
           </div>
 
+          {/* MENU ITEMS — SAME AS SIDEBAR */}
           <nav className="p-4 space-y-1">
-            {/* replicate main menu items (the same as sidebar) */}
             <Link
               to="/adminDashboard"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 
+        hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Dashboard
             </Link>
+
+            {/* ALL DETAILS DROPDOWN */}
+            <details>
+              <summary
+                className="cursor-pointer px-3 py-2 rounded-lg 
+        text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              >
+                All Details
+              </summary>
+              <div className="pl-6 pt-1 space-y-1">
+                <Link
+                  to="/adminDashboard/allDetails/option1"
+                  className="block px-2 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+                >
+                  Option 1
+                </Link>
+                <Link
+                  to="/adminDashboard/allDetails/option2"
+                  className="block px-2 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+                >
+                  Option 2
+                </Link>
+                <Link
+                  to="/adminDashboard/allDetails/option3"
+                  className="block px-2 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+                >
+                  Option 3
+                </Link>
+              </div>
+            </details>
+
             <Link
               to="/adminDashboard/companies"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Companies
             </Link>
+
             <Link
               to="/adminDashboard/plan"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Plan
             </Link>
+
             <Link
               to="/adminDashboard/plan-request"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Plan Request
             </Link>
+
             <Link
-              to="/adminDashboard/referral-program"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              to="/adminDashboard/referral"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Referral Program
             </Link>
+
             <Link
               to="/adminDashboard/coupon"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Coupon
             </Link>
+
             <Link
               to="/adminDashboard/order"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Order
             </Link>
+
             <Link
               to="/adminDashboard/email-template"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Email Template
             </Link>
+
             <Link
               to="/adminDashboard/landing-page"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Landing Page
             </Link>
+
             <Link
               to="/adminDashboard/settings"
-              className="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Settings
             </Link>

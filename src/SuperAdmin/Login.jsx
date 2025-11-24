@@ -23,7 +23,7 @@ const Login = () => {
     //     { withCredentials: true }
     //   );
     //   dispatch(addAdmin(res?.data));
-      navigate("/superAdminDashboard/allDetails");
+      navigate("/superAdminDashboard/home");
     // } catch (err) {
     //   setError(err.response?.data?.message || "Login failed");
     // }

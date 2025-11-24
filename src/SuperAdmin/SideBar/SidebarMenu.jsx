@@ -15,7 +15,7 @@ const MENU = [
     id: "dashboard",
     title: "Dashboard",
     icon: <FiHome />,
-    path: "/adminDashboard",
+    path: "/superAdminDashboard/home",
   },
 
   {
@@ -125,7 +125,7 @@ export default function SidebarMenu({ collapsed = false }) {
                   ${
                     isOpen
                       ? "bg-gray-100 dark:bg-[#1f1f23] text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1f1f23]"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#1f1f23]"
                   }
                 `}
               >
@@ -159,7 +159,7 @@ export default function SidebarMenu({ collapsed = false }) {
                         ${
                           subActive
                             ? "bg-gray-200 dark:bg-white text-gray-900 dark:text-black font-medium"
-                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1f1f23]"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
                         }
                       `}
                     >
@@ -185,7 +185,7 @@ export default function SidebarMenu({ collapsed = false }) {
               ${
                 isActive
                   ? "active-menu bg-black text-white dark:bg-white dark:text-black shadow-md"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1f1f23]"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
               }
               `
             }
