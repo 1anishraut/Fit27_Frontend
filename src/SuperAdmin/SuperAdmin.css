@@ -29,3 +29,19 @@
   background-color: #ffffff !important;
   color: #000 !important;
 }
+
+
+/* keep header on top of sidebar overflow and ensure a subtle backdrop blur if desired */
+header {
+  backdrop-filter: saturate(120%) blur(6px);
+}
+
+/* mobile overlay smoothing */
+.mobile-sheet-enter {
+  transform: translateX(-100%);
+}
+.mobile-sheet-enter-active {
+  transform: translateX(0);
+  transition: transform 200ms ease;
+}
+
