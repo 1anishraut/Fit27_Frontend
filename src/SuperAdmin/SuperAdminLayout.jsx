@@ -22,7 +22,7 @@ const SuperAdminLayout = () => {
   }, [theme]);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-white dark:bg-[#09090B]">
+    <div className="relative h-screen w-full overflow-hidden bg-[#F2F0EF] dark:bg-[#09090B]">
       <ToastContainer position="top-center" autoClose={3000} />
 
       {/* SIDEBAR (hidden on mobile) */}
@@ -48,7 +48,7 @@ const SuperAdminLayout = () => {
 
         {/* PAGE CONTENT */}
         <div className="flex-1 mt-16 overflow-y-auto p-6 dark:bg-[#09090B]">
-          <Outlet />
+          <Outlet context={{ theme, setTheme }} />
         </div>
       </div>
     </div>

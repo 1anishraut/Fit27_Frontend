@@ -45,3 +45,12 @@ header {
   transition: transform 200ms ease;
 }
 
+/* Hide scrollbar (Chrome, Safari) */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar (Firefox) */
+.scrollbar-none {
+  scrollbar-width: none;
+}

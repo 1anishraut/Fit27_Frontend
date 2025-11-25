@@ -1,5 +1,4 @@
 import React from "react";
-import { FaLinkedin, FaYoutube, FaInstagram, FaTiktok } from "react-icons/fa";
 import { FiClock } from "react-icons/fi";
 
 // Background patterns
@@ -9,38 +8,55 @@ import bgPatternLight from "../Images/bg-3.png";
 const stats = [
   {
     id: 1,
-    icon: <FiClock size={60}/>,
+    icon: <FiClock size={60} />,
     value: "Expiring Soon",
     label: "Total Companies 7",
   },
 ];
 
-export default function ExpriringSoon() {
-  // detect theme
-  const isDark = document.documentElement.classList.contains("dark");
-
+export default function ExpiringSoon() {
   return (
-    <div className="flex gap-6 w-[30%] ">
+    <div className="flex gap-6 w-[30%]">
       {stats.map((item) => (
         <div
           key={item.id}
-          className="w-full relative p-6 rounded-xl border border-gray-800 
-          bg-[#0D0D0F] dark:bg-[#0D0D0F]
-          hover:border-gray-700 transition backdrop-blur-sm"
+          className={`
+            relative w-full p-6 rounded-xl border 
+            bg-white dark:bg-[#0D0D0F]
+            border-gray-300 dark:border-gray-800
+            hover:border-gray-400 dark:hover:border-gray-700
+            overflow-hidden transition
+          `}
           style={{
-            backgroundImage: `url(${isDark ? bgPatternDark : bgPatternLight})`,
+            backgroundImage: `url(${bgPatternLight})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          {/* ICON */}
-          <div className="mb-3">{item.icon}</div>
+          {/* DARK MODE BACKGROUND (Image override) */}
+          <div
+            className="absolute inset-0 opacity-0 dark:opacity-100 transition-opacity duration-300"
+            style={{
+              backgroundImage: `url(${bgPatternDark})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
 
-          {/* VALUE */}
-          <h2 className="text-3xl font-bold text-white">{item.value}</h2>
+          {/* CONTENT */}
+          <div className="relative">
+            {/* ICON */}
+            <div className="mb-3">{item.icon}</div>
 
-          {/* LABEL */}
-          <p className="text-gray-400 text-sm mt-1">{item.label}</p>
+            {/* TEXT */}
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {item.value}
+            </h2>
+
+            <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+              {item.label}
+            </p>
+          </div>
         </div>
       ))}
     </div>

@@ -5,7 +5,7 @@ export default function Sidebar({ collapsed, setCollapsed, theme, setTheme }) {
   return (
     <aside
       className={`hidden lg:flex fixed top-0 left-0 h-screen z-50 flex-col pt-16 
-      bg-white dark:bg-[#09090B] border-r border-gray-300 dark:border-[#1f1f23] 
+      bg-[#F2F0EF] dark:bg-[#09090B] border-r border-gray-300 dark:border-[#1f1f23] 
       shadow-lg transition-all 
       ${collapsed ? "w-20" : "w-64"}`}
     >
