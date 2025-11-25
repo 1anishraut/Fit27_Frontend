@@ -8,7 +8,7 @@ const data = [
   { name: "Inactive", value: 25 },
 ];
 
-const COLORS = ["#4F46E5", "#E5E7EB"]; // Indigo + Light Gray
+const COLORS = ["#FF0000", "#E5E7EB"]; // Indigo + Light Gray
 
 const Inactive_Total = () => {
   const totalMembers = data.reduce((acc, cur) => acc + cur.value, 0);

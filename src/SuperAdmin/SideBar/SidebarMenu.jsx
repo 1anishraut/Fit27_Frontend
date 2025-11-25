@@ -30,53 +30,53 @@ const MENU = [
   },
 
   {
-    id: "companies",
-    title: "Companies",
+    id: "fitnessHubs",
+    title: "Fitness Hubs",
     icon: <FiUsers />,
-    path: "/adminDashboard/companies",
+    path: "/superAdminDashboard/fitnessHubs",
   },
   {
     id: "plan",
     title: "Plan",
     icon: <FiClipboard />,
-    path: "/adminDashboard/plan",
+    path: "/superAdminDashboard/plans",
   },
-  {
-    id: "planReq",
-    title: "Plan Request",
-    icon: <FiClipboard />,
-    path: "/adminDashboard/plan-request",
-  },
-  {
-    id: "referral",
-    title: "Referral Program",
-    icon: <FiUsers />,
-    path: "/adminDashboard/referral",
-  },
+  // {
+  //   id: "planReq",
+  //   title: "Plan Request",
+  //   icon: <FiClipboard />,
+  //   path: "/adminDashboard/plan-request",
+  // },
+  // {
+  //   id: "referral",
+  //   title: "Referral Program",
+  //   icon: <FiUsers />,
+  //   path: "/adminDashboard/referral",
+  // },
   {
     id: "coupon",
     title: "Coupon",
     icon: <FiShoppingBag />,
     path: "/adminDashboard/coupon",
   },
-  {
-    id: "order",
-    title: "Order",
-    icon: <FiShoppingBag />,
-    path: "/adminDashboard/order",
-  },
+  // {
+  //   id: "order",
+  //   title: "Order",
+  //   icon: <FiShoppingBag />,
+  //   path: "/adminDashboard/order",
+  // },
   {
     id: "emailTemp",
     title: "Email Template",
     icon: <FiClipboard />,
     path: "/adminDashboard/email-template",
   },
-  {
-    id: "landingPage",
-    title: "Landing Page",
-    icon: <FiHome />,
-    path: "/adminDashboard/landing-page",
-  },
+  // {
+  //   id: "landingPage",
+  //   title: "Landing Page",
+  //   icon: <FiHome />,
+  //   path: "/adminDashboard/landing-page",
+  // },
   {
     id: "settings",
     title: "Settings",
@@ -125,7 +125,7 @@ export default function SidebarMenu({ collapsed = false }) {
                   ${
                     isOpen
                       ? "bg-gray-100 dark:bg-[#1f1f23] text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#1f1f23]"
+                      : "text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#1f1f23]"
                   }
                 `}
               >
@@ -159,7 +159,7 @@ export default function SidebarMenu({ collapsed = false }) {
                         ${
                           subActive
                             ? "bg-gray-200 dark:bg-white text-gray-900 dark:text-black font-medium"
-                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
+                            : "text-gray-900 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
                         }
                       `}
                     >

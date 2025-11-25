@@ -10,6 +10,9 @@ import Login from "./admin/Login";
 import SuperAdminLogin from "./SuperAdmin/Login";
 import SuperAdminLayout from "./SuperAdmin/SuperAdminLayout";
 import Home from "./SuperAdmin/Home";
+import Companies from "./SuperAdmin/FitnessHubs";
+import Plans from "./SuperAdmin/Plans";
+import FitnessHubs from "./SuperAdmin/FitnessHubs";
 // import AdminLayout from "./admin/AdminLayout";
 
 // import AllDetails from "./admin/AllDetails";
@@ -32,8 +35,8 @@ function App() {
             <Route path="/superadmin" element={<SuperAdminLogin />} />
             <Route path="/superadminDashboard" element={<SuperAdminLayout />}>
               <Route path="home" element={<Home />} />
-              {/* <Route path="plans" element={<Plans />} /> */}
-              
+              <Route path="fitnessHubs" element={<FitnessHubs />} />
+              <Route path="plans" element={<Plans />} />
             </Route>
             {/* -------- Client Routes -------- */}
             <Route path="/" element={""}></Route>

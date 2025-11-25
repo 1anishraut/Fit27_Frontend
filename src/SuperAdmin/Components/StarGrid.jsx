@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-import { FaBuilding, FaShoppingCart, FaBook } from "react-icons/fa";
+import { FaBuilding } from "react-icons/fa";
 import { GiGymBag } from "react-icons/gi";
 import { TbFaceIdError, TbUsers } from "react-icons/tb";
 
@@ -36,17 +36,33 @@ const stats = [
 ];
 
 export default function StatsGrid() {
-  // detect theme
-  const isDark = document.documentElement.classList.contains("dark");
+  const [isDark, setIsDark] = useState(
+    document.documentElement.classList.contains("dark")
+  );
+
+  // Listen to theme changes
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="flex gap-6 ">
+    <div className="flex gap-6 w-full">
       {stats.map((item) => (
         <div
           key={item.id}
-          className="relative p-6 rounded-xl border border-gray-800 w-[20%]
-          bg-[#0D0D0F] dark:bg-[#0D0D0F]
-          hover:border-gray-700 transition backdrop-blur-sm"
+          className="relative p-6 rounded-xl border w-[20%]
+          bg-white dark:bg-[#0D0D0F]
+          border-gray-300 dark:border-gray-700
+          hover:border-gray-500 transition-all shadow-sm"
           style={{
             backgroundImage: `url(${isDark ? bgPatternDark : bgPatternLight})`,
             backgroundSize: "cover",
@@ -57,10 +73,14 @@ export default function StatsGrid() {
           <div className="mb-3">{item.icon}</div>
 
           {/* VALUE */}
-          <h2 className="text-3xl font-bold text-white">{item.value}</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {item.value}
+          </h2>
 
           {/* LABEL */}
-          <p className="text-gray-300 text-sm mt-1">{item.label}</p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+            {item.label}
+          </p>
         </div>
       ))}
     </div>

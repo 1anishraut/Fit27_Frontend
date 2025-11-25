@@ -51,7 +51,7 @@ export default function EarningsChart() {
                 onChange={() => setReferralsOnly(!referralsOnly)}
                 className="sr-only peer"
               />
-              <div className="w-10 h-5 bg-gray-600 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+              <div className="w-10 h-5 bg-gray-600 rounded-full peer peer-checked:bg-red-600 transition"></div>
               <div
                 className="absolute h-4 w-4 bg-white rounded-full top-0.5 left-1 
                   peer-checked:translate-x-5 transition"
@@ -96,7 +96,7 @@ export default function EarningsChart() {
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#3F8CFF"
+              stroke="#ff0000"
               strokeWidth={3}
               dot={false}
             />
