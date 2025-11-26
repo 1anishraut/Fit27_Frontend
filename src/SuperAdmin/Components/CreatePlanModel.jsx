@@ -1,6 +1,7 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { FiX } from "react-icons/fi";
+import axios from "axios";
+import { BASE_URL } from "../../Utils/Constants"; // adjust path as needed
 
 export default function CreatePlanModal({
   isOpen,
@@ -17,8 +18,10 @@ export default function CreatePlanModal({
     storage: "",
     description: "",
     trialEnable: false,
-    // chatgpt: false,
   });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const ref = useRef();
 
@@ -33,16 +36,46 @@ export default function CreatePlanModal({
 
   if (!isOpen) return null;
 
+  // Handle form change
   const handleChange = (key) => (e) => {
     const val =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setForm((prev) => ({ ...prev, [key]: val }));
   };
 
-  const submit = (e) => {
+  // Submit
+  const submit = async (e) => {
     e.preventDefault();
-    onCreate(form);
-    onClose();
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const payload = {
+        name: form.name,
+        price: Number(form.price),
+        duration: form.duration,
+        maxUsers: Number(form.maxUsers),
+        maxCustomers: Number(form.maxCustomers),
+        maxVendors: Number(form.maxVendors),
+        storage: Number(form.storage),
+        description: form.description,
+        trialEnable: form.trialEnable,
+      };
+
+      const res = await axios.post(`${BASE_URL}/adminPlans/create`, payload, {
+        withCredentials: true,
+      });
+
+      onCreate(res.data.data); // send data to parent if needed
+      setLoading(false);
+      onClose();
+    } catch (error) {
+      setLoading(false);
+      setErrorMsg(
+        error.response?.data?.message || "Failed to create plan. Try again."
+      );
+      console.error(error);
+    }
   };
 
   return (
@@ -77,6 +110,11 @@ export default function CreatePlanModal({
             <FiX className="text-2xl dark:text-gray-300" />
           </button>
         </div>
+
+        {/* Error */}
+        {errorMsg && (
+          <div className="text-red-500 text-sm mb-3">{errorMsg}</div>
+        )}
 
         {/* GRID FIELDS */}
         <div className="grid grid-cols-2 gap-4">
@@ -211,7 +249,6 @@ export default function CreatePlanModal({
 
         {/* TOGGLES */}
         <div className="mt-6 flex flex-wrap items-center gap-6">
-          {/* Trial Toggle */}
           <div className="flex items-center gap-3">
             <label className="text-sm dark:text-gray-200">
               Trial is enable (on/off)
@@ -223,17 +260,6 @@ export default function CreatePlanModal({
               className="toggle"
             />
           </div>
-
-          {/* ChatGPT Toggle */}
-          {/* <div className="flex items-center gap-3">
-            <label className="text-sm dark:text-gray-200">ChatGPT</label>
-            <input
-              type="checkbox"
-              checked={form.chatgpt}
-              onChange={handleChange("chatgpt")}
-              className="toggle"
-            />
-          </div> */}
         </div>
 
         {/* ACTIONS */}
@@ -242,17 +268,18 @@ export default function CreatePlanModal({
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-md 
-            bg-gray-200 dark:bg-gray-700"
+            bg-gray-200 dark:bg-gray-700 text-black dark:text-white"
           >
             Cancel
           </button>
 
           <button
             type="submit"
+            disabled={loading}
             className="px-4 py-2 rounded-md 
             bg-black text-white dark:bg-white dark:text-black"
           >
-            Create
+            {loading ? "Creating..." : "Create"}
           </button>
         </div>
       </form>

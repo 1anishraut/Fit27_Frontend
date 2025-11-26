@@ -1,11 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import { FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+import { useDispatch, useSelector } from "react-redux";
+import { removeSuperAdmin } from "../../Utils/superAdminSlice";
+import { BASE_URL } from "../../Utils/Constants";
 
 export default function UserMenu({ onClose }) {
+  const superAdmin = useSelector((state) => state.superAdmin);
   const menuRef = useRef();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Close menu when clicking outside
+  // Close dropdown outside click
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -15,6 +23,27 @@ export default function UserMenu({ onClose }) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // ✅ LOGOUT FUNCTION
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${BASE_URL}/superAdmin/logout`,
+        {},
+        { withCredentials: true }
+      );
+
+      // Clear redux persisted state
+      dispatch(removeSuperAdmin());
+
+      // Navigate to login screen
+      navigate("/superAdmin");
+
+      onClose();
+    } catch (error) {
+      console.log("Logout Error:", error);
+    }
+  };
 
   return (
     <div
@@ -26,16 +55,15 @@ export default function UserMenu({ onClose }) {
       <div className="flex items-center gap-3 pb-3 border-b dark:border-[#1f1f23]">
         <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700" />
         <div>
-          <p className="text-sm font-semibold dark:text-white">Admin</p>
+          <p className="text-sm font-semibold dark:text-white">Super Admin</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            admin@mail.com
+            {superAdmin?.emailId}
           </p>
         </div>
       </div>
 
       {/* Menu List */}
       <div className="mt-3 space-y-2">
-        {/* My Profile */}
         <Link
           to="/adminDashboard/profile"
           onClick={onClose}
@@ -46,7 +74,6 @@ export default function UserMenu({ onClose }) {
           My Profile
         </Link>
 
-        {/* Language */}
         <button
           className="flex items-center justify-between w-full p-2 rounded 
           hover:bg-gray-100 dark:hover:bg-[#1f1f23] text-sm dark:text-gray-200"
@@ -57,14 +84,11 @@ export default function UserMenu({ onClose }) {
           </span>
         </button>
 
-        {/* Logout */}
+        {/* LOGOUT BUTTON */}
         <button
-          onClick={() => {
-            onClose();
-            console.log("Logged out");
-          }}
+          onClick={handleLogout}
           className="w-full p-2 rounded bg-red-500 text-white text-sm mt-2 
-        hover:bg-red-600"
+          hover:bg-red-600 transition"
         >
           Logout
         </button>

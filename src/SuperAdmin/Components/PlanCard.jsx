@@ -1,29 +1,43 @@
-// PlanCard.jsx
 import React from "react";
-import { FiEdit2, FiTrash, FiToggleLeft } from "react-icons/fi";
+import { FiEdit2, FiTrash } from "react-icons/fi";
 import clsx from "clsx";
 
-/**
- * PlanCard
- * props:
- *  - title (string)
- *  - price (string)
- *  - duration (string)
- *  - features (array of {label, enabled})
- *  - onEdit, onDelete
- *  - active (bool)
- *  - showBadge (string) // e.g. "Free Plan", "Lifetime Plan"
- */
 export default function PlanCard({
-  title,
+  id,
+  name,
   price,
-  duration = "Lifetime",
-  features = [],
+  duration,
+  maxUsers,
+  maxCustomers,
+  maxVendors,
+  storage,
+  description,
+  trialEnable,
+  status,
   onEdit = () => {},
   onDelete = () => {},
-  active = false,
-  showBadge,
 }) {
+  // Build features list from schema
+  const features = [
+    {
+      label: `Users: ${maxUsers === -1 ? "Unlimited" : maxUsers}`,
+      enabled: true,
+    },
+    {
+      label: `Customers: ${maxCustomers === -1 ? "Unlimited" : maxCustomers}`,
+      enabled: true,
+    },
+    {
+      label: `Vendors: ${maxVendors === -1 ? "Unlimited" : maxVendors}`,
+      enabled: true,
+    },
+    { label: `Storage: ${storage} MB`, enabled: true },
+    {
+      label: `Trial Enabled: ${trialEnable ? "Yes" : "No"}`,
+      enabled: trialEnable,
+    },
+  ];
+
   return (
     <div
       className={clsx(
@@ -32,50 +46,32 @@ export default function PlanCard({
       )}
     >
       {/* Badge */}
-      {showBadge && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <span className="bg-black text-white dark:bg-white dark:text-black px-4 py-1 rounded-full text-sm shadow">
-            {showBadge}
-          </span>
-        </div>
-      )}
+      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+        <span
+          className={clsx(
+            "px-4 py-1 rounded-full text-sm shadow",
+            status === "active"
+              ? "bg-green-600 text-white"
+              : "bg-gray-600 text-white"
+          )}
+        >
+          {status === "active" ? "Active" : "Inactive"}
+        </span>
+      </div>
 
-      {/* Header price */}
+      {/* Header */}
       <div className="pt-6 mt-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between">
           <div>
-            <div className="text-4xl font-bold text-gray-900 dark:text-white">
-              {price}
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">
+              Rs {price}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              /{duration}
+              / {duration}
             </div>
             <div className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-              Free Trial Days : 0
+              {description || "No description added"}
             </div>
-          </div>
-
-          {/* Active Toggle */}
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 dark:text-gray-300">
-                Active
-              </span>
-              <div
-                className={clsx(
-                  "w-11 h-6 rounded-full relative transition",
-                  active ? "bg-green-500" : "bg-gray-300 dark:bg-gray-700"
-                )}
-                aria-hidden
-              >
-                <span
-                  className={clsx(
-                    "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition",
-                    active && "translate-x-5"
-                  )}
-                />
-              </div>
-            </label>
           </div>
         </div>
       </div>
@@ -90,20 +86,12 @@ export default function PlanCard({
                   "inline-flex items-center justify-center w-8 h-8 rounded-md",
                   f.enabled
                     ? "bg-green-50 text-green-600"
-                    : "bg-red-50 text-red-500"
+                    : "bg-gray-200 text-gray-500"
                 )}
               >
                 {f.enabled ? "+" : "—"}
               </span>
-              <span
-                className={
-                  f.enabled
-                    ? "text-gray-700 dark:text-gray-100"
-                    : "text-gray-500 dark:text-gray-400"
-                }
-              >
-                {f.label}
-              </span>
+              <span>{f.label}</span>
             </li>
           ))}
         </ul>
@@ -127,9 +115,8 @@ export default function PlanCard({
           <span className="text-sm">Delete</span>
         </button>
 
-        {/* small spacer */}
         <div className="ml-auto text-xs text-gray-400 dark:text-gray-500">
-          ID: 001
+          ID: {id.slice(-4)}
         </div>
       </div>
     </div>

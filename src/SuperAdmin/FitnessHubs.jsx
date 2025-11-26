@@ -1,44 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import CompanyCard from "./Components/CompanyCard";
 import CreateFitnessHubsModel from "./Components/CreateFitnessHubsModel";
+import { BASE_URL } from "../Utils/Constants";
 
 export default function FitnessHubs() {
   const [open, setOpen] = useState(false);
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const companies = [
-    {
-      plan: "Lifetime Plan",
-      name: "Community Plus",
-      email: "tapadir20@gmail.com",
-      date: "2025-10-12",
-      time: "12:01:49",
-      stats: [3, 0, 0, 0],
-    },
-    {
-      plan: "Free Plan",
-      name: "Nex Gen Allied Services",
-      email: "admin@nexgen.com",
-      date: "2025-11-23",
-      time: "16:27:21",
-      stats: [1, 0, 0, 0],
-    },
-    {
-      plan: "Free Plan",
-      name: "MindBoxx India",
-      email: "manzoor@mindboxxindia.com",
-      date: "2025-11-21",
-      time: "12:17:10",
-      stats: [1, 0, 0, 0],
-    },
-  ];
+  // Fetch all admins
+  const fetchAdmins = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/admin/all`, {
+        withCredentials: true,
+      });
+
+      setAdmins(res.data.data || []);
+    } catch (err) {
+      console.log("Error fetching admins:", err.response?.data || err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
 
   return (
     <div className="p-6 dark:bg-[#09090B] min-h-screen transition-all">
-      {/* Grid */}
+      {/* GRID */}
       <div className="grid grid-cols-4 gap-6">
-        {companies.map((item, i) => (
-          <CompanyCard key={i} {...item} />
-        ))}
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="text-gray-500 dark:text-gray-300 col-span-4 text-center">
+            Loading companies...
+          </div>
+        )}
+
+        {/* Render admin cards */}
+        {!loading &&
+          admins.map((admin, index) => (
+            <CompanyCard
+              key={admin._id}
+              plan={"Free Plan"} // temp until plans are added
+              name={admin.gymName || "— No Name —"}
+              email={admin.emailId}
+              date={new Date(admin.createdAt).toISOString().split("T")[0]}
+              time={new Date(admin.createdAt).toLocaleTimeString()}
+              stats={[0, 0, 0, 0]} // placeholder stats
+            />
+          ))}
 
         {/* Create Company Card */}
         <div
@@ -63,7 +76,13 @@ export default function FitnessHubs() {
         </div>
       </div>
 
-      <CreateFitnessHubsModel isOpen={open} onClose={() => setOpen(false)} />
+      <CreateFitnessHubsModel
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          fetchAdmins(); // refresh list after creation
+        }}
+      />
     </div>
   );
 }

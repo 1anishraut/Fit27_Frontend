@@ -116,7 +116,7 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
             >
               <FiUser className="text-gray-700 dark:text-gray-200" />
               <span className="hidden md:inline text-sm dark:text-gray-200">
-                Welcome, Super Admin
+                Welcome, {superAdmin?.firstName || "Super Admin"}
               </span>
             </button>
 

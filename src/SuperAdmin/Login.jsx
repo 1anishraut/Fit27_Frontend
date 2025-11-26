@@ -27,7 +27,7 @@ const Login = () => {
 
       // Store admin data in Redux
       dispatch(addSuperAdmin(res.data.data));
-      console.log(res.data.data);
+      // console.log(res.data.data);
       
       // Navigate to dashboard
       navigate("/superAdminDashboard/home");
