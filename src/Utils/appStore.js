@@ -1,4 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
+import superAdminReducer from "./superAdminSlice"
+
 import adminReducer from "./adminSlice";
 
 import membersReducer from "./membersSlice";
@@ -14,6 +16,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
+  superAdmin: superAdminReducer,
   admin: adminReducer,
   members: membersReducer,
   plans: plansReducer,

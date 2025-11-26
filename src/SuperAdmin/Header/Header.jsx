@@ -13,9 +13,11 @@ import {
 import logoDark from "../Images/mb_logo_dark.png";
 import logoLight from "../Images/mb_logo_light.png";
 import UserMenu from "./UserMenu";
+import { useSelector } from "react-redux";
 
 
 export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
+  const superAdmin = useSelector((state) => state.superAdmin);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -37,6 +39,8 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
     setMobileOpen(false);
     setSearchOpen(false);
   }, [location.pathname]);
+  console.log(superAdmin); // getting null value here
+  
 
   return (
     <>
