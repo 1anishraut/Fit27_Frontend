@@ -44,7 +44,7 @@ export default function FitnessHubs() {
           admins.map((admin, index) => (
             <CompanyCard
               key={admin._id}
-              plan={"Free Plan"} // temp until plans are added
+              plan={admin.plan?.duration || "No Plan Assigned"}
               name={admin.gymName || "— No Name —"}
               email={admin.emailId}
               date={new Date(admin.createdAt).toISOString().split("T")[0]}

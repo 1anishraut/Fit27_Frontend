@@ -35,7 +35,7 @@ export default function EarningsChart({ theme }) {
 
   return (
     <div
-      className={`w-[70%] p-4 rounded-xl border shadow-lg transition
+      className={`w-[70%] p-4 rounded-xl border  transition shadow-xl
       ${isDark ? "bg-[#0D0D0F] border-gray-800" : "bg-white border-gray-300"}`}
     >
       {/* Header */}

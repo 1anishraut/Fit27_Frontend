@@ -10,8 +10,8 @@ export default function CompanyCard({
 }) {
   return (
     <div
-      className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl shadow-sm 
-      border border-gray-300 dark:border-gray-700 p-4 transition-all"
+      className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl shadow-2xl 
+      border border-gray-400 dark:border-gray-700 p-4 transition-all"
     >
       {/* Plan Tag */}
       <div
@@ -60,15 +60,15 @@ export default function CompanyCard({
       {/* Buttons */}
       <div className="flex gap-3 mt-4">
         <button
-          className="bg-black dark:bg-white text-white dark:text-black 
+          className="bg-[#FF0000] dark:bg-white text-white dark:text-black 
           rounded-md px-4 py-2 text-sm w-full"
         >
           Upgrade Plan
         </button>
 
         <button
-          className="bg-purple-200 dark:bg-purple-900 
-          text-purple-900 dark:text-purple-200 rounded-md px-4 py-2 
+          className="bg-black dark:bg-[#FF0000]
+          text-white dark:text-purple-200 rounded-md px-4 py-2 
           text-sm w-full"
         >
           Admin Hub

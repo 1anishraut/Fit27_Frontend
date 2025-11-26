@@ -17,10 +17,10 @@ const Inactive_Total = () => {
   return (
     <div className="w-full flex flex-wrap gap-6">
       {/* TOTAL PACKAGES CARD */}
-      <div className="w-full md:w-1/2 lg:w-[30%]">
+      <div className="w-full md:w-1/2 lg:w-[30%] ">
         <div
-          className="border border-gray-300 dark:border-gray-700 
-          rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-md"
+          className="border border-gray-300 dark:border-gray-700 shadow-xl
+          rounded-xl p-6 bg-white dark:bg-[#0D0D0F] "
         >
           <h2 className="text-lg font-semibold mb-6 dark:text-white">
             Total Packages
@@ -82,8 +82,8 @@ const Inactive_Total = () => {
 
       {/* INACTIVE GYMS LIST */}
       <div
-        className="w-full md:w-1/2 lg:w-[60%] rounded-xl overflow-hidden 
-        border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] shadow-md"
+        className="w-full md:w-1/2 lg:w-[60%] rounded-xl overflow-hidden shadow-xl
+        border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] "
       >
         {/* Header */}
         <div

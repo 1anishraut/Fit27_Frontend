@@ -41,42 +41,18 @@ const MENU = [
     icon: <FiClipboard />,
     path: "/superAdminDashboard/plans",
   },
-  // {
-  //   id: "planReq",
-  //   title: "Plan Request",
-  //   icon: <FiClipboard />,
-  //   path: "/adminDashboard/plan-request",
-  // },
-  // {
-  //   id: "referral",
-  //   title: "Referral Program",
-  //   icon: <FiUsers />,
-  //   path: "/adminDashboard/referral",
-  // },
   {
     id: "coupon",
     title: "Coupon",
     icon: <FiShoppingBag />,
     path: "/adminDashboard/coupon",
   },
-  // {
-  //   id: "order",
-  //   title: "Order",
-  //   icon: <FiShoppingBag />,
-  //   path: "/adminDashboard/order",
-  // },
   {
     id: "emailTemp",
     title: "Email Template",
     icon: <FiClipboard />,
     path: "/adminDashboard/email-template",
   },
-  // {
-  //   id: "landingPage",
-  //   title: "Landing Page",
-  //   icon: <FiHome />,
-  //   path: "/adminDashboard/landing-page",
-  // },
   {
     id: "settings",
     title: "Settings",
@@ -111,7 +87,7 @@ export default function SidebarMenu({ collapsed = false }) {
             location.pathname.startsWith(item.path + "/"));
 
         //
-        // 🔹 Parent with dropdown
+        // 🔻 DROPDOWN MENU
         //
         if (item.children) {
           const isOpen = open[item.id];
@@ -130,9 +106,22 @@ export default function SidebarMenu({ collapsed = false }) {
                 `}
               >
                 <span className="text-lg">{item.icon}</span>
+
                 {!collapsed && (
-                  <span className="flex-1 text-sm">{item.title}</span>
+                  <span
+                    className={`
+                      flex-1 text-sm transition
+                      ${
+                        isOpen
+                          ? "text-gray-900 dark:text-black"
+                          : "text-gray-900 dark:text-gray-300"
+                      }
+                    `}
+                  >
+                    {item.title}
+                  </span>
                 )}
+
                 {!collapsed && (
                   <span className="text-gray-500 dark:text-gray-300">
                     {isOpen ? <FiChevronDown /> : <FiChevronRight />}
@@ -140,10 +129,10 @@ export default function SidebarMenu({ collapsed = false }) {
                 )}
               </button>
 
-              {/* Dropdown menu */}
               <div
-                className={`pl-10 mt-1 space-y-1 overflow-hidden transition-all 
-                ${isOpen ? "max-h-96" : "max-h-0"}`}
+                className={`pl-10 mt-1 space-y-1 overflow-hidden transition-all ${
+                  isOpen ? "max-h-96" : "max-h-0"
+                }`}
               >
                 {item.children.map((c, idx) => {
                   const subActive =
@@ -159,7 +148,7 @@ export default function SidebarMenu({ collapsed = false }) {
                         ${
                           subActive
                             ? "bg-gray-200 dark:bg-white text-gray-900 dark:text-black font-medium"
-                            : "text-gray-900 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
+                            : "text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
                         }
                       `}
                     >
@@ -173,7 +162,7 @@ export default function SidebarMenu({ collapsed = false }) {
         }
 
         //
-        // 🔹 Single-level menu item
+        // 🔹 SINGLE-LEVEL MENU ITEM
         //
         return (
           <NavLink
@@ -184,16 +173,18 @@ export default function SidebarMenu({ collapsed = false }) {
               flex items-center gap-3 w-full px-3 py-2 rounded-lg transition
               ${
                 isActive
-                  ? "active-menu bg-black text-white dark:bg-white dark:text-black shadow-md"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-md"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
               }
               `
             }
           >
+            {/* ICON BOX */}
             <div
-              className={`p-2 rounded-xl transition
+              className={`
+                p-2 rounded-xl transition
                 ${
-                  isActive
+                  location.pathname.startsWith(item.path)
                     ? "bg-white text-black dark:bg-black dark:text-white"
                     : "bg-gray-100 text-gray-500 dark:bg-[#1f1f23] dark:text-gray-300"
                 }
@@ -202,7 +193,21 @@ export default function SidebarMenu({ collapsed = false }) {
               <span className="text-lg">{item.icon}</span>
             </div>
 
-            {!collapsed && <span className="text-sm">{item.title}</span>}
+            {/* TITLE */}
+            {!collapsed && (
+              <span
+                className={`
+                  text-sm transition
+                  ${
+                    location.pathname.startsWith(item.path)
+                      ? "text-white dark:text-black"
+                      : "text-gray-700 dark:text-gray-300"
+                  }
+                `}
+              >
+                {item.title}
+              </span>
+            )}
           </NavLink>
         );
       })}

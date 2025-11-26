@@ -16,7 +16,7 @@ const stats = [
 
 export default function ExpiringSoon() {
   return (
-    <div className="flex gap-6 w-[30%]">
+    <div className="flex gap-6 w-[30%] ">
       {stats.map((item) => (
         <div
           key={item.id}
@@ -24,7 +24,7 @@ export default function ExpiringSoon() {
             relative w-full p-6 rounded-xl border 
             bg-white dark:bg-[#0D0D0F]
             border-gray-300 dark:border-gray-800
-            hover:border-gray-400 dark:hover:border-gray-700
+            hover:border-gray-400 dark:hover:border-gray-700 shadow-xl
             overflow-hidden transition
           `}
           style={{

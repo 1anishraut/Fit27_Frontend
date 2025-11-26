@@ -55,14 +55,14 @@ export default function StatsGrid() {
   }, []);
 
   return (
-    <div className="flex gap-6 w-full">
+    <div className="flex gap-6 w-full ">
       {stats.map((item) => (
         <div
           key={item.id}
-          className="relative p-6 rounded-xl border w-[20%]
+          className="relative p-6 rounded-xl border w-[20%] shadow-xl
           bg-white dark:bg-[#0D0D0F]
           border-gray-300 dark:border-gray-700
-          hover:border-gray-500 transition-all shadow-sm"
+          hover:border-gray-500 transition-all "
           style={{
             backgroundImage: `url(${isDark ? bgPatternDark : bgPatternLight})`,
             backgroundSize: "cover",
