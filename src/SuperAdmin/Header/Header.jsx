@@ -39,7 +39,7 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
     setMobileOpen(false);
     setSearchOpen(false);
   }, [location.pathname]);
-  console.log(superAdmin); // getting null value here
+  // console.log(superAdmin); // getting null value here
   
 
   return (

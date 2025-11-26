@@ -4,17 +4,27 @@ import CreatePlanModal from "./Components/CreatePlanModel";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
 
-export default function ManagePlan() {
-  const [open, setOpen] = useState(false);
-  const [plans, setPlans] = useState([]);
+import { useDispatch, useSelector } from "react-redux";
+import { addAdminPlans } from "../Utils/adminPlansSlice";
 
-  // Fetch all plans
+export default function ManagePlan() {
+  const dispatch = useDispatch();
+
+  const plans = useSelector((state) => state.adminPlan) || [];
+
+  const [open, setOpen] = useState(false);
+
+  /* ============================================================
+        Fetch all plans
+     ============================================================ */
   const fetchPlans = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/plans`, {
+      const res = await axios.get(`${BASE_URL}/adminPlans`, {
         withCredentials: true,
       });
-      setPlans(res.data.data);
+
+      // Save in Redux
+      dispatch(addAdminPlans(res.data.data));
     } catch (error) {
       console.error("Failed to fetch plans:", error);
     }
@@ -24,21 +34,27 @@ export default function ManagePlan() {
     fetchPlans();
   }, []);
 
-  // When new plan is created
+  /* ============================================================
+        When a new plan is created
+     ============================================================ */
   const handleCreate = (newPlan) => {
-    setPlans((prev) => [newPlan, ...prev]);
+    dispatch(addAdminPlans([newPlan, ...plans]));
   };
 
-  // When deleting plan
+  /* ============================================================
+        Delete Plan
+     ============================================================ */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this plan?")) return;
 
     try {
-      await axios.delete(`${BASE_URL}/plans/delete/${id}`, {
+      await axios.delete(`${BASE_URL}/adminplans/delete/${id}`, {
         withCredentials: true,
       });
 
-      setPlans((prev) => prev.filter((p) => p._id !== id));
+      const updatedPlans = plans.filter((p) => p._id !== id);
+
+      dispatch(addAdminPlans(updatedPlans));
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Delete failed.");
@@ -49,11 +65,7 @@ export default function ManagePlan() {
     <div className="p-6 dark:bg-[#09090B] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold dark:text-white">
-            Manage Plan
-          </h1>
-        </div>
+        <h1 className="text-2xl font-semibold dark:text-white">Manage Plan</h1>
 
         <button
           onClick={() => setOpen(true)}
