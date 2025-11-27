@@ -1,12 +1,16 @@
 import { FiClock, FiCalendar, FiMoreVertical } from "react-icons/fi";
+import clsx from "clsx";
 
 export default function CompanyCard({
+  _id,
   plan = "Free Plan",
   name = "Unnamed Gym",
   email = "--",
   date,
   time,
   stats = [],
+  active = true,
+  onToggle = () => {},
 }) {
   return (
     <div
@@ -80,21 +84,47 @@ export default function CompanyCard({
         Plan Expired : Lifetime
       </p>
 
-      {/* Stats (Optional) */}
-      {stats?.length > 0 && (
-        <div className="flex gap-3 mt-3">
-          {stats.map((item, i) => (
+      {/* Stats + Toggle */}
+      <div className="flex justify-between items-center mt-3">
+        {stats?.length > 0 && (
+          <div className="flex gap-3">
+            {stats.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-center w-8 h-8 
+                rounded-md bg-pink-200 dark:bg-pink-900 text-sm 
+                text-black dark:text-white"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ACTIVE / INACTIVE TOGGLE */}
+        <div
+          className="flex items-center cursor-pointer select-none"
+          onClick={() => onToggle(_id, !active)}
+        >
+          <span className="mr-2 text-xs text-gray-500 dark:text-gray-400">
+            {active ? "Active" : "Inactive"}
+          </span>
+
+          <div
+            className={clsx(
+              "w-12 h-6 rounded-full p-1 flex items-center transition-all",
+              active ? "bg-green-500" : "bg-gray-400 dark:bg-gray-600"
+            )}
+          >
             <div
-              key={i}
-              className="flex items-center justify-center w-8 h-8 
-              rounded-md bg-pink-200 dark:bg-pink-900 text-sm 
-              text-black dark:text-white"
-            >
-              {item}
-            </div>
-          ))}
+              className={clsx(
+                "w-4 h-4 rounded-full bg-white shadow transition-all",
+                active ? "translate-x-6" : "translate-x-0"
+              )}
+            />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

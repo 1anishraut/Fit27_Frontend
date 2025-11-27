@@ -154,13 +154,13 @@ export default function CreatePlanModal({
             <select
               value={form.duration}
               onChange={handleChange("duration")}
-              className="input"
+              className="inputl"
             >
-              <option>Lifetime</option>
-              <option>Monthly</option>
-              <option>Quarterly (4 Months)</option>
-              <option>Half Yearly</option>
-              <option>Yearly</option>
+              <option className="text-black">Lifetime</option>
+              <option className="text-black">Monthly</option>
+              <option className="text-black">Quarterly (4 Months)</option>
+              <option className="text-black">Half Yearly</option>
+              <option className="text-black">Yearly</option>
             </select>
           </div>
 
