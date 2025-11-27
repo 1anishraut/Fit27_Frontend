@@ -13,6 +13,7 @@ import Home from "./SuperAdmin/Home";
 import Companies from "./SuperAdmin/FitnessHubs";
 import Plans from "./SuperAdmin/Plans";
 import FitnessHubs from "./SuperAdmin/FitnessHubs";
+import Coupon from "./SuperAdmin/Coupon";
 // import AdminLayout from "./admin/AdminLayout";
 
 // import AllDetails from "./admin/AllDetails";
@@ -37,6 +38,7 @@ function App() {
               <Route path="home" element={<Home />} />
               <Route path="fitnessHubs" element={<FitnessHubs />} />
               <Route path="plans" element={<Plans />} />
+              <Route path="coupon" element={<Coupon />} />
             </Route>
             {/* -------- Client Routes -------- */}
             <Route path="/" element={""}></Route>

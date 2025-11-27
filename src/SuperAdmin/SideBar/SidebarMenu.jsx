@@ -45,7 +45,7 @@ const MENU = [
     id: "coupon",
     title: "Coupon",
     icon: <FiShoppingBag />,
-    path: "/adminDashboard/coupon",
+    path: "/superAdminDashboard/coupon",
   },
   {
     id: "emailTemp",
