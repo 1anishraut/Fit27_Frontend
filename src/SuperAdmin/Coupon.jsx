@@ -8,6 +8,9 @@ export default function Coupon() {
   const [open, setOpen] = useState(false);
   const [coupons, setCoupons] = useState([]);
 
+  const [search, setSearch] = useState("");
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // Fetch all coupons
   const fetchCoupons = async () => {
     try {
@@ -26,6 +29,24 @@ export default function Coupon() {
     fetchCoupons();
   }, []);
 
+  /* -----------------------------------------------
+       FILTERING + SEARCHING (Frontend Only)
+  ------------------------------------------------ */
+  const filteredCoupons = coupons.filter((c) => {
+    const query = search.toLowerCase().trim();
+
+    return (
+      c.name.toLowerCase().includes(query) ||
+      c.code.toLowerCase().includes(query) ||
+      c.discountType.toLowerCase().includes(query)
+    );
+  });
+
+  /* -----------------------------------------------
+       PAGINATION
+  ------------------------------------------------ */
+  const paginatedCoupons = filteredCoupons.slice(0, rowsPerPage);
+
   return (
     <div className="p-6 dark:bg-[#09090B] min-h-screen">
       {/* Header */}
@@ -40,23 +61,33 @@ export default function Coupon() {
 
       {/* Filter Bar */}
       <div className="bg-white dark:bg-[#0D0D0F] p-4 rounded-xl shadow flex justify-between items-center">
-        <select className="border px-3 py-2 rounded-lg dark:bg-[#1f1f23] dark:border-gray-700 dark:text-gray-200 focus:outline-none">
-          <option>10</option>
-          <option>25</option>
-          <option>50</option>
-        </select>
+        {/* Entries Per Page */}
+        <div className="flex items-center gap-2">
+          <select
+            value={rowsPerPage}
+            onChange={(e) => setRowsPerPage(Number(e.target.value))}
+            className="border px-3 py-2 rounded-lg dark:bg-[#1f1f23] dark:border-gray-700 dark:text-gray-200 focus:outline-none"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
 
-        <span className="text-gray-600 dark:text-gray-400 ml-4">
-          entries per page
-        </span>
+          <span className="text-gray-600 dark:text-gray-400">
+            entries per page
+          </span>
+        </div>
 
         <div className="flex-1"></div>
 
+        {/* Search */}
         <div className="relative">
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-2 border rounded-lg dark:bg-[#1f1f23] dark:border-gray-700 dark:text-gray-200"
           />
         </div>
@@ -76,7 +107,7 @@ export default function Coupon() {
           </thead>
 
           <tbody>
-            {coupons.length === 0 ? (
+            {paginatedCoupons.length === 0 ? (
               <tr>
                 <td
                   colSpan={5}
@@ -86,7 +117,7 @@ export default function Coupon() {
                 </td>
               </tr>
             ) : (
-              coupons.map((c) => (
+              paginatedCoupons.map((c) => (
                 <tr key={c._id} className="border-b dark:border-gray-700">
                   <td className="p-3">{c.name}</td>
                   <td className="p-3">{c.code}</td>
@@ -111,7 +142,7 @@ export default function Coupon() {
       <CreateCouponModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onCreated={fetchCoupons} // ✔ refresh after creating coupon
+        onCreated={fetchCoupons} // auto refresh
       />
     </div>
   );

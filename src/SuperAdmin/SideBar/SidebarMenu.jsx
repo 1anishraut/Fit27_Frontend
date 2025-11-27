@@ -51,7 +51,7 @@ const MENU = [
     id: "emailTemp",
     title: "Email Template",
     icon: <FiClipboard />,
-    path: "/adminDashboard/email-template",
+    path: "/superAdminDashboard/emailTemplate",
   },
   {
     id: "settings",

@@ -85,7 +85,7 @@ export default function CreateCouponModal({ isOpen, onClose, onCreated }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-[#0D0D0F] w-[600px] rounded-xl shadow-xl p-6 relative">
-        {/* close */}
+        {/* Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4">
           <FiX size={22} className="text-gray-500 dark:text-gray-300" />
         </button>
@@ -111,6 +111,7 @@ export default function CreateCouponModal({ isOpen, onClose, onCreated }) {
 
           {/* Discount Type + Amount */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Discount Type */}
             <div>
               <label className="block text-sm font-medium dark:text-gray-300 mb-1">
                 Discount Type*
@@ -125,16 +126,22 @@ export default function CreateCouponModal({ isOpen, onClose, onCreated }) {
               </select>
             </div>
 
+            {/* Dynamic Amount Field */}
             <div>
               <label className="block text-sm font-medium dark:text-gray-300 mb-1">
-                Amount*
+                {discountType === "percentage"
+                  ? "Percentage (%) *"
+                  : "Amount (₹) *"}
               </label>
+
               <input
                 type="number"
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 className="w-full border rounded-lg p-2 dark:bg-[#1f1f23] dark:text-gray-200"
-                placeholder="Enter Amount"
+                placeholder={
+                  discountType === "percentage" ? "Enter %" : "Enter amount"
+                }
               />
             </div>
           </div>
@@ -172,7 +179,7 @@ export default function CreateCouponModal({ isOpen, onClose, onCreated }) {
             </div>
           </div>
 
-          {/* Coupon Code (always manual now) */}
+          {/* Coupon Code */}
           <div>
             <label className="block text-sm font-medium dark:text-gray-300 mb-1">
               Coupon Code*
