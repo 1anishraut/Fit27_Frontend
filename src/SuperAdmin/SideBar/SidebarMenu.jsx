@@ -57,7 +57,7 @@ const MENU = [
     id: "settings",
     title: "Settings",
     icon: <FiSettings />,
-    path: "/adminDashboard/settings",
+    path: "/superAdminDashboard/settings",
   },
 ];
 

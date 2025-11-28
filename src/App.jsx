@@ -15,6 +15,7 @@ import Plans from "./SuperAdmin/Plans";
 import FitnessHubs from "./SuperAdmin/FitnessHubs";
 import Coupon from "./SuperAdmin/Coupon";
 import EmailTemplate from "./SuperAdmin/EmailTemplate";
+import Settings from "./SuperAdmin/Settings";
 // import AdminLayout from "./admin/AdminLayout";
 
 // import AllDetails from "./admin/AllDetails";
@@ -41,6 +42,7 @@ function App() {
               <Route path="plans" element={<Plans />} />
               <Route path="coupon" element={<Coupon />} />
               <Route path="emailTemplate" element={<EmailTemplate />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             {/* -------- Client Routes -------- */}
             <Route path="/" element={""}></Route>
