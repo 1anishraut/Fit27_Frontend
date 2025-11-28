@@ -1,136 +1,231 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { FiSearch, FiPlus } from "react-icons/fi";
+import {
+  FiSearch,
+  FiPlus,
+  FiMoreVertical,
+  FiEdit2,
+  FiTrash2,
+} from "react-icons/fi";
+
 import { BASE_URL } from "../Utils/Constants";
-import CreateCouponModal from "./Components/CreateCoupnModel";
+import CreateCouponModal from "../SuperAdmin/Components/CreateCoupnModel";
+import EditCouponModal from "./Components/EditCouponModal";
 
-export default function Coupon() {
-  const [open, setOpen] = useState(false);
+export default function Coupons() {
+  const [open, setOpen] = useState(false); // Create modal
+  const [editOpen, setEditOpen] = useState(false); // Edit modal
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+
   const [coupons, setCoupons] = useState([]);
-
   const [search, setSearch] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch all coupons
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
+
+  /* ---------------------------------------------------
+      CLICK OUTSIDE → CLOSE MENU
+  --------------------------------------------------- */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /* ---------------------------------------------------
+      FETCH COUPONS
+  --------------------------------------------------- */
   const fetchCoupons = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/coupon/all`, {
         withCredentials: true,
       });
-
       setCoupons(res.data.data || []);
-    } catch (error) {
-      console.log("Coupon fetch failed:", error);
+    } catch (err) {
+      console.log("Error fetching coupons:", err);
     }
   };
 
-  // Load on page open
   useEffect(() => {
     fetchCoupons();
   }, []);
 
-  /* -----------------------------------------------
-       FILTERING + SEARCHING (Frontend Only)
-  ------------------------------------------------ */
-  const filteredCoupons = coupons.filter((c) => {
-    const query = search.toLowerCase().trim();
-
+  /* ---------------------------------------------------
+      SEARCH + PAGINATION
+  --------------------------------------------------- */
+  const filtered = coupons.filter((c) => {
+    const q = search.toLowerCase();
     return (
-      c.name.toLowerCase().includes(query) ||
-      c.code.toLowerCase().includes(query) ||
-      c.discountType.toLowerCase().includes(query)
+      c.code.toLowerCase().includes(q) ||
+      c.discountType.toLowerCase().includes(q)
     );
   });
 
-  /* -----------------------------------------------
-       PAGINATION
-  ------------------------------------------------ */
-  const paginatedCoupons = filteredCoupons.slice(0, rowsPerPage);
+  const paginated = filtered.slice(0, rowsPerPage);
+
+  /* ---------------------------------------------------
+      DELETE COUPON
+  --------------------------------------------------- */
+  const deleteCoupon = async (id) => {
+    if (!window.confirm("Delete this coupon?")) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/coupon/delete/${id}`, {
+        withCredentials: true,
+      });
+
+      alert("Coupon deleted!");
+      fetchCoupons();
+    } catch (err) {
+      console.log(err);
+      alert("Failed to delete coupon");
+    }
+  };
+
+  /* ---------------------------------------------------
+      EDIT
+  --------------------------------------------------- */
+  const handleEdit = (coupon) => {
+    setSelectedCoupon(coupon);
+    setEditOpen(true);
+    setOpenMenuId(null);
+  };
 
   return (
     <div className="p-6 dark:bg-[#09090B] min-h-screen">
       {/* Header */}
-      <div className="flex justify-end items-center mb-4">
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => setOpen(true)}
-          className="w-10 h-10 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black rounded-lg"
+          className="w-10 h-10 bg-black dark:bg-white text-white dark:text-black
+                     flex items-center justify-center rounded-lg"
         >
           <FiPlus size={20} />
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white dark:bg-[#0D0D0F] p-4 rounded-xl shadow flex justify-between items-center">
-        {/* Entries Per Page */}
+      <div
+        className="bg-white dark:bg-[#0D0D0F] p-4 rounded-xl shadow 
+                      flex justify-between items-center"
+      >
         <div className="flex items-center gap-2">
           <select
             value={rowsPerPage}
             onChange={(e) => setRowsPerPage(Number(e.target.value))}
-            className="border px-3 py-2 rounded-lg dark:bg-[#1f1f23] dark:border-gray-700 dark:text-gray-200 focus:outline-none"
+            className="border px-3 py-2 rounded-lg 
+                       dark:bg-[#1f1f23] dark:text-gray-200"
           >
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
           </select>
-
           <span className="text-gray-600 dark:text-gray-400">
             entries per page
           </span>
         </div>
 
-        <div className="flex-1"></div>
-
-        {/* Search */}
         <div className="relative">
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search coupons..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 pr-4 py-2 border rounded-lg dark:bg-[#1f1f23] dark:border-gray-700 dark:text-gray-200"
+            className="pl-10 pr-4 py-2 border rounded-lg 
+                       dark:bg-[#1f1f23] dark:text-gray-200"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="mt-4 bg-white dark:bg-[#0D0D0F] rounded-xl shadow overflow-x-auto">
+      <div
+        className="mt-4 bg-white dark:bg-[#0D0D0F] rounded-xl shadow 
+                      overflow-visible pb-10 scrollbar-hide"
+      >
         <table className="w-full">
-          <thead className="bg-gray-100 dark:bg-[#1f1f23] text-gray-700 dark:text-gray-300">
+          <thead
+            className="bg-gray-100 dark:bg-[#1f1f23]
+                           text-gray-700 dark:text-gray-300"
+          >
             <tr>
-              <th className="p-3 text-left">NAME</th>
               <th className="p-3 text-left">CODE</th>
               <th className="p-3 text-left">DISCOUNT</th>
-              <th className="p-3 text-left">USED</th>
+              <th className="p-3 text-left">CREATED</th>
               <th className="p-3 text-left">ACTION</th>
             </tr>
           </thead>
 
           <tbody>
-            {paginatedCoupons.length === 0 ? (
+            {paginated.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="text-center py-10 text-gray-500 dark:text-gray-400"
-                >
-                  No entries found
+                <td colSpan={4} className="text-center py-10 text-gray-500">
+                  No coupons found
                 </td>
               </tr>
             ) : (
-              paginatedCoupons.map((c) => (
+              paginated.map((c) => (
                 <tr key={c._id} className="border-b dark:border-gray-700">
-                  <td className="p-3">{c.name}</td>
                   <td className="p-3">{c.code}</td>
 
+                  {/* DISCOUNT */}
                   <td className="p-3">
                     {c.discountType === "percentage"
                       ? `${c.amount}%`
                       : `₹${c.amount}`}
                   </td>
 
-                  <td className="p-3">{c.used}</td>
+                  {/* CREATED DATE */}
+                  <td className="p-3">
+                    {new Date(c.createdAt).toLocaleDateString()}
+                  </td>
 
-                  <td className="p-3">Action</td>
+                  {/* ACTIONS */}
+                  <td className="p-3 relative overflow-visible">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === c._id ? null : c._id)
+                      }
+                      className="p-2 rounded hover:bg-gray-200 
+                                 dark:hover:bg-[#1f1f23]"
+                    >
+                      <FiMoreVertical size={18} />
+                    </button>
+
+                    {/* DROPDOWN */}
+                    {openMenuId === c._id && (
+                      <div
+                        ref={menuRef}
+                        className="absolute right-0 top-10 w-32 bg-white 
+                                   dark:bg-[#1f1f23] border 
+                                   dark:border-gray-700 
+                                   rounded-lg shadow-lg z-[999]"
+                      >
+                        <button
+                          onClick={() => handleEdit(c)}
+                          className="flex items-center gap-2 px-3 py-2 w-full 
+                                     hover:bg-gray-100 dark:hover:bg-gray-800 
+                                     text-left"
+                        >
+                          <FiEdit2 size={16} /> Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteCoupon(c._id)}
+                          className="flex items-center gap-2 px-3 py-2 w-full 
+                                     text-red-600 hover:bg-gray-100 
+                                     dark:hover:bg-gray-800 text-left"
+                        >
+                          <FiTrash2 size={16} /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
@@ -138,11 +233,18 @@ export default function Coupon() {
         </table>
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <CreateCouponModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onCreated={fetchCoupons} // auto refresh
+        onCreated={fetchCoupons}
+      />
+
+      <EditCouponModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        coupon={selectedCoupon}
+        onUpdated={fetchCoupons}
       />
     </div>
   );
