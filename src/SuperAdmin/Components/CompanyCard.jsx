@@ -86,7 +86,7 @@ export default function CompanyCard({
 
       {/* Stats + Toggle */}
       <div className="flex justify-between items-center mt-3">
-        {stats?.length > 0 && (
+        {/* {stats?.length > 0 && (
           <div className="flex gap-3">
             {stats.map((item, i) => (
               <div
@@ -99,7 +99,7 @@ export default function CompanyCard({
               </div>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* ACTIVE / INACTIVE TOGGLE */}
         <div

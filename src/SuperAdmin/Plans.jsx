@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PlanCard from "./Components/PlanCard";
 import CreatePlanModal from "./Components/CreatePlanModel";
+import EditPlanModal from "./Components/EditPlanModal"; // ✅ NEW
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
 
@@ -9,21 +10,18 @@ import { addAdminPlans } from "../Utils/adminPlansSlice";
 
 export default function ManagePlan() {
   const dispatch = useDispatch();
-
   const plans = useSelector((state) => state.adminPlan) || [];
 
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
 
-  /* ============================================================
-        Fetch all plans
-     ============================================================ */
+  /* ========================== Fetch Plans ========================== */
   const fetchPlans = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/adminPlans`, {
         withCredentials: true,
       });
-
-      // Save in Redux
       dispatch(addAdminPlans(res.data.data));
     } catch (error) {
       console.error("Failed to fetch plans:", error);
@@ -34,16 +32,12 @@ export default function ManagePlan() {
     fetchPlans();
   }, []);
 
-  /* ============================================================
-        When a new plan is created
-     ============================================================ */
+  /* ========================== Create Handler ========================== */
   const handleCreate = (newPlan) => {
     dispatch(addAdminPlans([newPlan, ...plans]));
   };
 
-  /* ============================================================
-        Delete Plan
-     ============================================================ */
+  /* ========================== Delete Handler ========================== */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this plan?")) return;
 
@@ -53,12 +47,17 @@ export default function ManagePlan() {
       });
 
       const updatedPlans = plans.filter((p) => p._id !== id);
-
       dispatch(addAdminPlans(updatedPlans));
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Delete failed.");
     }
+  };
+
+  /* ========================== Edit Handler ========================== */
+  const handleEdit = (id) => {
+    setSelectedPlanId(id);
+    setEditOpen(true);
   };
 
   return (
@@ -76,33 +75,40 @@ export default function ManagePlan() {
       </div>
 
       {/* Cards Section */}
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 md:col-span-8 grid grid-cols-2 gap-6">
-          {plans.map((p) => (
-            <PlanCard
-              key={p._id}
-              id={p._id}
-              name={p.name}
-              price={p.price}
-              duration={p.duration}
-              maxUsers={p.maxUsers}
-              maxCustomers={p.maxCustomers}
-              maxVendors={p.maxVendors}
-              storage={p.storage}
-              description={p.description}
-              trialEnable={p.trialEnable}
-              status={p.status}
-              onEdit={() => alert("Edit " + p._id)}
-              onDelete={() => handleDelete(p._id)}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {plans.map((p) => (
+          <PlanCard
+            key={p._id}
+            id={p._id}
+            name={p.name}
+            price={p.price}
+            duration={p.duration}
+            maxUsers={p.maxUsers}
+            maxCustomers={p.maxCustomers}
+            maxVendors={p.maxVendors}
+            storage={p.storage}
+            description={p.description}
+            trialEnable={p.trialEnable}
+            status={p.status}
+            onEdit={() => handleEdit(p._id)}
+            onDelete={() => handleDelete(p._id)}
+          />
+        ))}
       </div>
 
+      {/* Create Modal */}
       <CreatePlanModal
         isOpen={open}
         onClose={() => setOpen(false)}
         onCreate={handleCreate}
+      />
+
+      {/* Edit Modal */}
+      <EditPlanModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        planId={selectedPlanId}
+        onUpdated={fetchPlans}
       />
     </div>
   );
