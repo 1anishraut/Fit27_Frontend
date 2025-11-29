@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
+import { useDispatch } from "react-redux";
+import { addBrandData } from "../../../Utils/brandData";
 
 export default function BrandSettings() {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
   // TEXT STATES
@@ -31,6 +34,7 @@ export default function BrandSettings() {
         if (res.data.data.length > 0) {
           const brand = res.data.data[0];
 
+          // SET TO LOCAL STATES
           setName(brand.name || "");
           setTitleText(brand.titleText || "");
           setFooterText(brand.footerText || "");
@@ -43,6 +47,9 @@ export default function BrandSettings() {
 
           if (brand.faviIcon)
             setFaviconPreview(`${BASE_URL}/${brand.faviIcon}`);
+
+          // 🔥 DISPATCH TO REDUX
+          dispatch(addBrandData(brand));
         }
       } catch (err) {
         console.error("Brand Load Error:", err);
@@ -52,7 +59,8 @@ export default function BrandSettings() {
     };
 
     fetchBrand();
-  }, []);
+  }, [dispatch]);
+
 
   // ------------------------- FILE HANDLER -------------------------
   const handleFile = (e, setPreview, setFile) => {
@@ -104,7 +112,7 @@ export default function BrandSettings() {
         {/* Logo Dark */}
         <div className="border rounded-xl bg-white p-4 shadow-sm">
           <p className="font-medium text-gray-700 mb-2">Logo Dark</p>
-          <div className="w-full h-32 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-full h-32 bg-gray-300 flex items-center justify-center rounded-lg overflow-hidden">
             {logoDarkPreview ? (
               <img src={logoDarkPreview} className="h-full object-contain" />
             ) : (
@@ -128,7 +136,7 @@ export default function BrandSettings() {
         {/* Logo Light */}
         <div className="border rounded-xl bg-white p-4 shadow-sm">
           <p className="font-medium text-gray-700 mb-2">Logo Light</p>
-          <div className="w-full h-32 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-full h-32 bg-gray-500 flex items-center justify-center rounded-lg overflow-hidden">
             {logoLightPreview ? (
               <img src={logoLightPreview} className="h-full object-contain" />
             ) : (
@@ -152,7 +160,7 @@ export default function BrandSettings() {
         {/* Favicon */}
         <div className="border rounded-xl bg-white p-4 shadow-sm">
           <p className="font-medium text-gray-700 mb-2">Favicon</p>
-          <div className="w-full h-32 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-full h-32 bg-gray-500 flex items-center justify-center rounded-lg overflow-hidden">
             {faviconPreview ? (
               <img src={faviconPreview} className="h-full object-contain" />
             ) : (
