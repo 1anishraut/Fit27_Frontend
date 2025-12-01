@@ -69,6 +69,12 @@ const MENU = [
     icon: <FiBox />,
     path: "/",
   },
+  {
+    id: "adminPlans",
+    title: "Plans",
+    icon: <FiBox />,
+    path: "/adminDashboard/adminPlans",
+  },
 
   {
     id: "reports",

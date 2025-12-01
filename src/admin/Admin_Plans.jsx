@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaPlus } from "react-icons/fa";
-import DashboardCard from "./Components/DashboardCards";
+import DashboardCard from "../admin/Components/Dashboard/DashboardCards";
 import { useNavigate } from "react-router";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { BASE_URL } from "../Utils/Constants";
 import { useDispatch } from "react-redux";
 import { addPlans } from "../Utils/plansSlice";
 
-const Plans = () => {
+const AdminPlans = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [plans, setPlans] = useState([]);
@@ -144,4 +144,4 @@ const Plans = () => {
   );
 };
 
-export default Plans;
+export default AdminPlans;
