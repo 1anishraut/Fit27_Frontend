@@ -1,4 +1,3 @@
-
 // import Layout from "./Components/AdminLayout";
 // import Login from "./Components/Admin/Login";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -21,12 +20,11 @@ import AdminLayout from "./admin/AdminLayout";
 import AllDetails from "./admin/AllDetails";
 // import Plans from "./admin/Plans";
 import Feedbacks from "./admin/Feedbacks";
-import CreateMembers from "./admin/CreateMembers";
+import CreateMembers from "./admin/Components/CreateMembers";
 import CreatePlan from "./admin/CreatePlan";
 import EditPlan from "./admin/EditPlan";
 import Classes from "./admin/Classes";
 import CreateClasses from "./admin/CreateClasses";
-
 
 function App() {
   return (
@@ -57,8 +55,8 @@ function App() {
             <Route path="/admin" element={<SuperAdminLogin />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
+              <Route path="classes" element={<Classes />} />
               <Route path="createMember" element={<CreateMembers />} />
-             
             </Route>
           </Routes>
         </BrowserRouter>

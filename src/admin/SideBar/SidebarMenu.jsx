@@ -45,9 +45,17 @@ const MENU = [
     id: "members",
     title: "Members",
     icon: <FiUsers />,
-    path: "/",
+    children: [
+      {
+        title: "Enquiry",
+        path: "/adminDashboard/members/enquiry",
+      },
+      {
+        title: "Members",
+        path: "/adminDashboard/members/list",
+      },
+    ],
   },
-
   {
     id: "orders",
     title: "Orders",
@@ -73,7 +81,7 @@ const MENU = [
     id: "classes",
     title: "Classes",
     icon: <FiBookOpen />,
-    path: "/",
+    path: "/adminDashboard/classes",
   },
 
   {
