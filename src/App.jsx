@@ -16,16 +16,16 @@ import FitnessHubs from "./SuperAdmin/FitnessHubs";
 import Coupon from "./SuperAdmin/Coupon";
 import EmailTemplate from "./SuperAdmin/EmailTemplate";
 import Settings from "./SuperAdmin/Settings";
-// import AdminLayout from "./admin/AdminLayout";
+import AdminLayout from "./admin/AdminLayout";
 
-// import AllDetails from "./admin/AllDetails";
+import AllDetails from "./admin/AllDetails";
 // import Plans from "./admin/Plans";
-// import Feedbacks from "./admin/Feedbacks";
-// import CreateMembers from "./admin/CreateMembers";
-// import CreatePlan from "./admin/CreatePlan";
-// import EditPlan from "./admin/EditPlan";
-// import Classes from "./admin/Classes";
-// import CreateClasses from "./admin/CreateClasses";
+import Feedbacks from "./admin/Feedbacks";
+import CreateMembers from "./admin/CreateMembers";
+import CreatePlan from "./admin/CreatePlan";
+import EditPlan from "./admin/EditPlan";
+import Classes from "./admin/Classes";
+import CreateClasses from "./admin/CreateClasses";
 
 
 function App() {
@@ -54,18 +54,12 @@ function App() {
             </Route> */}
 
             {/* -------- Admin Routes -------- */}
-            {/* <Route path="/admin" element={<Login />} />
+            <Route path="/admin" element={<SuperAdminLogin />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
-
-              <Route path="plans" element={<Plans />} />
-              <Route path="classes" element={<Classes />} />
-              <Route path="createClasses" element={<CreateClasses />} />
-              <Route path="feedbacks" element={<Feedbacks />} />
               <Route path="createMember" element={<CreateMembers />} />
-              <Route path="createPlan" element={<CreatePlan />} />
-              <Route path="editPlan/:id" element={<EditPlan />} />
-            </Route> */}
+             
+            </Route>
           </Routes>
         </BrowserRouter>
       </PersistGate>

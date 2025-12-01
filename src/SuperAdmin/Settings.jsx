@@ -23,65 +23,66 @@ import CookieSettings from "../SuperAdmin/Components/SettingsSubPage/CookieSetti
 import CacheSettings from "../SuperAdmin/Components/SettingsSubPage/CacheSettings";
 import ChatGPTSettings from "../SuperAdmin/Components/SettingsSubPage/ChatGPTSettings";
 
+// ⭐ Use icon components (not JSX icons)
 const sections = [
   {
     id: "brand-settings",
     label: "Brand Settings",
-    icon: <FiSettings size={18} />,
+    icon: FiSettings,
     component: <BrandSettings />,
   },
   {
     id: "email-settings",
     label: "Email Settings",
-    icon: <FiMail size={18} />,
+    icon: FiMail,
     component: <EmailSettings />,
   },
   {
     id: "payment-settings",
     label: "Payment Settings",
-    icon: <FiDollarSign size={18} />,
+    icon: FiDollarSign,
     component: <PaymentSettings />,
   },
   {
     id: "pusher-settings",
     label: "Pusher Settings",
-    icon: <FiBell size={18} />,
+    icon: FiBell,
     component: <PusherSettings />,
   },
   {
     id: "recaptcha-settings",
     label: "ReCaptcha Settings",
-    icon: <FiShield size={18} />,
+    icon: FiShield,
     component: <ReCaptchaSettings />,
   },
   {
     id: "storage-settings",
     label: "Storage Settings",
-    icon: <FiDatabase size={18} />,
+    icon: FiDatabase,
     component: <StorageSettings />,
   },
   {
     id: "seo-settings",
     label: "SEO Settings",
-    icon: <FiTool size={18} />,
+    icon: FiTool,
     component: <SEOSettings />,
   },
   {
     id: "cookie-settings",
     label: "Cookie Settings",
-    icon: <FiLock size={18} />,
+    icon: FiLock,
     component: <CookieSettings />,
   },
   {
     id: "cache-settings",
     label: "Cache Settings",
-    icon: <FiCloud size={18} />,
+    icon: FiCloud,
     component: <CacheSettings />,
   },
   {
     id: "chatgpt-settings",
     label: "Chat GPT Settings",
-    icon: <FiCpu size={18} />,
+    icon: FiCpu,
     component: <ChatGPTSettings />,
   },
 ];
@@ -90,7 +91,7 @@ export default function Settings() {
   const [active, setActive] = useState("brand-settings");
   const contentRef = useRef(null);
 
-  // Scroll Spy
+  // Scroll spy
   useEffect(() => {
     if (!contentRef.current) return;
 
@@ -128,7 +129,7 @@ export default function Settings() {
 
   return (
     <div className="flex h-[calc(100vh-60px)] overflow-hidden bg-[#F2F0EF] dark:bg-[#09090B] dark:text-gray-200">
-      {/* DESKTOP NAV */}
+      {/* DESKTOP / TABLET SIDEBAR */}
       <div className="hidden md:block w-64 bg-white dark:bg-[#0D0D0F] dark:border-gray-700 h-[90%] overflow-auto p-4 sticky top-0 rounded-xl">
         <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
           Settings
@@ -144,13 +145,14 @@ export default function Settings() {
                 : "cursor-pointer flex items-center gap-3 px-3 py-2 rounded-lg mb-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
             }
           >
-            {s.icon}
+            {/* ⭐ Responsive icon sizes */}
+            <s.icon className="text-[26px] md:text-[22px] lg:text-[18px]" />
             <span>{s.label}</span>
           </div>
         ))}
       </div>
 
-      {/* MOBILE NAV ICONS */}
+      {/* MOBILE NAV ICON BAR */}
       <div className="md:hidden w-16 bg-white dark:bg-[#0D0D0F] border-r dark:border-gray-700 h-full overflow-auto p-4 flex flex-col gap-6 sticky top-0">
         {sections.map((s) => (
           <div
@@ -162,12 +164,13 @@ export default function Settings() {
                 : "cursor-pointer flex items-center justify-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
             }
           >
-            {s.icon}
+            {/* ⭐ Mobile icon size */}
+            <s.icon className="text-[26px]" />
           </div>
         ))}
       </div>
 
-      {/* CONTENT AREA (SCROLLBAR HIDDEN) */}
+      {/* CONTENT AREA */}
       <div
         ref={contentRef}
         className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-5"

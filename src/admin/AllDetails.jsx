@@ -1,18 +1,18 @@
 import React from "react";
-import DashboardCard from "./Components/DashboardCards";
+import DashboardCard from "./Components/Dashboard/DashboardCards";
 import { FaPlus } from "react-icons/fa";
 import { FaQuestion } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { HiOutlineQrCode } from "react-icons/hi2";
-import DashboardStats from "./Components/DashboardStates";
-import MemberChart from "./Components/MemberChart";
+import DashboardStats from "./Components/Dashboard/DashboardStates";
+import MemberChart from "./Components/Dashboard/MemberChart";
 // import QuickActions from "./Components/QuickActions";
 
 const AllDetails = () => {
   return (
     <>
-      <section className="m-4 border rounded-md border-gray-200 ">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
+      <section className=" ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <DashboardCard
             icon={<FaPlus />}
             title="Add Member"
@@ -34,7 +34,7 @@ const AllDetails = () => {
           />
         </div>
       </section>
-      <section className="m-4 border rounded-md border-gray-200 ">
+      <section className="">
         <DashboardStats />
       </section>
       <section className="m-4  flex justify-between gap-8">

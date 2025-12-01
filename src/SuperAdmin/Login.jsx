@@ -1,12 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
-import { addAdmin } from "../Utils/adminSlice"; // use separate slice if needed
+import { addAdmin } from "../Utils/adminSlice";
+import { addSuperAdmin } from "../Utils/superAdminSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
-import { addSuperAdmin } from "../Utils/superAdminSlice";
 
-const Login = () => {
+const SuperAdminLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -14,29 +14,49 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const superAdminLoginHandler = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await axios.post(
+      /* ---------------------
+         1) TRY SUPER ADMIN LOGIN
+      --------------------- */
+      const superAdminRes = await axios.post(
         `${BASE_URL}/superAdmin/login`,
         { emailId, password },
         { withCredentials: true }
       );
 
-      // Store admin data in Redux
-      dispatch(addSuperAdmin(res.data.data));
-      // console.log(res.data.data);
-      
-      // Navigate to dashboard
-      navigate("/superAdminDashboard/home");
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        "Login failed. Please check your credentials.";
+      const user = superAdminRes.data.data;
 
-      setError(message);
+      localStorage.setItem("role", "superAdmin");
+      dispatch(addSuperAdmin(user));
+
+      return navigate("/superAdminDashboard/home");
+    } catch (err1) {
+      // If super admin login fails → continue to admin login
+    }
+
+    try {
+      /* ---------------------
+         2) TRY ADMIN LOGIN
+      --------------------- */
+      const adminRes = await axios.post(
+        `${BASE_URL}/admin/login`,
+        { emailId, password },
+        { withCredentials: true }
+      );
+
+      const user = adminRes.data.data;
+
+      localStorage.setItem("role", "admin");
+      dispatch(addAdmin(user));
+
+      return navigate("/adminDashboard/allDetails");
+    } catch (err2) {
+      // If both fail → show error
+      setError(err2.response?.data?.message || "Invalid email or password");
     }
   };
 
@@ -46,17 +66,14 @@ const Login = () => {
         <section className="relative md:h-[80%] flex flex-col items-center justify-center px-10 rounded-md border-gray-400 shadow-lg shadow-black/50 border">
           <div className="flex flex-col items-center">
             <div className="text-center mb-12">
-              <h1 className="text-4xl mb-4">Super Admin Login</h1>
+              <h1 className="text-4xl mb-4">Login</h1>
               <p className="text-sm">Enter your credentials</p>
             </div>
 
-            <form
-              onSubmit={superAdminLoginHandler}
-              className="flex flex-col gap-4 w-96"
-            >
+            <form onSubmit={handleLogin} className="flex flex-col gap-4 w-96">
               <div className="flex flex-col">
                 <label htmlFor="emailId" className="mb-2">
-                  Super Admin Email
+                  Email
                 </label>
                 <input
                   type="text"
@@ -96,4 +113,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SuperAdminLogin;
