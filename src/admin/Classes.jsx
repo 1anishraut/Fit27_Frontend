@@ -101,7 +101,7 @@ export default function Classes() {
         </h1>
 
         <button
-          onClick={() => navigate("/adminDashboard/createClass")}
+          onClick={() => navigate("/adminDashboard/createClasses")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm shadow-md"
         >
           + Add Class

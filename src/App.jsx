@@ -24,7 +24,7 @@ import CreateMembers from "./admin/Components/CreateMembers";
 import CreatePlan from "./admin/CreatePlan";
 import EditPlan from "./admin/EditPlan";
 import Classes from "./admin/Classes";
-import CreateClasses from "./admin/CreateClasses";
+import CreateClasses from "./admin/Components/CreateClasses";
 
 function App() {
   return (
@@ -56,6 +56,7 @@ function App() {
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
               <Route path="classes" element={<Classes />} />
+              <Route path="createClasses" element={<CreateClasses />} />
               <Route path="createMember" element={<CreateMembers />} />
             </Route>
           </Routes>
