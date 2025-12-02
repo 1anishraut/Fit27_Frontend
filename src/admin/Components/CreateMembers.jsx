@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { FaEyeSlash } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/Constants";
 
 const CreateMembers = () => {
   const navigate = useNavigate();
+
+  const [plans, setPlans] = useState([]); // <-- FETCH PLAN LIST
+  const [avatar, setAvatar] = useState(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -19,15 +21,33 @@ const CreateMembers = () => {
     state: "",
     city: "",
     zip: "",
-    selectedPlan: "Free",
+    selectedPlan: "", // <-- store ObjectId
     bookingFrom: "Manual Booking",
     specialNote: "",
   });
 
-  const [avatar, setAvatar] = useState(null);
-
   const inputClass =
     "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
+
+  /* --------------------------------------------------
+        FETCH PLANS FROM BACKEND
+  -------------------------------------------------- */
+  const fetchPlans = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/plan/all`, {
+        withCredentials: true,
+      });
+
+      const planList = res?.data?.data || [];
+      setPlans(planList);
+    } catch (error) {
+      console.log("Error fetching plans:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,6 +56,9 @@ const CreateMembers = () => {
 
   const handleCancel = () => navigate("/adminDashboard/allDetails");
 
+  /* --------------------------------------------------
+        SUBMIT FORM
+  -------------------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -49,6 +72,7 @@ const CreateMembers = () => {
       Object.entries(formData).forEach(([key, value]) =>
         payload.append(key, value)
       );
+
       if (avatar) payload.append("avatar", avatar);
 
       const res = await axios.post(`${BASE_URL}/user/signUp`, payload, {
@@ -87,6 +111,7 @@ const CreateMembers = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                {/* FIRST NAME */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     First Name
@@ -100,6 +125,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
+                {/* SURNAME */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Surname
@@ -113,6 +139,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
+                {/* EMAIL */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Email Address
@@ -126,6 +153,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
+                {/* CONTACT */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Phone Number
@@ -139,6 +167,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
+                {/* PLAN SELECT (DYNAMIC) */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Plan
@@ -149,12 +178,17 @@ const CreateMembers = () => {
                     onChange={handleChange}
                     className={inputClass}
                   >
-                    <option value="Free">Free</option>
-                    <option value="Basic">Basic</option>
-                    <option value="Pro">Pro</option>
+                    <option value="">Select Plan</option>
+
+                    {plans.map((plan) => (
+                      <option key={plan._id} value={plan._id}>
+                        {plan.planName} — ₹{plan.planPrice}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
+                {/* BOOKING FROM */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Booking From

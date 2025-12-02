@@ -1,3 +1,4 @@
+// src/admin/Members.jsx (or wherever your file lives)
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
@@ -41,7 +42,6 @@ export default function Members() {
       });
 
       console.log(res.data);
-      
       setMembers(res.data || []);
     } catch (err) {
       console.log("Error fetching members:", err);
@@ -94,14 +94,85 @@ export default function Members() {
     fetchMembers();
   }, []);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "N/A";
-    const d = new Date(dateStr);
+  /* ========================================
+         FORMAT DATE
+  ======================================== */
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
     return d.toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
+  };
+
+  /* ========================================
+         SAFE PLAN NAME ACCESS
+         (handles both ObjectId & populated object)
+  ======================================== */
+  // 🔹 CHANGED: avoid crash when selectedPlan is not an object
+  const getPlanName = (user) => {
+    const p = user.selectedPlan;
+    if (!p) return "N/A";
+
+    // If populated (Object with planName)
+    if (typeof p === "object") {
+      return p.planName || "N/A";
+    }
+
+    // If it's just a string / ObjectId, show that for now
+    return p;
+  };
+
+  /* ========================================
+         CALCULATE PLAN EXPIRY FROM startedAt
+         USING PLAN BILLING PERIOD
+  ======================================== */
+  // 🔹 CHANGED: new helper to compute expiry from startedAt + plan period
+  // and then subtract 1 day so the plan is inclusive of the start date.
+  const computePlanEndDate = (user) => {
+    if (!user.startedAt) return null;
+
+    const plan = user.selectedPlan;
+    const start = new Date(user.startedAt);
+    if (isNaN(start.getTime())) return null;
+
+    // If no populated plan object, fallback to endedAt if present
+    if (!plan || typeof plan !== "object") {
+      return user.endedAt ? new Date(user.endedAt) : null;
+    }
+
+    const end = new Date(start); // copy base date
+
+    const period = plan.billingPeriod || "Monthly";
+    const customType = plan.customPeriodType;
+    const customValue = plan.customPeriodValue || 0;
+
+    if (period === "Daily") {
+      end.setDate(end.getDate() + 1); // 1 day plan
+    } else if (period === "Weekly") {
+      end.setDate(end.getDate() + 7);
+    } else if (period === "Monthly") {
+      end.setMonth(end.getMonth() + 1);
+    } else if (period === "Yearly") {
+      end.setFullYear(end.getFullYear() + 1);
+    } else if (period === "Custom" && customValue > 0) {
+      if (customType === "Days") {
+        end.setDate(end.getDate() + customValue);
+      } else if (customType === "Weeks") {
+        end.setDate(end.getDate() + customValue * 7);
+      } else if (customType === "Months") {
+        end.setMonth(end.getMonth() + customValue);
+      }
+    }
+
+    // CHANGED: ONE FIX Removing 1 day from final day 
+    
+    end.setDate(end.getDate() - 1);
+
+    return end;
   };
 
   return (
@@ -148,90 +219,96 @@ export default function Members() {
                   </td>
                 </tr>
               ) : (
-                members.map((user) => (
-                  <tr
-                    key={user._id}
-                    className="border-b border-gray-700 bg-[#0D0D0F] hover:bg-[#1A1A1A] transition"
-                  >
-                    <td className="p-3 text-gray-200">
-                      {user.firstName} {user.surName}
-                    </td>
+                members.map((user) => {
+                  const endDate = computePlanEndDate(user); // 🔹 CHANGED: use computed expiry
+                  const planName = getPlanName(user); // 🔹 CHANGED: safe plan name
 
-                    <td className="p-3 text-gray-200">{user.emailId}</td>
+                  return (
+                    <tr
+                      key={user._id}
+                      className="border-b border-gray-700 bg-[#0D0D0F] hover:bg-[#1A1A1A] transition"
+                    >
+                      <td className="p-3 text-gray-200">
+                        {user.firstName} {user.surName}
+                      </td>
 
-                    <td className="p-3 text-gray-200">{user.contact}</td>
+                      <td className="p-3 text-gray-200">{user.emailId}</td>
 
-                    <td className="p-3 text-gray-200">{user.selectedPlan}</td>
+                      <td className="p-3 text-gray-200">{user.contact}</td>
 
-                    {/* STATUS TOGGLE */}
-                    <td className="p-3">
-                      <label className="flex items-center cursor-pointer">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={user.status === "active"}
-                            onChange={() => toggleStatus(user)}
-                            className="sr-only"
-                          />
+                      <td className="p-3 text-gray-200">{planName}</td>
 
+                      {/* STATUS TOGGLE */}
+                      <td className="p-3">
+                        <label className="flex items-center cursor-pointer">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={user.status === "active"}
+                              onChange={() => toggleStatus(user)}
+                              className="sr-only"
+                            />
+
+                            <div
+                              className={`w-10 h-5 rounded-full transition ${
+                                user.status === "active"
+                                  ? "bg-green-600"
+                                  : "bg-gray-600"
+                              }`}
+                            ></div>
+
+                            <div
+                              className={`absolute left-1 top-1 w-3 h-3 rounded-full transition ${
+                                user.status === "active"
+                                  ? "translate-x-5 bg-white"
+                                  : "translate-x-0 bg-white"
+                              }`}
+                            ></div>
+                          </div>
+                        </label>
+                      </td>
+
+                      {/* PLAN EXPIRING (computed) */}
+                      <td className="p-3 text-gray-200">
+                        {formatDate(endDate)}
+                      </td>
+
+                      {/* ACTIONS */}
+                      <td className="p-3 relative flex justify-end items-center">
+                        <BsThreeDotsVertical
+                          className="text-xl cursor-pointer text-gray-300"
+                          onClick={() => toggleMenu(user._id)}
+                        />
+
+                        {menuOpenId === user._id && (
                           <div
-                            className={`w-10 h-5 rounded-full transition ${
-                              user.status === "active"
-                                ? "bg-green-600"
-                                : "bg-gray-600"
-                            }`}
-                          ></div>
-
-                          <div
-                            className={`absolute left-1 top-1 w-3 h-3 rounded-full transition ${
-                              user.status === "active"
-                                ? "translate-x-5 bg-white"
-                                : "translate-x-0 bg-white"
-                            }`}
-                          ></div>
-                        </div>
-                      </label>
-                    </td>
-
-                    <td className="p-3 text-gray-200">
-                      {formatDate(user.endedAt)}
-                    </td>
-
-                    {/* ACTIONS */}
-                    <td className="p-3 relative flex justify-end items-center">
-                      <BsThreeDotsVertical
-                        className="text-xl cursor-pointer text-gray-300"
-                        onClick={() => toggleMenu(user._id)}
-                      />
-
-                      {menuOpenId === user._id && (
-                        <div
-                          ref={menuRef}
-                          className="absolute right-0 top-10 bg-[#1A1A1C] shadow-xl rounded-lg w-40 border border-gray-700 z-50"
-                        >
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/adminDashboard/editMembers/${user._id}`,
-                                { state: { user } }
-                              )
-                            }
-                            className="flex items-center gap-2 w-full px-4 py-2 text-gray-200 hover:bg-[#2A2A2C]"
+                            ref={menuRef}
+                            className="absolute right-0 top-10 bg-[#1A1A1C] shadow-xl rounded-lg w-40 border border-gray-700 z-50"
                           >
-                            <FiEdit2 /> Edit
-                          </button>
+                            <button
+                              onClick={() =>
+                                navigate(
+                                  `/adminDashboard/editMembers/${user._id}`,
+                                  { state: { user } }
+                                )
+                              }
+                              className="flex items-center gap-2 w-full px-4 py-2 text-gray-200 hover:bg-[#2A2A2C]"
+                            >
+                              <FiEdit2 /> Edit
+                            </button>
 
-                          <button
-                            onClick={() => handleDelete(user._id)}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-red-400 hover:bg-[#2A2A2C]"
-                          >
-                            <FiTrash2 /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                            <button
+                              onClick={() => handleDelete(user._id)}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-red-400 hover:bg-[#2A2A2C]"
+                            >
+                              <FiTrash2 /> Delete
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
 
               {members.length > 0 && (
