@@ -1,30 +1,36 @@
+// src/admin/Header/UserMenu.jsx
 import React, { useEffect, useRef } from "react";
 import { FiUser } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
 import { useDispatch, useSelector } from "react-redux";
-import { removeSuperAdmin } from "../../Utils/superAdminSlice";
+import { removeAdmin } from "../../Utils/adminSlice";
 import { BASE_URL } from "../../Utils/Constants";
 
 export default function UserMenu({ onClose }) {
   const admin = useSelector((state) => state.admin);
-  const menuRef = useRef();
+  const menuRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Close dropdown outside click
+  // 🔹 Close on outside click (desktop + mobile)
   useEffect(() => {
-    const handler = (e) => {
+    const handleOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         onClose();
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
-  // ✅ LOGOUT FUNCTION
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, [onClose]);
+
+  // 🔹 Logout
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -33,10 +39,8 @@ export default function UserMenu({ onClose }) {
         { withCredentials: true }
       );
 
-      // Clear redux persisted state
-      dispatch(removeSuperAdmin());
-
-      // Navigate to login screen
+      // Clear redux state
+      dispatch(removeAdmin());
       navigate("/admin");
 
       onClose();
@@ -44,27 +48,31 @@ export default function UserMenu({ onClose }) {
       console.log("Logout Error:", error);
     }
   };
-  console.log(admin);
-  
 
   return (
     <div
       ref={menuRef}
       className="absolute right-0 mt-2 w-64 rounded-xl shadow-lg 
-      bg-white dark:bg-[#09090B] border border-gray-300 dark:border-[#1f1f23] p-4 z-50 animate-fadeIn"
+      bg-white dark:bg-[#09090B] border border-gray-300 dark:border-[#1f1f23] 
+      p-4 z-50 animate-fadeIn"
+      onClick={(e) => e.stopPropagation()}
     >
-      {/* Profile Header */}
+      {/* Profile header */}
       <div className="flex items-center gap-3 pb-3 border-b dark:border-[#1f1f23]">
-        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700" />
+        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+          <FiUser className="text-gray-600 dark:text-gray-200" />
+        </div>
         <div>
-          <p className="text-sm font-semibold dark:text-white">Admin</p>
+          <p className="text-sm font-semibold dark:text-white">
+            {admin?.firstName || "Admin"}
+          </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {admin?.emailId}
           </p>
         </div>
       </div>
 
-      {/* Menu List */}
+      {/* Menu list */}
       <div className="mt-3 space-y-2">
         <Link
           to="/adminDashboard/profile"
@@ -77,6 +85,7 @@ export default function UserMenu({ onClose }) {
         </Link>
 
         <button
+          type="button"
           className="flex items-center justify-between w-full p-2 rounded 
           hover:bg-gray-100 dark:hover:bg-[#1f1f23] text-sm dark:text-gray-200"
         >
@@ -86,8 +95,9 @@ export default function UserMenu({ onClose }) {
           </span>
         </button>
 
-        {/* LOGOUT BUTTON */}
+        {/* Logout */}
         <button
+          type="button"
           onClick={handleLogout}
           className="w-full p-2 rounded bg-red-500 text-white text-sm mt-2 
           hover:bg-red-600 transition"

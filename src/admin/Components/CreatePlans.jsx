@@ -150,8 +150,8 @@ const CreatePlans = () => {
         </div>
 
         {/* BILLING PERIOD */}
-        <div className="mt-6 flex items-center gap-4 ">
-          <div className="w-[30%]">
+        <div className="mt-6 flex flex-col lg:flex-row items-center gap-4 ">
+          <div className="lg:w-[30%] w-full">
             <label className="text-sm font-medium dark:text-white">
               Billing Period
             </label>
@@ -170,7 +170,7 @@ const CreatePlans = () => {
             </select>
           </div>
           {/* CUSTOM BILLING FIELDS */}
-          <div className="">
+          <div className="w-full">
             {formData.billingPeriod === "Custom" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Custom Period Type */}
