@@ -5,11 +5,9 @@ import appStore, { persistor } from "./Utils/appStore";
 import { Provider } from "react-redux";
 // import AdminDashboard from "./Components/Admin/AdminDashboard";
 import { PersistGate } from "redux-persist/integration/react";
-import Login from "./admin/Login";
 import SuperAdminLogin from "./SuperAdmin/Login";
 import SuperAdminLayout from "./SuperAdmin/SuperAdminLayout";
 import Home from "./SuperAdmin/Home";
-import Companies from "./SuperAdmin/FitnessHubs";
 import Plans from "./SuperAdmin/Plans";
 import FitnessHubs from "./SuperAdmin/FitnessHubs";
 import Coupon from "./SuperAdmin/Coupon";
@@ -17,15 +15,13 @@ import EmailTemplate from "./SuperAdmin/EmailTemplate";
 import Settings from "./SuperAdmin/Settings";
 import AdminLayout from "./admin/AdminLayout";
 
-import AllDetails from "./admin/AllDetails";
 // import Plans from "./admin/Plans";
-import Feedbacks from "./admin/Feedbacks";
+import AllDetails from "./admin/AllDetails";
 import CreateMembers from "./admin/Components/CreateMembers";
-import CreatePlan from "./admin/CreatePlan";
-import EditPlan from "./admin/EditPlan";
 import Classes from "./admin/Classes";
 import CreateClasses from "./admin/Components/CreateClasses";
 import AdminPlans from "./admin/Admin_Plans";
+import CreatePlans from "./admin/Components/CreatePlans";
 
 function App() {
   return (
@@ -60,6 +56,7 @@ function App() {
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="adminPlans" element={<AdminPlans/>} />
+              <Route path="createPlan" element={<CreatePlans />} />
             </Route>
           </Routes>
         </BrowserRouter>
