@@ -52,7 +52,7 @@ const MENU = [
       },
       {
         title: "Members",
-        path: "/adminDashboard/members/list",
+        path: "/adminDashboard/members",
       },
     ],
   },
