@@ -10,19 +10,17 @@ export default function Instructors() {
 
   const [instructors, setInstructors] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
-
   const menuRef = useRef(null);
 
-  /* =====================================================
-        CLICK OUTSIDE TO CLOSE DROPDOWN MENU
-  ===================================================== */
+  /* ------------------------------
+      CLICK OUTSIDE TO CLOSE MENU
+  ------------------------------ */
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpenId(null);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -31,12 +29,12 @@ export default function Instructors() {
     setMenuOpenId((prev) => (prev === id ? null : id));
   };
 
-  /* =====================================================
-        FETCH INSTRUCTORS
-  ===================================================== */
+  /* ------------------------------
+      FETCH INSTRUCTORS
+  ------------------------------ */
   const fetchInstructors = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/instructors/all`, {
+      const res = await axios.get(`${BASE_URL}/instructor/all`, {
         withCredentials: true,
       });
 
@@ -46,12 +44,12 @@ export default function Instructors() {
     }
   };
 
-  /* =====================================================
-        DELETE INSTRUCTOR
-  ===================================================== */
+  /* ------------------------------
+      DELETE INSTRUCTOR
+  ------------------------------ */
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/instructors/delete/${id}`, {
+      await axios.delete(`${BASE_URL}/instructor/delete/${id}`, {
         withCredentials: true,
       });
 
@@ -62,24 +60,26 @@ export default function Instructors() {
     }
   };
 
-  /* =====================================================
-        ACTIVE / INACTIVE TOGGLE
-  ===================================================== */
+  /* ------------------------------
+      ACTIVE / INACTIVE TOGGLE
+  ------------------------------ */
   const toggleActive = async (id, currentStatus) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+
     try {
-      await axios.put(
-        `${BASE_URL}/instructors/update/${id}`,
-        { active: !currentStatus },
+      await axios.patch(
+        `${BASE_URL}/instructor/update/${id}`,
+        { status: newStatus },
         { withCredentials: true }
       );
 
       setInstructors((prev) =>
         prev.map((ins) =>
-          ins._id === id ? { ...ins, active: !currentStatus } : ins
+          ins._id === id ? { ...ins, status: newStatus } : ins
         )
       );
     } catch (error) {
-      console.log("Active toggle failed:", error);
+      console.log("Status update failed:", error);
     }
   };
 
@@ -96,7 +96,7 @@ export default function Instructors() {
         </h1>
 
         <button
-          onClick={() => navigate("/adminDashboard/createInstructors")}
+          onClick={() => navigate("/adminDashboard/createInstructor")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm shadow-md"
         >
           + Add Instructor
@@ -138,9 +138,18 @@ export default function Instructors() {
                       transition
                     "
                   >
-                    <td className="p-3 text-gray-200">{item.name}</td>
-                    <td className="p-3 text-gray-200">{item.expertise}</td>
-                    <td className="p-3 text-gray-200">{item.phone}</td>
+                    {/* Name */}
+                    <td className="p-3 text-gray-200">
+                      {item.firstName} {item.surName}
+                    </td>
+
+                    {/* Expertise */}
+                    <td className="p-3 text-gray-200">
+                      {item.profileInfo || "—"}
+                    </td>
+
+                    {/* Contact */}
+                    <td className="p-3 text-gray-200">{item.contact}</td>
 
                     {/* ACTIVE TOGGLE */}
                     <td className="p-3">
@@ -148,20 +157,22 @@ export default function Instructors() {
                         <div className="relative">
                           <input
                             type="checkbox"
-                            checked={item.active}
-                            onChange={() => toggleActive(item._id, item.active)}
+                            checked={item.status === "active"}
+                            onChange={() => toggleActive(item._id, item.status)}
                             className="sr-only"
                           />
 
                           <div
                             className={`w-10 h-5 rounded-full transition ${
-                              item.active ? "bg-green-600" : "bg-gray-600"
+                              item.status === "active"
+                                ? "bg-green-600"
+                                : "bg-gray-600"
                             }`}
                           ></div>
 
                           <div
                             className={`absolute left-1 top-1 w-3 h-3 rounded-full transition ${
-                              item.active
+                              item.status === "active"
                                 ? "translate-x-5 bg-white"
                                 : "translate-x-0 bg-white"
                             }`}
@@ -170,7 +181,7 @@ export default function Instructors() {
                       </label>
                     </td>
 
-                    {/* ACTION BUTTONS */}
+                    {/* ACTIONS */}
                     <td className="p-3 relative flex justify-end items-center">
                       <BsThreeDotsVertical
                         className="text-xl cursor-pointer text-gray-300"
@@ -192,7 +203,7 @@ export default function Instructors() {
                           <button
                             onClick={() =>
                               navigate(
-                                `/adminDashboard/editInstructors/${item._id}`,
+                                `/adminDashboard/editInstructor/${item._id}`,
                                 { state: { item } }
                               )
                             }
@@ -235,7 +246,7 @@ export default function Instructors() {
         </div>
       </div>
 
-      {/* SCROLLBAR REMOVAL */}
+      {/* SCROLLBAR REMOVE */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { scrollbar-width: none !important; }
