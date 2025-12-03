@@ -27,6 +27,7 @@ import EditPlan from "./admin/Components/EditPlan";
 import Members from "./admin/Members";
 import Instructors from "./admin/Instructors";
 import CreateInstructor from "./admin/Components/CreateInstructor";
+import EditInstructor from "./admin/Components/EditInstructor";
 
 function App() {
   return (
@@ -60,13 +61,14 @@ function App() {
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="editClasses/:id" element={<EditClasses />} />
+              <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />
-              <Route path="members" element={<Members />} />
               <Route path="instructors" element={<Instructors/>}/>
               <Route path="createInstructor" element={<CreateInstructor/>}/>
+              <Route path="editInstructor/:id" element={<EditInstructor/>}/>
             </Route>
           </Routes>
         </BrowserRouter>

@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/Constants";
 import { FiTrash2 } from "react-icons/fi";
 
-const CreateInstructor = () => {
+const EditInstructor = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const existing = location.state?.item;
 
   const [classesList, setClassesList] = useState([]);
-  const [showClassModal, setShowClassModal] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showClassSelector, setShowClassSelector] = useState(false);
 
   const [files, setFiles] = useState({
     avatar: null,
@@ -30,16 +34,16 @@ const CreateInstructor = () => {
     profileInfo: "",
     personalTrainer: false,
     status: "active",
-    classes: [], // MULTIPLE CLASS IDS
+    classes: [],
     specialNote: "",
   });
 
   const inputClass =
     "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
 
-  /* ============================================================
+  /* ------------------------------------------------
       FETCH CLASSES
-  ============================================================ */
+  ------------------------------------------------ */
   const fetchClasses = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/classes/all`, {
@@ -55,9 +59,36 @@ const CreateInstructor = () => {
     fetchClasses();
   }, []);
 
-  /* ============================================================
+  /* ------------------------------------------------
+      PREFILL EXISTING INSTRUCTOR DATA
+  ------------------------------------------------ */
+  useEffect(() => {
+    if (!existing) return;
+
+    setFormData({
+      firstName: existing.firstName,
+      surName: existing.surName,
+      emailId: existing.emailId,
+      contact: existing.contact,
+      hoursPayment: existing.hoursPayment,
+      rentPayment: existing.rentPayment,
+      profileInfo: existing.profileInfo,
+      personalTrainer: existing.personalTrainer,
+      status: existing.status,
+      classes: existing.classes?.map((cls) => cls._id) || [],
+      specialNote: existing.specialNote || "",
+    });
+
+    setLinks(
+      existing.links && existing.links.length > 0
+        ? existing.links
+        : [{ url: "", label: "" }]
+    );
+  }, [existing]);
+
+  /* ------------------------------------------------
       INPUT HANDLERS
-  ============================================================ */
+  ------------------------------------------------ */
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -73,13 +104,12 @@ const CreateInstructor = () => {
   const addLink = () => setLinks([...links, { url: "", label: "" }]);
   const removeLink = (i) => setLinks(links.filter((_, idx) => idx !== i));
 
-  /* ============================================================
-      CLASS CHECKBOX HANDLER
-  ============================================================ */
+  /* ------------------------------------------------
+      CLASS CHECKBOX
+  ------------------------------------------------ */
   const handleClassCheckbox = (classId) => {
     setFormData((prev) => {
       const exists = prev.classes.includes(classId);
-
       return {
         ...prev,
         classes: exists
@@ -89,9 +119,9 @@ const CreateInstructor = () => {
     });
   };
 
-  /* ============================================================
+  /* ------------------------------------------------
       SUBMIT HANDLER
-  ============================================================ */
+  ------------------------------------------------ */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -99,23 +129,30 @@ const CreateInstructor = () => {
       const payload = new FormData();
 
       Object.entries(formData).forEach(([key, val]) => {
-        if (key === "classes") payload.append("classes", JSON.stringify(val));
-        else payload.append(key, val);
+        if (key === "classes") {
+          payload.append("classes", JSON.stringify(val));
+        } else {
+          payload.append(key, val);
+        }
       });
 
       payload.append("links", JSON.stringify(links));
 
-      Object.entries(files).forEach(([key, file]) => {
-        if (file) payload.append(key, file);
+      Object.entries(files).forEach(([key, val]) => {
+        if (val) payload.append(key, val);
       });
 
-      const res = await axios.post(`${BASE_URL}/instructor/create`, payload, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.patch(
+        `${BASE_URL}/instructor/update/${id}`,
+        payload,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      if (res.status === 201) {
-        alert("Instructor created successfully");
+      if (res.status === 200) {
+        alert("Instructor updated successfully");
         navigate("/adminDashboard/instructors");
       }
     } catch (error) {
@@ -123,25 +160,25 @@ const CreateInstructor = () => {
     }
   };
 
-  /* ============================================================
-      COMPONENT UI
-  ============================================================ */
+  /* ------------------------------------------------
+      UI
+  ------------------------------------------------ */
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       <form onSubmit={handleSubmit}>
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Create Instructor
+            Edit Instructor
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Fill out instructor details, documents & class assignments.
+            Update instructor details & documents.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT SECTION */}
           <div className="lg:col-span-2 space-y-6">
-            {/* GENERAL INFORMATION */}
+            {/* GENERAL INFO */}
             <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
               <h2 className="text-lg font-semibold dark:text-white">
                 General information
@@ -246,7 +283,7 @@ const CreateInstructor = () => {
                     placeholder="URL"
                     value={item.url}
                     onChange={(e) => handleLinkChange(i, "url", e.target.value)}
-                    className="col-span-5 border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-300"
+                    className="col-span-5 border p-2 rounded-md bg-white dark:bg-[#0D0D0F]"
                   />
 
                   <input
@@ -255,7 +292,7 @@ const CreateInstructor = () => {
                     onChange={(e) =>
                       handleLinkChange(i, "label", e.target.value)
                     }
-                    className="col-span-5 border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-300"
+                    className="col-span-5 border p-2 rounded-md bg-white dark:bg-[#0D0D0F]"
                   />
 
                   <button
@@ -286,16 +323,16 @@ const CreateInstructor = () => {
 
                 <button
                   type="button"
-                  onClick={() => setShowClassModal(!showClassModal)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md"
+                  onClick={() => setShowClassSelector(!showClassSelector)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md"
                 >
-                  {showClassModal ? "Hide Classes" : "Browse Classes"}
+                  {showClassSelector ? "Hide Classes" : "Browse Classes"}
                 </button>
               </div>
 
-              {/* Selected classes */}
+              {/* SELECTED CLASSES */}
               {formData.classes.length > 0 && (
-                <div className="mt-4 p-3 rounded-md bg-gray-100 dark:bg-[#1A1A1A]">
+                <div className="mt-4 p-3 rounded-md bg-gray-100 dark:bg-[#1A1A1C]">
                   <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Selected Classes:
                   </h3>
@@ -313,26 +350,26 @@ const CreateInstructor = () => {
                 </div>
               )}
 
-              {/* Inline classes list */}
-              {showClassModal && (
+              {/* INLINE CLASS SELECTOR */}
+              {showClassSelector && (
                 <div className="mt-6">
-                  {/* Search bar */}
+                  {/* SEARCH BAR */}
                   <input
                     type="text"
                     placeholder="Search classes..."
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    className="w-full border p-2 rounded-md bg-white dark:bg-[#1A1A1C] 
+                    className="w-full border p-2 rounded-md bg-white dark:bg-[#1A1A1C]
                     text-gray-900 dark:text-gray-200 border-gray-400 dark:border-gray-600 mb-4"
                   />
 
-                  {/* List */}
-                  <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
                     {classesList
-                      .filter((cls) => {
-                        const name = cls?.name?.toLowerCase() || "";
-                        return name.includes(searchText.toLowerCase());
-                      })
+                      .filter((cls) =>
+                        cls.name
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase())
+                      )
                       .map((cls) => (
                         <label
                           key={cls._id}
@@ -357,7 +394,7 @@ const CreateInstructor = () => {
             </div>
           </div>
 
-          {/* RIGHT SECTION */}
+          {/* RIGHT PANEL */}
           <div className="space-y-6">
             {/* PERSONAL TRAINER */}
             <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
@@ -403,6 +440,7 @@ const CreateInstructor = () => {
             {/* STATUS */}
             <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
               <h2 className="text-lg font-semibold dark:text-white">Status</h2>
+
               <select
                 name="status"
                 value={formData.status}
@@ -422,10 +460,12 @@ const CreateInstructor = () => {
               </h2>
 
               <div className="space-y-5 mt-4">
+                {/* AVATAR */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Avatar
                   </label>
+
                   <input
                     type="file"
                     name="avatar"
@@ -433,6 +473,14 @@ const CreateInstructor = () => {
                     onChange={handleFileChange}
                     className="mt-2"
                   />
+
+                  {!files.avatar && existing?.avatar && (
+                    <img
+                      src={`${BASE_URL}${existing.avatar}`}
+                      className="w-32 h-32 rounded-full mt-3 object-cover border"
+                    />
+                  )}
+
                   {files.avatar && (
                     <img
                       src={URL.createObjectURL(files.avatar)}
@@ -441,10 +489,12 @@ const CreateInstructor = () => {
                   )}
                 </div>
 
+                {/* QUALIFICATION */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Qualification (PDF)
                   </label>
+
                   <input
                     type="file"
                     name="qualification"
@@ -452,12 +502,24 @@ const CreateInstructor = () => {
                     className="mt-2"
                     accept="application/pdf"
                   />
+
+                  {existing?.qualification && !files.qualification && (
+                    <a
+                      href={`${BASE_URL}${existing.qualification}`}
+                      target="_blank"
+                      className="text-blue-400 text-sm underline mt-1 block"
+                    >
+                      View Current File
+                    </a>
+                  )}
                 </div>
 
+                {/* DOCUMENT */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Document (PDF)
                   </label>
+
                   <input
                     type="file"
                     name="document"
@@ -465,12 +527,24 @@ const CreateInstructor = () => {
                     className="mt-2"
                     accept="application/pdf"
                   />
+
+                  {existing?.document && !files.document && (
+                    <a
+                      href={`${BASE_URL}${existing.document}`}
+                      target="_blank"
+                      className="text-blue-400 text-sm underline mt-1 block"
+                    >
+                      View Current File
+                    </a>
+                  )}
                 </div>
 
+                {/* INSURANCE */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Insurance (PDF)
                   </label>
+
                   <input
                     type="file"
                     name="insurance"
@@ -478,6 +552,16 @@ const CreateInstructor = () => {
                     className="mt-2"
                     accept="application/pdf"
                   />
+
+                  {existing?.insurance && !files.insurance && (
+                    <a
+                      href={`${BASE_URL}${existing.insurance}`}
+                      target="_blank"
+                      className="text-blue-400 text-sm underline mt-1 block"
+                    >
+                      View Current File
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -498,7 +582,7 @@ const CreateInstructor = () => {
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white rounded-md"
           >
-            Save
+            Save Changes
           </button>
         </div>
       </form>
@@ -506,4 +590,4 @@ const CreateInstructor = () => {
   );
 };
 
-export default CreateInstructor;
+export default EditInstructor;
