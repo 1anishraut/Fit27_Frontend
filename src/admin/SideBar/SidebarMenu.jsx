@@ -82,6 +82,12 @@ const MENU = [
     icon: <FiBarChart2 />,
     path: "/",
   },
+  {
+    id: "instructors",
+    title: "Instructors",
+    icon: <FiUserCheck />,
+    path: "/adminDashboard/instructors",
+  },
 
   {
     id: "classes",
@@ -96,13 +102,6 @@ const MENU = [
     icon: <FiMessageCircle />,
     path: "/",
   },
-
-  // {
-  //   id: "instructors",
-  //   title: "Instructors",
-  //   icon: <FiUserCheck />,
-  //   path: "/",
-  // },
 
   // {
   //   id: "weekSchedules",

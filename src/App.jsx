@@ -25,6 +25,7 @@ import AdminPlans from "./admin/Admin_Plans";
 import CreatePlans from "./admin/Components/CreatePlans";
 import EditPlan from "./admin/Components/EditPlan";
 import Members from "./admin/Members";
+import Instructors from "./admin/Instructors";
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />
               <Route path="members" element={<Members />} />
+              <Route path="instructors" element={<Instructors/>}/>
             </Route>
           </Routes>
         </BrowserRouter>
