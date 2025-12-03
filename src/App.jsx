@@ -20,8 +20,10 @@ import AllDetails from "./admin/AllDetails";
 import CreateMembers from "./admin/Components/CreateMembers";
 import Classes from "./admin/Classes";
 import CreateClasses from "./admin/Components/CreateClasses";
+import EditClasses from "./admin/Components/EditClasses";
 import AdminPlans from "./admin/Admin_Plans";
 import CreatePlans from "./admin/Components/CreatePlans";
+import EditPlan from "./admin/Components/EditPlan";
 import Members from "./admin/Members";
 
 function App() {
@@ -55,10 +57,12 @@ function App() {
               <Route path="allDetails" element={<AllDetails />} />
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
+              <Route path="editClasses/:id" element={<EditClasses />} />
               <Route path="createMember" element={<CreateMembers />} />
-              <Route path="adminPlans" element={<AdminPlans/>} />
+              <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
-              <Route path="members" element={<Members/>}/>
+              <Route path="editPlan/:id" element={<EditPlan />} />
+              <Route path="members" element={<Members />} />
             </Route>
           </Routes>
         </BrowserRouter>

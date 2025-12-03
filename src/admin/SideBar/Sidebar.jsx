@@ -9,7 +9,7 @@ export default function Sidebar({ collapsed, setCollapsed, theme, setTheme }) {
       shadow-lg transition-all 
       ${collapsed ? "w-20" : "w-64"}`}
     >
-      <div className="flex-1 overflow-y-auto px-2 py-4">
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-2 py-4">
         <SidebarMenu collapsed={collapsed} />
       </div>
     </aside>

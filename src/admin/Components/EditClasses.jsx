@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/Constants";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-export default function CreateClasses() {
+export default function EditClasses() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -15,28 +17,69 @@ export default function CreateClasses() {
     links: [{ url: "", label: "" }],
   });
 
-  // -------------------
-  // HANDLE INPUT CHANGE
-  // -------------------
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  /* -------------------------------------------------------
+      1️⃣ PREFILL IF NAVIGATED WITH STATE
+  ------------------------------------------------------- */
+  useEffect(() => {
+    if (location.state?.item) {
+      const cls = location.state.item;
+
+      setFormData({
+        name: cls.name || "",
+        description: cls.description || "",
+        capacity: cls.capacity || "",
+        cost: cls.cost || "",
+        active: cls.active ?? true,
+        links: cls.links?.length ? cls.links : [{ url: "", label: "" }],
+      });
+    }
+  }, [location.state]);
+
+  /* -------------------------------------------------------
+      2️⃣ FETCH FROM BACKEND IF PAGE REFRESHED
+  ------------------------------------------------------- */
+  const fetchClassById = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/classes/${id}`, {
+        withCredentials: true,
+      });
+
+      const cls = res.data.data;
+
+      setFormData({
+        name: cls.name,
+        description: cls.description,
+        capacity: cls.capacity,
+        cost: cls.cost,
+        active: cls.active,
+        links: cls.links?.length ? cls.links : [{ url: "", label: "" }],
+      });
+    } catch (error) {
+      console.log("Error fetching class:", error);
+    }
   };
 
-  // -------------------
-  // HANDLE LINKS UPDATE
-  // -------------------
+  useEffect(() => {
+    if (!location.state?.item) fetchClassById();
+  }, []);
+
+  /* -------------------------------------------------------
+      3️⃣ HANDLERS
+  ------------------------------------------------------- */
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
   const updateLink = (index, field, value) => {
     const updated = [...formData.links];
     updated[index][field] = value;
     setFormData({ ...formData, links: updated });
   };
 
-  const addLink = () => {
+  const addLink = () =>
     setFormData({
       ...formData,
       links: [...formData.links, { url: "", label: "" }],
     });
-  };
 
   const removeLink = (index) => {
     const updated = [...formData.links];
@@ -44,33 +87,37 @@ export default function CreateClasses() {
     setFormData({ ...formData, links: updated });
   };
 
-  // -------------------
-  // SUBMIT FORM
-  // -------------------
+  /* -------------------------------------------------------
+      4️⃣ SUBMIT UPDATE
+  ------------------------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(`${BASE_URL}/classes/create`, formData, {
+      await axios.put(`${BASE_URL}/classes/update/${id}`, formData, {
         withCredentials: true,
       });
 
-      alert("Class created successfully");
-      navigate(-1);
+      alert("Class updated successfully!");
+      navigate("/adminDashboard/classes");
     } catch (error) {
       console.log(error);
       alert(error.response?.data?.message || "Something went wrong");
     }
   };
 
+  /* -------------------------------------------------------
+      5️⃣ UI SAME AS CREATE CLASSES
+  ------------------------------------------------------- */
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] min-h-screen">
       {/* PAGE HEADER */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Create New Class
+          Edit Class
         </h1>
         <p className="text-gray-600 dark:text-gray-300 text-sm">
-          Add a new workout/training class with full details.
+          Update details for this workout/training class.
         </p>
       </div>
 
@@ -159,11 +206,13 @@ export default function CreateClasses() {
                 }
                 className="sr-only"
               />
+
               <div
                 className={`w-12 h-6 rounded-full transition ${
                   formData.active ? "bg-green-600" : "bg-gray-600"
                 }`}
               ></div>
+
               <div
                 className={`absolute left-1 top-1 w-4 h-4 rounded-full transition ${
                   formData.active
@@ -175,9 +224,9 @@ export default function CreateClasses() {
           </label>
         </div>
 
-        {/* LINKS REPEATER */}
+        {/* LINKS */}
         <div className="mt-6">
-          <h2 className="text-md font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-md font-semibold dark:text-white">
             External Links
           </h2>
 
@@ -242,7 +291,7 @@ export default function CreateClasses() {
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Save Class
+            Save Changes
           </button>
         </div>
       </form>

@@ -6,7 +6,7 @@ import { BASE_URL } from "../../Utils/Constants";
 const CreateMembers = () => {
   const navigate = useNavigate();
 
-  const [plans, setPlans] = useState([]); // <-- FETCH PLAN LIST
+  const [plans, setPlans] = useState([]);
   const [avatar, setAvatar] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ const CreateMembers = () => {
     state: "",
     city: "",
     zip: "",
-    selectedPlan: "", // <-- store ObjectId
+    selectedPlan: "",
     bookingFrom: "Manual Booking",
     specialNote: "",
   });
@@ -30,11 +30,11 @@ const CreateMembers = () => {
     "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
 
   /* --------------------------------------------------
-        FETCH PLANS FROM BACKEND
+        FETCH ONLY ACTIVE PLANS  
   -------------------------------------------------- */
   const fetchPlans = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/plan/all`, {
+      const res = await axios.get(`${BASE_URL}/plan/active`, {
         withCredentials: true,
       });
 
@@ -56,9 +56,6 @@ const CreateMembers = () => {
 
   const handleCancel = () => navigate("/adminDashboard/allDetails");
 
-  /* --------------------------------------------------
-        SUBMIT FORM
-  -------------------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -111,7 +108,6 @@ const CreateMembers = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {/* FIRST NAME */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     First Name
@@ -121,11 +117,9 @@ const CreateMembers = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
 
-                {/* SURNAME */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Surname
@@ -135,11 +129,9 @@ const CreateMembers = () => {
                     value={formData.surName}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
 
-                {/* EMAIL */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Email Address
@@ -153,7 +145,6 @@ const CreateMembers = () => {
                   />
                 </div>
 
-                {/* CONTACT */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Phone Number
@@ -163,11 +154,10 @@ const CreateMembers = () => {
                     value={formData.contact}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
 
-                {/* PLAN SELECT (DYNAMIC) */}
+                {/* ONLY ACTIVE PLANS */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Plan
@@ -179,7 +169,6 @@ const CreateMembers = () => {
                     className={inputClass}
                   >
                     <option value="">Select Plan</option>
-
                     {plans.map((plan) => (
                       <option key={plan._id} value={plan._id}>
                         {plan.planName} — ₹{plan.planPrice}
@@ -188,7 +177,6 @@ const CreateMembers = () => {
                   </select>
                 </div>
 
-                {/* BOOKING FROM */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Booking From
@@ -222,10 +210,8 @@ const CreateMembers = () => {
                     value={formData.fullAddress}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
-
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Zip
@@ -235,7 +221,6 @@ const CreateMembers = () => {
                     value={formData.zip}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
               </div>
@@ -250,10 +235,8 @@ const CreateMembers = () => {
                     value={formData.country}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
-
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     State
@@ -263,10 +246,8 @@ const CreateMembers = () => {
                     value={formData.state}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
-
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     City
@@ -276,7 +257,6 @@ const CreateMembers = () => {
                     value={formData.city}
                     onChange={handleChange}
                     className={inputClass}
-                    type="text"
                   />
                 </div>
               </div>
@@ -335,7 +315,6 @@ const CreateMembers = () => {
                 value={formData.specialNote}
                 onChange={handleChange}
                 className={`${inputClass} h-32`}
-                placeholder="Write here..."
               />
             </div>
 
@@ -355,7 +334,6 @@ const CreateMembers = () => {
                   <img
                     src={URL.createObjectURL(avatar)}
                     className="w-32 h-32 rounded-full object-cover"
-                    alt="Preview"
                   />
                 ) : (
                   <p className="text-gray-500 dark:text-gray-300 text-sm">
@@ -367,20 +345,17 @@ const CreateMembers = () => {
           </div>
         </div>
 
-        {/* BUTTONS */}
         <div className="flex justify-end gap-3 mt-8">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-5 py-2 border border-gray-300 dark:border-gray-700 rounded-md 
-            hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-800 dark:text-white"
+            className="px-5 py-2 border border-gray-300 dark:border-gray-700 rounded-md"
           >
             Cancel
           </button>
-
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md"
           >
             Save
           </button>

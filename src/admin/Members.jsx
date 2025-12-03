@@ -41,7 +41,7 @@ export default function Members() {
         withCredentials: true,
       });
 
-      console.log(res.data);
+      // console.log(res.data);
       setMembers(res.data || []);
     } catch (err) {
       console.log("Error fetching members:", err);
@@ -184,7 +184,7 @@ export default function Members() {
         </h1>
 
         <button
-          onClick={() => navigate("/adminDashboard/createMembers")}
+          onClick={() => navigate("/adminDashboard/createMember")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm shadow-md"
         >
           + Add Member

@@ -202,7 +202,7 @@ export default function Classes() {
                           <button
                             onClick={() =>
                               navigate(
-                                `/adminDashboard/editClass/${item._id}`,
+                                `/adminDashboard/editClasses/${item._id}`,
                                 {
                                   state: { item },
                                 }

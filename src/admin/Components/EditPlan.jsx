@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { BASE_URL } from "../../Utils/Constants";
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const CreatePlans = () => {
+const EditPlan = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     planName: "",
@@ -14,34 +17,56 @@ const CreatePlans = () => {
     classes: "",
     guestPass: "",
     billingPeriod: "Monthly",
-    customPeriodType: null,
+    customPeriodType: "",
     customPeriodValue: "",
-    active: true, // ⭐ NEW FIELD
+    active: true,
   });
 
-  // Handle Input Changes
+  /* -----------------------------------------
+        FETCH PLAN (FROM STATE OR BACKEND)
+  ----------------------------------------- */
+  useEffect(() => {
+    if (location.state?.plan) {
+      setFormData({ ...location.state.plan });
+    } else {
+      fetchPlanById();
+    }
+  }, []);
+
+  const fetchPlanById = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/plan/${id}`, {
+        withCredentials: true,
+      });
+
+      setFormData(res.data.data);
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  /* -----------------------------------------
+        HANDLE INPUT CHANGE
+  ----------------------------------------- */
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ⭐ Toggle Active Status
-  const toggleActive = () => {
-    setFormData((prev) => ({ ...prev, active: !prev.active }));
-  };
-
-  // Submit Form
+  /* -----------------------------------------
+        SUBMIT UPDATED PLAN
+  ----------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.post(`${BASE_URL}/plan/create`, formData, {
+      await axios.patch(`${BASE_URL}/plan/update/${id}`, formData, {
         withCredentials: true,
       });
 
-      alert("Plan created successfully!");
+      toast.success("Plan updated successfully!");
       navigate(-1);
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      console.error("Update error:", error);
     }
   };
 
@@ -50,10 +75,10 @@ const CreatePlans = () => {
       {/* HEADER */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Create New Plan
+          Edit Plan
         </h1>
         <p className="text-gray-600 dark:text-gray-300 text-sm">
-          Add all required membership plan details here.
+          Update membership plan information
         </p>
       </div>
 
@@ -110,7 +135,7 @@ const CreatePlans = () => {
           ></textarea>
         </div>
 
-        {/* RENEWAL, CLASSES, GUEST PASS */}
+        {/* EXTRA FIELDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-sm font-medium dark:text-white">
@@ -156,8 +181,8 @@ const CreatePlans = () => {
         </div>
 
         {/* BILLING PERIOD */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="">
+        <div className="mt-6 flex flex-col lg:flex-row items-center gap-4">
+          <div className="lg:w-[30%] w-full">
             <label className="text-sm font-medium dark:text-white">
               Billing Period
             </label>
@@ -178,7 +203,7 @@ const CreatePlans = () => {
 
           {/* CUSTOM FIELDS */}
           {formData.billingPeriod === "Custom" && (
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div>
                 <label className="text-sm font-medium dark:text-white">
                   Custom Period Type
@@ -214,31 +239,41 @@ const CreatePlans = () => {
           )}
         </div>
 
-        {/* ⭐ ACTIVE TOGGLE */}
+        {/* ACTIVE TOGGLE */}
         <div className="mt-6">
           <label className="text-sm font-medium dark:text-white">
-            Plan Status
+            Active Status
           </label>
 
-          <div
-            className="flex items-center mt-2 cursor-pointer"
-            onClick={toggleActive}
-          >
-            <div className="relative">
-              <div
-                className={`w-12 h-6 rounded-full transition ${
-                  formData.active ? "bg-green-600" : "bg-gray-500"
-                }`}
-              ></div>
+          <div className="flex items-center mt-2">
+            <label className="flex items-center cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={formData.active}
+                  onChange={() =>
+                    setFormData({ ...formData, active: !formData.active })
+                  }
+                  className="sr-only"
+                />
 
-              <div
-                className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white transition ${
-                  formData.active ? "translate-x-6" : "translate-x-0"
-                }`}
-              ></div>
-            </div>
+                <div
+                  className={`w-10 h-5 rounded-full transition ${
+                    formData.active ? "bg-green-600" : "bg-gray-600"
+                  }`}
+                ></div>
 
-            <span className="ml-3 text-gray-800 dark:text-white">
+                <div
+                  className={`absolute left-1 top-1 w-3 h-3 rounded-full transition ${
+                    formData.active
+                      ? "translate-x-5 bg-white"
+                      : "translate-x-0 bg-white"
+                  }`}
+                ></div>
+              </div>
+            </label>
+
+            <span className="ml-3 text-gray-900 dark:text-white">
               {formData.active ? "Active" : "Inactive"}
             </span>
           </div>
@@ -259,7 +294,7 @@ const CreatePlans = () => {
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Save Plan
+            Save Changes
           </button>
         </div>
       </form>
@@ -267,4 +302,4 @@ const CreatePlans = () => {
   );
 };
 
-export default CreatePlans;
+export default EditPlan;
