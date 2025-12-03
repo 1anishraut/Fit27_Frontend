@@ -1,3 +1,7 @@
+/** ============================================================
+      EDIT INSTRUCTOR (with Bank Info + QR Image Support)
+    ============================================================ */
+
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -20,6 +24,7 @@ const EditInstructor = () => {
     document: null,
     insurance: null,
     qualification: null,
+    qrImage: null,
   });
 
   const [links, setLinks] = useState([{ url: "", label: "" }]);
@@ -36,10 +41,17 @@ const EditInstructor = () => {
     status: "active",
     classes: [],
     specialNote: "",
+
+    // NEW BANK FIELDS
+    bankName: "",
+    accountNumber: "",
+    bankCode: "",
+    branchName: "",
   });
 
   const inputClass =
-    "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
+    "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] " +
+    "text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
 
   /* ------------------------------------------------
       FETCH CLASSES
@@ -60,7 +72,7 @@ const EditInstructor = () => {
   }, []);
 
   /* ------------------------------------------------
-      PREFILL EXISTING INSTRUCTOR DATA
+      PREFILL EXISTING DATA
   ------------------------------------------------ */
   useEffect(() => {
     if (!existing) return;
@@ -77,6 +89,12 @@ const EditInstructor = () => {
       status: existing.status,
       classes: existing.classes?.map((cls) => cls._id) || [],
       specialNote: existing.specialNote || "",
+
+      // PREFILL NEW BANK FIELDS
+      bankName: existing.bankName || "",
+      accountNumber: existing.accountNumber || "",
+      bankCode: existing.bankCode || "",
+      branchName: existing.branchName || "",
     });
 
     setLinks(
@@ -129,17 +147,14 @@ const EditInstructor = () => {
       const payload = new FormData();
 
       Object.entries(formData).forEach(([key, val]) => {
-        if (key === "classes") {
-          payload.append("classes", JSON.stringify(val));
-        } else {
-          payload.append(key, val);
-        }
+        if (key === "classes") payload.append("classes", JSON.stringify(val));
+        else payload.append(key, val);
       });
 
       payload.append("links", JSON.stringify(links));
 
-      Object.entries(files).forEach(([key, val]) => {
-        if (val) payload.append(key, val);
+      Object.entries(files).forEach(([key, file]) => {
+        if (file) payload.append(key, file);
       });
 
       const res = await axios.patch(
@@ -166,102 +181,76 @@ const EditInstructor = () => {
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       <form onSubmit={handleSubmit}>
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Edit Instructor
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Update instructor details & documents.
-          </p>
-        </div>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          Edit Instructor
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
+          Update instructor details & documents.
+        </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT SECTION */}
+          {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-6">
             {/* GENERAL INFO */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">
-                General information
+                General Information
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    First Name
-                  </label>
-                  <input
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="First Name"
+                />
 
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    Surname
-                  </label>
-                  <input
-                    name="surName"
-                    value={formData.surName}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  name="surName"
+                  value={formData.surName}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Surname"
+                />
 
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="emailId"
-                    value={formData.emailId}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  type="email"
+                  name="emailId"
+                  value={formData.emailId}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Email Address"
+                />
 
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    Phone Number
-                  </label>
-                  <input
-                    name="contact"
-                    value={formData.contact}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  name="contact"
+                  value={formData.contact}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Phone Number"
+                />
 
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    Hourly Payment
-                  </label>
-                  <input
-                    name="hoursPayment"
-                    value={formData.hoursPayment}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  name="hoursPayment"
+                  value={formData.hoursPayment}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Hourly Payment"
+                />
 
-                <div>
-                  <label className="text-sm font-medium dark:text-white">
-                    Rent Payment
-                  </label>
-                  <input
-                    name="rentPayment"
-                    value={formData.rentPayment}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+                <input
+                  name="rentPayment"
+                  value={formData.rentPayment}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Rent Payment"
+                />
               </div>
             </div>
 
-            {/* PROFILE INFO */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            {/* PROFILE */}
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">
                 Profile Information
               </h2>
@@ -269,12 +258,13 @@ const EditInstructor = () => {
                 name="profileInfo"
                 value={formData.profileInfo}
                 onChange={handleChange}
-                className={`${inputClass} h-32`}
+                className={`${inputClass} h-32 mt-3`}
+                placeholder="Write something..."
               />
             </div>
 
             {/* LINKS */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">Links</h2>
 
               {links.map((item, i) => (
@@ -315,7 +305,7 @@ const EditInstructor = () => {
             </div>
 
             {/* ASSIGN CLASSES */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold dark:text-white">
                   Assign Classes
@@ -326,18 +316,18 @@ const EditInstructor = () => {
                   onClick={() => setShowClassSelector(!showClassSelector)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md"
                 >
-                  {showClassSelector ? "Hide Classes" : "Browse Classes"}
+                  {showClassSelector ? "Hide" : "Browse Classes"}
                 </button>
               </div>
 
-              {/* SELECTED CLASSES */}
+              {/* SELECTED */}
               {formData.classes.length > 0 && (
-                <div className="mt-4 p-3 rounded-md bg-gray-100 dark:bg-[#1A1A1C]">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <div className="mt-4 p-3 bg-gray-100 dark:bg-[#1A1A1C] rounded-md">
+                  <h3 className="font-semibold text-gray-700 dark:text-gray-300">
                     Selected Classes:
                   </h3>
 
-                  <ul className="mt-2 space-y-1 text-gray-800 dark:text-gray-200 text-sm">
+                  <ul className="mt-2 space-y-1 text-gray-800 dark:text-gray-200">
                     {formData.classes.map((id) => {
                       const cls = classesList.find((c) => c._id === id);
                       return (
@@ -350,17 +340,15 @@ const EditInstructor = () => {
                 </div>
               )}
 
-              {/* INLINE CLASS SELECTOR */}
+              {/* SEARCH + CHECKBOXES */}
               {showClassSelector && (
                 <div className="mt-6">
-                  {/* SEARCH BAR */}
                   <input
                     type="text"
                     placeholder="Search classes..."
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    className="w-full border p-2 rounded-md bg-white dark:bg-[#1A1A1C]
-                    text-gray-900 dark:text-gray-200 border-gray-400 dark:border-gray-600 mb-4"
+                    className={`${inputClass} mb-3`}
                   />
 
                   <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -373,8 +361,7 @@ const EditInstructor = () => {
                       .map((cls) => (
                         <label
                           key={cls._id}
-                          className="flex items-center gap-3 p-2 rounded-md cursor-pointer
-                          hover:bg-gray-200 dark:hover:bg-[#1A1A1A]"
+                          className="flex items-center gap-3 p-2 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-[#1A1A1A]"
                         >
                           <input
                             type="checkbox"
@@ -394,10 +381,10 @@ const EditInstructor = () => {
             </div>
           </div>
 
-          {/* RIGHT PANEL */}
+          {/* RIGHT SIDE */}
           <div className="space-y-6">
             {/* PERSONAL TRAINER */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">
                 Personal Trainer
               </h2>
@@ -438,7 +425,7 @@ const EditInstructor = () => {
             </div>
 
             {/* STATUS */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">Status</h2>
 
               <select
@@ -453,14 +440,14 @@ const EditInstructor = () => {
               </select>
             </div>
 
-            {/* DOCUMENTS */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-700">
+            {/* DOCUMENTS & BANK DETAILS */}
+            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] border-gray-700 shadow-xl">
               <h2 className="text-lg font-semibold dark:text-white">
-                Documents
+                Documents & Bank Info
               </h2>
 
               <div className="space-y-5 mt-4">
-                {/* AVATAR */}
+                {/* Avatar */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Avatar
@@ -489,12 +476,11 @@ const EditInstructor = () => {
                   )}
                 </div>
 
-                {/* QUALIFICATION */}
+                {/* Qualification */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Qualification (PDF)
                   </label>
-
                   <input
                     type="file"
                     name="qualification"
@@ -514,12 +500,11 @@ const EditInstructor = () => {
                   )}
                 </div>
 
-                {/* DOCUMENT */}
+                {/* Document */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Document (PDF)
                   </label>
-
                   <input
                     type="file"
                     name="document"
@@ -539,12 +524,11 @@ const EditInstructor = () => {
                   )}
                 </div>
 
-                {/* INSURANCE */}
+                {/* Insurance */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Insurance (PDF)
                   </label>
-
                   <input
                     type="file"
                     name="insurance"
@@ -564,11 +548,78 @@ const EditInstructor = () => {
                   )}
                 </div>
               </div>
+
+              {/* BANK DETAILS */}
+              <div className="mt-6 border-t border-gray-600 pt-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  Bank Details
+                </h3>
+
+                <input
+                  name="bankName"
+                  placeholder="Bank Name"
+                  value={formData.bankName}
+                  onChange={handleChange}
+                  className={`${inputClass} mb-3`}
+                />
+
+                <input
+                  name="accountNumber"
+                  placeholder="Account Number"
+                  value={formData.accountNumber}
+                  onChange={handleChange}
+                  className={`${inputClass} mb-3`}
+                />
+
+                <input
+                  name="bankCode"
+                  placeholder="IFSC Code"
+                  value={formData.bankCode}
+                  onChange={handleChange}
+                  className={`${inputClass} mb-3`}
+                />
+
+                <input
+                  name="branchName"
+                  placeholder="Branch Name"
+                  value={formData.branchName}
+                  onChange={handleChange}
+                  className={`${inputClass} mb-3`}
+                />
+
+                {/* QR IMAGE */}
+                <label className="text-sm font-medium dark:text-white">
+                  QR Image
+                </label>
+                <input
+                  type="file"
+                  name="qrImage"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="mt-2"
+                />
+
+                {/* Existing QR */}
+                {!files.qrImage && existing?.qrImage && (
+                  <img
+                    src={`${BASE_URL}${existing.qrImage}`}
+                    className="w-32 h-32 mt-3 rounded-md object-cover border"
+                  />
+                )}
+
+                {/* New QR Preview */}
+                {files.qrImage && (
+                  <img
+                    src={URL.createObjectURL(files.qrImage)}
+                    className="w-32 h-32 mt-3 rounded-md object-cover"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* BUTTONS */}
+        {/* FOOTER BUTTONS */}
         <div className="flex justify-end gap-3 mt-8">
           <button
             type="button"

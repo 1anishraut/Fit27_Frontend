@@ -12,9 +12,7 @@ export default function Instructors() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
 
-  /* ------------------------------
-      CLICK OUTSIDE TO CLOSE MENU
-  ------------------------------ */
+  /* CLICK OUTSIDE TO CLOSE ACTION MENU */
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -29,24 +27,19 @@ export default function Instructors() {
     setMenuOpenId((prev) => (prev === id ? null : id));
   };
 
-  /* ------------------------------
-      FETCH INSTRUCTORS
-  ------------------------------ */
+  /* FETCH INSTRUCTORS */
   const fetchInstructors = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/instructor/all`, {
         withCredentials: true,
       });
-
       setInstructors(res?.data?.data || []);
     } catch (error) {
       console.error("Error fetching instructors:", error);
     }
   };
 
-  /* ------------------------------
-      DELETE INSTRUCTOR
-  ------------------------------ */
+  /* DELETE INSTRUCTOR */
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/instructor/delete/${id}`, {
@@ -60,9 +53,7 @@ export default function Instructors() {
     }
   };
 
-  /* ------------------------------
-      ACTIVE / INACTIVE TOGGLE
-  ------------------------------ */
+  /* ACTIVE / INACTIVE TOGGLE */
   const toggleActive = async (id, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
 
@@ -104,15 +95,17 @@ export default function Instructors() {
       </div>
 
       {/* TABLE CARD */}
-      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-2xl border border-gray-400 dark:border-gray-700">
+      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-2xl border border-gray-300 dark:border-gray-700">
         <div className="overflow-visible no-scrollbar">
           <table className="w-full border-collapse">
-            <thead className="bg-[#121214] text-gray-200">
+            <thead className="bg-gray-100 dark:bg-[#121214] text-gray-800 dark:text-gray-200">
               <tr>
-                <th className="p-3 text-left font-medium">Instructor Name</th>
-                <th className="p-3 text-left font-medium">Expertise</th>
+                <th className="p-3 text-left font-medium">Name</th>
                 <th className="p-3 text-left font-medium">Contact</th>
+                <th className="p-3 text-left font-medium">Email</th>
                 <th className="p-3 text-left font-medium">Active</th>
+                <th className="p-3 text-left font-medium">Hourly Payment</th>
+                <th className="p-3 text-left font-medium">Rent Payment</th>
                 <th className="p-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
@@ -120,7 +113,7 @@ export default function Instructors() {
             <tbody>
               {instructors.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={7} className="py-16 text-center">
                     <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
                       <FiAlertTriangle className="text-4xl mb-2" />
                       No instructors available
@@ -132,24 +125,27 @@ export default function Instructors() {
                   <tr
                     key={item._id}
                     className="
-                      border-b border-gray-700
-                      bg-[#0D0D0F]
-                      hover:bg-[#1A1A1A]
+                      border-b 
+                      border-gray-300 dark:border-gray-700
+                      bg-white dark:bg-[#0D0D0F]
+                      hover:bg-gray-100 dark:hover:bg-[#1A1A1A]
                       transition
                     "
                   >
                     {/* Name */}
-                    <td className="p-3 text-gray-200">
+                    <td className="p-3 text-gray-800 dark:text-gray-200">
                       {item.firstName} {item.surName}
                     </td>
 
-                    {/* Expertise */}
-                    <td className="p-3 text-gray-200">
-                      {item.profileInfo || "—"}
+                    {/* Contact */}
+                    <td className="p-3 text-gray-800 dark:text-gray-200">
+                      {item.contact}
                     </td>
 
-                    {/* Contact */}
-                    <td className="p-3 text-gray-200">{item.contact}</td>
+                    {/* Email */}
+                    <td className="p-3 text-gray-800 dark:text-gray-200">
+                      {item.emailId}
+                    </td>
 
                     {/* ACTIVE TOGGLE */}
                     <td className="p-3">
@@ -181,10 +177,20 @@ export default function Instructors() {
                       </label>
                     </td>
 
-                    {/* ACTIONS */}
+                    {/* Hourly Payment */}
+                    <td className="p-3 text-gray-800 dark:text-gray-200">
+                      ₹{item.hoursPayment}
+                    </td>
+
+                    {/* Rent Payment */}
+                    <td className="p-3 text-gray-800 dark:text-gray-200">
+                      ₹{item.rentPayment}
+                    </td>
+
+                    {/* ACTION MENU */}
                     <td className="p-3 relative flex justify-end items-center">
                       <BsThreeDotsVertical
-                        className="text-xl cursor-pointer text-gray-300"
+                        className="text-xl cursor-pointer text-gray-600 dark:text-gray-300"
                         onClick={() => toggleMenu(item._id)}
                       />
 
@@ -193,9 +199,9 @@ export default function Instructors() {
                           ref={menuRef}
                           className="
                             absolute right-0 top-10
-                            bg-[#1A1A1C]
+                            bg-white dark:bg-[#1A1A1C]
                             shadow-xl rounded-lg w-40
-                            border border-gray-700
+                            border border-gray-300 dark:border-gray-700
                             z-50
                           "
                         >
@@ -209,7 +215,8 @@ export default function Instructors() {
                             }
                             className="
                               flex items-center gap-2 w-full px-4 py-2
-                              text-gray-200 hover:bg-[#2A2A2C]
+                              text-gray-700 dark:text-gray-200
+                              hover:bg-gray-100 dark:hover:bg-[#2A2A2C]
                             "
                           >
                             <FiEdit2 />
@@ -221,7 +228,8 @@ export default function Instructors() {
                             onClick={() => handleDelete(item._id)}
                             className="
                               flex items-center gap-2 w-full px-4 py-2
-                              text-red-400 hover:bg-[#2A2A2C]
+                              text-red-500 dark:text-red-400
+                              hover:bg-gray-100 dark:hover:bg-[#2A2A2C]
                             "
                           >
                             <FiTrash2 />
@@ -235,10 +243,10 @@ export default function Instructors() {
               )}
 
               {instructors.length > 0 && (
-                <tr className="bg-[#121214] text-gray-200 font-semibold">
+                <tr className="bg-gray-100 dark:bg-[#121214] text-gray-800 dark:text-gray-200 font-semibold">
                   <td className="p-3">Total Instructors</td>
                   <td className="p-3">{instructors.length}</td>
-                  <td colSpan={3}></td>
+                  <td colSpan={5}></td>
                 </tr>
               )}
             </tbody>
@@ -246,7 +254,7 @@ export default function Instructors() {
         </div>
       </div>
 
-      {/* SCROLLBAR REMOVE */}
+      {/* Remove Scrollbar */}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { scrollbar-width: none !important; }
