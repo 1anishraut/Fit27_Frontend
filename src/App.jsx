@@ -28,6 +28,7 @@ import Members from "./admin/Members";
 import Instructors from "./admin/Instructors";
 import CreateInstructor from "./admin/Components/CreateInstructor";
 import EditInstructor from "./admin/Components/EditInstructor";
+import EditMember from "./admin/Components/EditMember";
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
               <Route path="editClasses/:id" element={<EditClasses />} />
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
+              <Route path="editMember/:id" element={<EditMember />} />
               <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />

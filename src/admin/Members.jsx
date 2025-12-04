@@ -1,4 +1,4 @@
-// src/admin/Members.jsx (or wherever your file lives)
+// src/admin/Members.jsx
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
@@ -8,15 +8,14 @@ import { useNavigate } from "react-router-dom";
 
 export default function Members() {
   const navigate = useNavigate();
-
   const [members, setMembers] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
 
   const menuRef = useRef(null);
 
-  /* ========================================
-         CLICK OUTSIDE TO CLOSE MENU
-  ======================================== */
+  /* -----------------------------
+        CLOSE DROPDOWN WHEN CLICK OUTSIDE
+  ----------------------------- */
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -28,55 +27,34 @@ export default function Members() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleMenu = (id) => {
-    setMenuOpenId((prev) => (prev === id ? null : id));
-  };
-
-  /* ========================================
-         FETCH MEMBERS (Correct Route)
-  ======================================== */
+  /* -----------------------------
+      FETCH MEMBERS (ACCORDING TO BACKEND)
+  ----------------------------- */
   const fetchMembers = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/allUsers`, {
         withCredentials: true,
       });
+      console.log(res.data.data);
+      
 
-      // console.log(res.data);
-      setMembers(res.data || []);
-    } catch (err) {
-      console.log("Error fetching members:", err);
-    }
-  };
-
-  /* ========================================
-         TOGGLE STATUS
-  ======================================== */
-  const toggleStatus = async (user) => {
-    const newStatus = user.status === "active" ? "inactive" : "active";
-
-    try {
-      await axios.patch(
-        `${BASE_URL}/user/update`,
-        {
-          emailId: user.emailId,
-          status: newStatus,
-        },
-        { withCredentials: true }
-      );
-
-      setMembers((prev) =>
-        prev.map((m) => (m._id === user._id ? { ...m, status: newStatus } : m))
-      );
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      setMembers(list);
     } catch (error) {
-      console.log("Status update failed:", error);
+      console.error("Fetch members error:", error);
+      setMembers([]);
     }
   };
 
-  /* ========================================
-         DELETE MEMBER
-  ======================================== */
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  /* -----------------------------
+      DELETE MEMBER
+  ----------------------------- */
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this member?")) return;
+    if (!window.confirm("Delete this member?")) return;
 
     try {
       await axios.delete(`${BASE_URL}/user/delete/${id}`, {
@@ -85,22 +63,20 @@ export default function Members() {
 
       setMembers((prev) => prev.filter((m) => m._id !== id));
       setMenuOpenId(null);
-    } catch (err) {
-      console.log("Delete failed:", err);
+    } catch (error) {
+      console.log("Delete failed:", error);
     }
   };
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+  /* -----------------------------
+      HELPERS
+  ----------------------------- */
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
 
-  /* ========================================
-         FORMAT DATE
-  ======================================== */
-  const formatDate = (date) => {
-    if (!date) return "N/A";
-    const d = new Date(date);
+    const d = new Date(dateString);
     if (isNaN(d.getTime())) return "N/A";
+
     return d.toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
@@ -108,71 +84,12 @@ export default function Members() {
     });
   };
 
-  /* ========================================
-         SAFE PLAN NAME ACCESS
-         (handles both ObjectId & populated object)
-  ======================================== */
-  // 🔹 CHANGED: avoid crash when selectedPlan is not an object
   const getPlanName = (user) => {
-    const p = user.selectedPlan;
-    if (!p) return "N/A";
+    if (!user.selectedPlan) return "N/A";
 
-    // If populated (Object with planName)
-    if (typeof p === "object") {
-      return p.planName || "N/A";
-    }
-
-    // If it's just a string / ObjectId, show that for now
-    return p;
-  };
-
-  /* ========================================
-         CALCULATE PLAN EXPIRY FROM startedAt
-         USING PLAN BILLING PERIOD
-  ======================================== */
-  // 🔹 CHANGED: new helper to compute expiry from startedAt + plan period
-  // and then subtract 1 day so the plan is inclusive of the start date.
-  const computePlanEndDate = (user) => {
-    if (!user.startedAt) return null;
-
-    const plan = user.selectedPlan;
-    const start = new Date(user.startedAt);
-    if (isNaN(start.getTime())) return null;
-
-    // If no populated plan object, fallback to endedAt if present
-    if (!plan || typeof plan !== "object") {
-      return user.endedAt ? new Date(user.endedAt) : null;
-    }
-
-    const end = new Date(start); // copy base date
-
-    const period = plan.billingPeriod || "Monthly";
-    const customType = plan.customPeriodType;
-    const customValue = plan.customPeriodValue || 0;
-
-    if (period === "Daily") {
-      end.setDate(end.getDate() + 1); // 1 day plan
-    } else if (period === "Weekly") {
-      end.setDate(end.getDate() + 7);
-    } else if (period === "Monthly") {
-      end.setMonth(end.getMonth() + 1);
-    } else if (period === "Yearly") {
-      end.setFullYear(end.getFullYear() + 1);
-    } else if (period === "Custom" && customValue > 0) {
-      if (customType === "Days") {
-        end.setDate(end.getDate() + customValue);
-      } else if (customType === "Weeks") {
-        end.setDate(end.getDate() + customValue * 7);
-      } else if (customType === "Months") {
-        end.setMonth(end.getMonth() + customValue);
-      }
-    }
-
-    // CHANGED: ONE FIX Removing 1 day from final day 
-    
-    end.setDate(end.getDate() - 1);
-
-    return end;
+    return typeof user.selectedPlan === "object"
+      ? user.selectedPlan.planName
+      : user.selectedPlan;
   };
 
   return (
@@ -191,142 +108,121 @@ export default function Members() {
         </button>
       </div>
 
-      {/* TABLE CARD */}
-      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-2xl border border-gray-400 dark:border-gray-700">
-        <div className="overflow-visible no-scrollbar">
-          <table className="w-full border-collapse">
-            {/* TABLE HEADER */}
-            <thead className="bg-[#121214] text-gray-200">
+      {/* TABLE */}
+      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-xl border border-gray-400 dark:border-gray-700">
+        <table className="w-full border-collapse">
+          <thead className="bg-[#121214] text-gray-200">
+            <tr>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Contact</th>
+              <th className="p-3 text-left">Plan</th>
+              <th className="p-3 text-left">Subscription</th>
+              <th className="p-3 text-left">Expired On</th>
+              <th className="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {members.length === 0 ? (
               <tr>
-                <th className="p-3 text-left font-medium">Name</th>
-                <th className="p-3 text-left font-medium">Email</th>
-                <th className="p-3 text-left font-medium">Contact</th>
-                <th className="p-3 text-left font-medium">Plan Name</th>
-                <th className="p-3 text-left font-medium">Status</th>
-                <th className="p-3 text-left font-medium">Plan Expiring</th>
-                <th className="p-3 text-right font-medium">Actions</th>
+                <td colSpan={7} className="py-16 text-center">
+                  <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
+                    <FiAlertTriangle className="text-4xl mb-2" />
+                    No members found
+                  </div>
+                </td>
               </tr>
-            </thead>
+            ) : (
+              members.map((user) => {
+                return (
+                  <tr
+                    key={user._id}
+                    className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+                  >
+                    <td className="p-3 text-gray-900 dark:text-gray-200">
+                      {user.firstName} {user.surName}
+                    </td>
 
-            <tbody>
-              {members.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-16 text-center">
-                    <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
-                      <FiAlertTriangle className="text-4xl mb-2" />
-                      No members found
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                members.map((user) => {
-                  const endDate = computePlanEndDate(user); // 🔹 CHANGED: use computed expiry
-                  const planName = getPlanName(user); // 🔹 CHANGED: safe plan name
+                    <td className="p-3 text-gray-900 dark:text-gray-200">
+                      {user.emailId}
+                    </td>
 
-                  return (
-                    <tr
-                      key={user._id}
-                      className="border-b border-gray-700 bg-[#0D0D0F] hover:bg-[#1A1A1A] transition"
-                    >
-                      <td className="p-3 text-gray-200">
-                        {user.firstName} {user.surName}
-                      </td>
+                    <td className="p-3 text-gray-900 dark:text-gray-200">
+                      {user.contact}
+                    </td>
 
-                      <td className="p-3 text-gray-200">{user.emailId}</td>
+                    <td className="p-3 text-gray-900 dark:text-gray-200">
+                      {getPlanName(user)}
+                    </td>
 
-                      <td className="p-3 text-gray-200">{user.contact}</td>
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          user.subscription === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {user.subscription === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </td>
 
-                      <td className="p-3 text-gray-200">{planName}</td>
+                    <td className="p-3 text-gray-900 dark:text-gray-200">
+                      {formatDate(user.endedAt)}
+                    </td>
 
-                      {/* STATUS TOGGLE */}
-                      <td className="p-3">
-                        <label className="flex items-center cursor-pointer">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={user.status === "active"}
-                              onChange={() => toggleStatus(user)}
-                              className="sr-only"
-                            />
+                    {/* ACTIONS */}
+                    <td className="p-3 relative text-right">
+                      <BsThreeDotsVertical
+                        className="text-xl cursor-pointer text-gray-600 dark:text-gray-300"
+                        onClick={() =>
+                          setMenuOpenId((prev) =>
+                            prev === user._id ? null : user._id
+                          )
+                        }
+                      />
 
-                            <div
-                              className={`w-10 h-5 rounded-full transition ${
-                                user.status === "active"
-                                  ? "bg-green-600"
-                                  : "bg-gray-600"
-                              }`}
-                            ></div>
-
-                            <div
-                              className={`absolute left-1 top-1 w-3 h-3 rounded-full transition ${
-                                user.status === "active"
-                                  ? "translate-x-5 bg-white"
-                                  : "translate-x-0 bg-white"
-                              }`}
-                            ></div>
-                          </div>
-                        </label>
-                      </td>
-
-                      {/* PLAN EXPIRING (computed) */}
-                      <td className="p-3 text-gray-200">
-                        {formatDate(endDate)}
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="p-3 relative flex justify-end items-center">
-                        <BsThreeDotsVertical
-                          className="text-xl cursor-pointer text-gray-300"
-                          onClick={() => toggleMenu(user._id)}
-                        />
-
-                        {menuOpenId === user._id && (
-                          <div
-                            ref={menuRef}
-                            className="absolute right-0 top-10 bg-[#1A1A1C] shadow-xl rounded-lg w-40 border border-gray-700 z-50"
+                      {menuOpenId === user._id && (
+                        <div
+                          ref={menuRef}
+                          className="absolute right-0 top-10 bg-white dark:bg-[#1A1A1C] shadow-xl rounded-lg w-40 border border-gray-300 dark:border-gray-700 z-50"
+                        >
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/adminDashboard/editMember/${user._id}`,
+                                { state: { user } }
+                              )
+                            }
+                            className="flex items-center gap-2 w-full px-4 py-2 text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2C]"
                           >
-                            <button
-                              onClick={() =>
-                                navigate(
-                                  `/adminDashboard/editMembers/${user._id}`,
-                                  { state: { user } }
-                                )
-                              }
-                              className="flex items-center gap-2 w-full px-4 py-2 text-gray-200 hover:bg-[#2A2A2C]"
-                            >
-                              <FiEdit2 /> Edit
-                            </button>
+                            <FiEdit2 /> Edit
+                          </button>
 
-                            <button
-                              onClick={() => handleDelete(user._id)}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-red-400 hover:bg-[#2A2A2C]"
-                            >
-                              <FiTrash2 /> Delete
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+                          <button
+                            onClick={() => handleDelete(user._id)}
+                            className="flex items-center gap-2 w-full px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-[#2A2A2C]"
+                          >
+                            <FiTrash2 /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
 
-              {members.length > 0 && (
-                <tr className="bg-[#121214] text-gray-200 font-semibold">
-                  <td className="p-3">Total Members</td>
-                  <td className="p-3">{members.length}</td>
-                  <td colSpan={5}></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* REMOVE SCROLLBAR */}
-        <style>{`
-          .no-scrollbar::-webkit-scrollbar { display: none !important; }
-          .no-scrollbar { scrollbar-width: none !important; }
-        `}</style>
+            {members.length > 0 && (
+              <tr className="bg-[#121214] text-gray-200 font-semibold">
+                <td className="p-3">Total Members</td>
+                <td className="p-3">{members.length}</td>
+                <td colSpan={5}></td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

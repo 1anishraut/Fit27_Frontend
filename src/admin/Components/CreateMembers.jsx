@@ -56,6 +56,9 @@ const CreateMembers = () => {
 
   const handleCancel = () => navigate("/adminDashboard/allDetails");
 
+  /* --------------------------------------------------
+      SUBMIT
+  -------------------------------------------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -64,11 +67,22 @@ const CreateMembers = () => {
       return;
     }
 
+    // AUTO SET SUBSCRIPTION BASED ON PLAN
+    const subscriptionValue =
+      formData.selectedPlan && formData.selectedPlan !== ""
+        ? "active"
+        : "inactive";
+
     try {
       const payload = new FormData();
+
+      // Append normal fields
       Object.entries(formData).forEach(([key, value]) =>
         payload.append(key, value)
       );
+
+      // Append subscription
+      payload.append("subscription", subscriptionValue);
 
       if (avatar) payload.append("avatar", avatar);
 
@@ -85,6 +99,8 @@ const CreateMembers = () => {
       alert(error.response?.data?.message || "Something went wrong");
     }
   };
+
+  /* -------------------------------------------------- */
 
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
@@ -157,7 +173,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
-                {/* ONLY ACTIVE PLANS */}
+                {/* ACTIVE PLANS */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Plan
