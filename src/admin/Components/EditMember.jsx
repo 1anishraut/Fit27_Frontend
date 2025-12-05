@@ -103,9 +103,7 @@ export default function EditMember() {
       const oldVal = originalData[key];
 
       if (newVal !== oldVal) {
-        // allow removing plan by sending ""
         if (newVal === "" && key !== "selectedPlan") return;
-
         changed[key] = newVal;
       }
     });
@@ -320,7 +318,7 @@ export default function EditMember() {
                   />
                 </div>
 
-                {/* ⭐ NEW HOLD DATE FIELDS */}
+                {/* ⭐ HOLD DATE FIELDS */}
                 <div>
                   <label className="text-sm dark:text-white">
                     Hold Start Date
@@ -349,13 +347,103 @@ export default function EditMember() {
               </div>
 
               <p className="text-sm text-gray-500 mt-2">
-                Note: Hold dates will automatically update plan end date.
+                Note: Hold dates automatically extend end date.
               </p>
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SIDE */}
           <div className="space-y-6">
+            {/* ⭐ PLAN DETAILS CARD */}
+            {formData.selectedPlan && (
+              <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
+                <h2 className="text-lg font-semibold dark:text-white mb-3">
+                  Plan Details
+                </h2>
+
+                <div className="space-y-2 text-sm">
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Plan Name:</span>{" "}
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.planName
+                    }
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Billing Period:</span>{" "}
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.billingPeriod
+                    }
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Price:</span> ₹
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.planPrice
+                    }
+                  </p>
+
+                  {/* Custom Duration */}
+                  {plans.find((p) => p._id === formData.selectedPlan)
+                    ?.customPeriodValue && (
+                    <p className="text-gray-700 dark:text-gray-300">
+                      <span className="font-semibold">Custom Duration:</span>{" "}
+                      {
+                        plans.find((p) => p._id === formData.selectedPlan)
+                          ?.customPeriodValue
+                      }{" "}
+                      {
+                        plans.find((p) => p._id === formData.selectedPlan)
+                          ?.customPeriodType
+                      }
+                    </p>
+                  )}
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Classes:</span>{" "}
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.classes
+                    }
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Guest Pass:</span>{" "}
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.guestPass
+                    }
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Description:</span>{" "}
+                    {
+                      plans.find((p) => p._id === formData.selectedPlan)
+                        ?.planDescription
+                    }
+                  </p>
+
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold">Plan Status:</span>{" "}
+                    {plans.find((p) => p._id === formData.selectedPlan)
+                      ?.active ? (
+                      <span className="px-2 py-1 text-xs rounded bg-green-500 text-white">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs rounded bg-red-500 text-white">
+                        Inactive
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* SPECIAL NOTE */}
             <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
               <h2 className="text-lg font-semibold dark:text-white">
                 Special Note
@@ -368,6 +456,7 @@ export default function EditMember() {
               />
             </div>
 
+            {/* AVATAR */}
             <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
               <h2 className="text-lg font-semibold dark:text-white">Avatar</h2>
               <input
