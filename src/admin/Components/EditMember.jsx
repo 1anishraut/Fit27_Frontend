@@ -11,9 +11,7 @@ const toInputDate = (dateString) => {
   if (!dateString) return "";
   const d = new Date(dateString);
   if (isNaN(d.getTime())) return "";
-  // Use local date portion in YYYY-MM-DD
-  const iso = d.toISOString();
-  return iso.split("T")[0];
+  return d.toISOString().split("T")[0];
 };
 
 export default function EditMember() {
@@ -44,6 +42,7 @@ export default function EditMember() {
       const res = await axios.get(`${BASE_URL}/user/${id}`, {
         withCredentials: true,
       });
+
       const u = res?.data?.data;
       if (!u) throw new Error("User not found");
 
@@ -62,10 +61,15 @@ export default function EditMember() {
         specialNote: u.specialNote || "",
         startedAt: toInputDate(u.startedAt),
         endedAt: toInputDate(u.endedAt),
+
+        // ⭐ NEW HOLD FIELDS
+        holdStartDate: toInputDate(u.holdStartDate),
+        holdEndDate: toInputDate(u.holdEndDate),
       };
 
       setOriginalData(normalized);
       setFormData(normalized);
+
       setExistingAvatar(u.avatar ? `${BASE_URL}${u.avatar}` : "");
     } catch (err) {
       console.log("User load error:", err);
@@ -77,7 +81,6 @@ export default function EditMember() {
   useEffect(() => {
     fetchPlans();
     fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleChange = (e) =>
@@ -89,30 +92,22 @@ export default function EditMember() {
     }
   };
 
-  const handleCancel = () => navigate("/adminDashboard/allDetails");
-
-  // Only include keys that changed.
-  // Special-case selectedPlan: allow sending empty string to remove plan.
+  // Detect changed fields only
   const getChangedFields = () => {
     if (!formData || !originalData) return {};
 
     const changed = {};
+
     Object.keys(formData).forEach((key) => {
       const newVal = formData[key];
       const oldVal = originalData[key];
 
-      const differs = newVal !== oldVal;
+      if (newVal !== oldVal) {
+        // allow removing plan by sending ""
+        if (newVal === "" && key !== "selectedPlan") return;
 
-      if (!differs) return;
-
-      // Never send empty strings for most fields to avoid accidental overwrite.
-      // But allow selectedPlan to be sent even if it's "", because this is how we remove plan.
-      if (newVal === "" && key !== "selectedPlan") {
-        // skip - user didn't enter a new value for this field
-        return;
+        changed[key] = newVal;
       }
-
-      changed[key] = newVal;
     });
 
     if (avatarFile) changed.avatar = avatarFile;
@@ -123,6 +118,7 @@ export default function EditMember() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const changed = getChangedFields();
+
     if (Object.keys(changed).length === 0) {
       alert("No changes to update");
       return;
@@ -198,8 +194,8 @@ export default function EditMember() {
                   <input
                     name="emailId"
                     value={formData.emailId}
-                    className={inputClass}
                     disabled
+                    className={inputClass}
                   />
                 </div>
 
@@ -323,10 +319,37 @@ export default function EditMember() {
                     className={inputClass}
                   />
                 </div>
+
+                {/* ⭐ NEW HOLD DATE FIELDS */}
+                <div>
+                  <label className="text-sm dark:text-white">
+                    Hold Start Date
+                  </label>
+                  <input
+                    type="date"
+                    name="holdStartDate"
+                    value={formData.holdStartDate}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm dark:text-white">
+                    Hold End Date
+                  </label>
+                  <input
+                    type="date"
+                    name="holdEndDate"
+                    value={formData.holdEndDate}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
               </div>
+
               <p className="text-sm text-gray-500 mt-2">
-                Note: End date and subscription are recalculated/validated on
-                the backend.
+                Note: Hold dates will automatically update plan end date.
               </p>
             </div>
           </div>
@@ -352,6 +375,7 @@ export default function EditMember() {
                 accept="image/*"
                 onChange={handleAvatarChange}
               />
+
               <div className="mt-4 flex justify-center">
                 {avatarFile ? (
                   <img
@@ -377,7 +401,7 @@ export default function EditMember() {
         <div className="flex justify-end gap-4 mt-6">
           <button
             type="button"
-            onClick={handleCancel}
+            onClick={() => navigate(-1)}
             className="px-5 py-2 border rounded-md"
           >
             Cancel
