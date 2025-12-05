@@ -117,8 +117,9 @@ export default function Members() {
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Contact</th>
               <th className="p-3 text-left">Plan</th>
+              <th className="p-3 text-left">Member Status</th>
               <th className="p-3 text-left">Subscription</th>
-              <th className="p-3 text-left">Expired On</th>
+              <th className="p-3 text-left">Expiring On</th>
               <th className="p-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -126,7 +127,7 @@ export default function Members() {
           <tbody>
             {members.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-16 text-center">
+                <td colSpan={8} className="py-16 text-center">
                   <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
                     <FiAlertTriangle className="text-4xl mb-2" />
                     No members found
@@ -135,6 +136,18 @@ export default function Members() {
               </tr>
             ) : (
               members.map((user) => {
+                // ⭐ STATUS BADGE COLOR LOGIC
+                const statusColor =
+                  user.status === "active"
+                    ? "bg-green-100 text-green-800"
+                    : user.status === "hold"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : user.status === "pending"
+                    ? "bg-blue-100 text-blue-800"
+                    : user.status === "lost"
+                    ? "bg-gray-300 text-gray-800"
+                    : "bg-red-100 text-red-800"; 
+
                 return (
                   <tr
                     key={user._id}
@@ -156,6 +169,17 @@ export default function Members() {
                       {getPlanName(user)}
                     </td>
 
+                    {/* ⭐ NEW MEMBER STATUS BADGE */}
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full font-medium ${statusColor}`}
+                      >
+                        {user.status?.charAt(0).toUpperCase() +
+                          user.status?.slice(1)}
+                      </span>
+                    </td>
+
+                    {/* Subscription Badge */}
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 text-xs rounded-full font-medium ${
@@ -190,10 +214,7 @@ export default function Members() {
                         >
                           <button
                             onClick={() =>
-                              navigate(
-                                `/adminDashboard/editMember/${user._id}`,
-                                { state: { user } }
-                              )
+                              navigate(`/adminDashboard/editMember/${user._id}`)
                             }
                             className="flex items-center gap-2 w-full px-4 py-2 text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2A2C]"
                           >
@@ -218,7 +239,7 @@ export default function Members() {
               <tr className="bg-[#121214] text-gray-200 font-semibold">
                 <td className="p-3">Total Members</td>
                 <td className="p-3">{members.length}</td>
-                <td colSpan={5}></td>
+                <td colSpan={6}></td>
               </tr>
             )}
           </tbody>

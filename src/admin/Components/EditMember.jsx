@@ -24,6 +24,7 @@ export default function EditMember() {
   const [formData, setFormData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ststus, setStatus]= useState("");
 
   const fetchPlans = async () => {
     try {
@@ -44,6 +45,9 @@ export default function EditMember() {
       });
 
       const u = res?.data?.data;
+      console.log(u);
+      setStatus(u.status);
+      
       if (!u) throw new Error("User not found");
 
       const normalized = {
@@ -164,6 +168,9 @@ export default function EditMember() {
             <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
               <h2 className="text-lg font-semibold dark:text-white">
                 General Information
+              </h2>
+              <h2>
+                Member Status <span className="text-green-500">{ststus}</span>
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
