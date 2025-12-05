@@ -354,6 +354,33 @@ export default function EditMember() {
 
           {/* RIGHT SIDE */}
           <div className="space-y-6">
+            {/* AVATAR */}
+            <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
+              <h2 className="text-lg font-semibold dark:text-white">Avatar</h2>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+              />
+
+              <div className="mt-4 flex justify-center">
+                {avatarFile ? (
+                  <img
+                    src={URL.createObjectURL(avatarFile)}
+                    className="w-32 h-32 rounded-full object-cover"
+                    alt="avatar-preview"
+                  />
+                ) : existingAvatar ? (
+                  <img
+                    src={existingAvatar}
+                    className="w-32 h-32 rounded-full object-cover"
+                    alt="existing-avatar"
+                  />
+                ) : (
+                  <p>No Avatar</p>
+                )}
+              </div>
+            </div>
             {/* ⭐ PLAN DETAILS CARD */}
             {formData.selectedPlan && (
               <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
@@ -454,34 +481,6 @@ export default function EditMember() {
                 onChange={handleChange}
                 className={`${inputClass} h-32`}
               />
-            </div>
-
-            {/* AVATAR */}
-            <div className="border p-6 rounded-xl bg-white dark:bg-[#0D0D0F]">
-              <h2 className="text-lg font-semibold dark:text-white">Avatar</h2>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-              />
-
-              <div className="mt-4 flex justify-center">
-                {avatarFile ? (
-                  <img
-                    src={URL.createObjectURL(avatarFile)}
-                    className="w-32 h-32 rounded-full object-cover"
-                    alt="avatar-preview"
-                  />
-                ) : existingAvatar ? (
-                  <img
-                    src={existingAvatar}
-                    className="w-32 h-32 rounded-full object-cover"
-                    alt="existing-avatar"
-                  />
-                ) : (
-                  <p>No Avatar</p>
-                )}
-              </div>
             </div>
           </div>
         </div>
