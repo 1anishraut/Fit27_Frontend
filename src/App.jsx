@@ -29,8 +29,9 @@ import Instructors from "./admin/Instructors";
 import CreateInstructor from "./admin/Components/CreateInstructor";
 import EditInstructor from "./admin/Components/EditInstructor";
 import EditMember from "./admin/Components/EditMember";
-import CreateDaysSchedule from "./admin/Components/CreateDaysTemplate";
 import AllClassScheduleList from "./admin/AllClassScheduleList";
+import CreateDaysSchedule from "./admin/Components/CreateDaysTemplate";
+import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
               <Route path="editClasses/:id" element={<EditClasses />} />
               <Route path="allClassScheduleList" element={<AllClassScheduleList />} />
               <Route path="createDaysSchedule" element={<CreateDaysSchedule />} />
+              <Route path="createWeeklySchedule" element={<CreateWeeklySchedule/>}/>
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />

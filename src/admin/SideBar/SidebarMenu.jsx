@@ -65,7 +65,10 @@ const MENU = [
     children: [
       { title: "All Schedules", path: "/adminDashboard/allClassScheduleList" },
       { title: "Days Schedules", path: "/adminDashboard/createDaysSchedule" },
-      { title: "Weeks Schedules", path: "/adminDashboard/weeks-schedule" },
+      {
+        title: "Weeks Schedules",
+        path: "/adminDashboard/createWeeklySchedule",
+      },
     ],
   },
 
