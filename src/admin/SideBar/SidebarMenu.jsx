@@ -46,16 +46,11 @@ const MENU = [
     title: "Members",
     icon: <FiUsers />,
     children: [
-      {
-        title: "Enquiry",
-        path: "/adminDashboard/members/enquiry",
-      },
-      {
-        title: "Members",
-        path: "/adminDashboard/members",
-      },
+      { title: "Enquiry", path: "/adminDashboard/members/enquiry" },
+      { title: "Members", path: "/adminDashboard/members" },
     ],
   },
+
   {
     id: "orders",
     title: "Orders",
@@ -69,6 +64,7 @@ const MENU = [
     icon: <FiBox />,
     path: "/",
   },
+
   {
     id: "adminPlans",
     title: "Plans",
@@ -82,6 +78,7 @@ const MENU = [
     icon: <FiBarChart2 />,
     path: "/",
   },
+
   {
     id: "instructors",
     title: "Instructors",
@@ -93,7 +90,20 @@ const MENU = [
     id: "classes",
     title: "Classes",
     icon: <FiBookOpen />,
-    path: "/adminDashboard/classes",
+    children: [
+      {
+        title: "All Classes",
+        path: "/adminDashboard/classes",
+      },
+      {
+        title: "Days Schedules",
+        path: "/adminDashboard/daysSchedule",
+      },
+      {
+        title: "Weeks Schedules",
+        path: "/adminDashboard/weeks-schedule",
+      },
+    ],
   },
 
   {
@@ -102,35 +112,8 @@ const MENU = [
     icon: <FiMessageCircle />,
     path: "/",
   },
-
-  // {
-  //   id: "weekSchedules",
-  //   title: "Week Schedules",
-  //   icon: <FiCalendar />,
-  //   path: "/",
-  // },
-
-  // {
-  //   id: "announcements",
-  //   title: "Announcements",
-  //   icon: <FiVolume2 />,
-  //   path: "/",
-  // },
-
-  // {
-  //   id: "frontend",
-  //   title: "Frontend",
-  //   icon: <FiGlobe />,
-  //   path: "/",
-  // },
-
-  // {
-  //   id: "staff",
-  //   title: "Staff",
-  //   icon: <FiUser />,
-  //   path: "/",
-  // },
 ];
+
 
 export default function SidebarMenu({ collapsed = false }) {
   const location = useLocation();
