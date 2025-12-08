@@ -23,7 +23,7 @@ const emptyRow = {
   instructorId: "",
 };
 
-const CreateDaysTemplates = () => {
+const CreateDaysSchedule = () => {
   const navigate = useNavigate();
 
   const [label, setLabel] = useState("");
@@ -173,7 +173,7 @@ const CreateDaysTemplates = () => {
       });
 
       alert("Template created successfully");
-      navigate("/adminDashboard/days-templates");
+      navigate(-1);
     } catch (err) {
       console.error(err);
       alert(
@@ -197,11 +197,13 @@ const CreateDaysTemplates = () => {
       {/* GENERAL INFO */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          General Information
+          Add New Days Schedule 
         </h2>
 
-        <div className="space-y-4">
-          <div>
+        {/* FLEX ROW */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          {/* LABEL INPUT */}
+          <div className="flex-1">
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Label <span className="text-red-500">*</span>
             </label>
@@ -210,22 +212,37 @@ const CreateDaysTemplates = () => {
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className={inputClass}
+              className={`
+          w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm 
+          bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 
+          focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white
+        `}
               placeholder="Morning weekday template"
             />
           </div>
 
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="h-4 w-4 border-gray-400 dark:border-gray-600"
-            />
-            <span className="text-xs text-gray-700 dark:text-gray-300">
+          {/* TOGGLE SWITCH */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               Active
             </span>
-          </label>
+
+            <button
+              type="button"
+              onClick={() => setActive(!active)}
+              className={`
+          relative inline-flex h-6 w-11 items-center rounded-full 
+          transition 
+          ${active ? "bg-black dark:bg-white" : "bg-gray-300 dark:bg-gray-700"}
+        `}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white dark:bg-black transition 
+            ${active ? "translate-x-6" : "translate-x-1"}
+          `}
+              />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -446,4 +463,4 @@ const CreateDaysTemplates = () => {
   );
 };
 
-export default CreateDaysTemplates;
+export default CreateDaysSchedule;

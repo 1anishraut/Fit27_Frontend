@@ -52,31 +52,10 @@ const MENU = [
   },
 
   {
-    id: "orders",
-    title: "Orders",
-    icon: <FiShoppingCart />,
-    path: "/",
-  },
-
-  {
-    id: "products",
-    title: "Products",
-    icon: <FiBox />,
-    path: "/",
-  },
-
-  {
     id: "adminPlans",
     title: "Plans",
     icon: <FiBox />,
     path: "/adminDashboard/adminPlans",
-  },
-
-  {
-    id: "reports",
-    title: "Reports",
-    icon: <FiBarChart2 />,
-    path: "/",
   },
 
   {
@@ -90,20 +69,45 @@ const MENU = [
     id: "classes",
     title: "Classes",
     icon: <FiBookOpen />,
+    path: "/adminDashboard/classes",
+  },
+  {
+    id: "class schedule",
+    title: "Class Schedule",
+    icon: <FiBookOpen />,
     children: [
       {
-        title: "All Classes",
-        path: "/adminDashboard/classes",
+        title: "All Schedules",
+        path: "/adminDashboard/allClassScheduleList",
       },
       {
         title: "Days Schedules",
-        path: "/adminDashboard/daysSchedule",
+        path: "/adminDashboard/createDaysSchedule",
       },
       {
         title: "Weeks Schedules",
         path: "/adminDashboard/weeks-schedule",
       },
     ],
+  },
+  {
+    id: "orders",
+    title: "Orders",
+    icon: <FiShoppingCart />,
+    path: "/",
+  },
+
+  {
+    id: "products",
+    title: "Products",
+    icon: <FiBox />,
+    path: "/",
+  },
+  {
+    id: "reports",
+    title: "Reports",
+    icon: <FiBarChart2 />,
+    path: "/",
   },
 
   {
@@ -113,7 +117,6 @@ const MENU = [
     path: "/",
   },
 ];
-
 
 export default function SidebarMenu({ collapsed = false }) {
   const location = useLocation();
