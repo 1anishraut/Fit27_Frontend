@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { MdDashboard } from "react-icons/md";
 import {
   FiMessageSquare,
@@ -11,10 +11,6 @@ import {
   FiBookOpen,
   FiMessageCircle,
   FiUserCheck,
-  FiCalendar,
-  FiVolume2,
-  FiGlobe,
-  FiUser,
   FiChevronDown,
   FiChevronRight,
 } from "react-icons/fi";
@@ -27,27 +23,17 @@ const MENU = [
     path: "/adminDashboard/allDetails",
   },
 
-  {
-    id: "enquiries",
-    title: "Enquiries",
-    icon: <FiMessageSquare />,
-    path: "/",
-  },
+  { id: "enquiries", title: "Enquiries", icon: <FiMessageSquare />, path: "/" },
 
-  {
-    id: "tasks",
-    title: "Tasks",
-    icon: <FiCheckSquare />,
-    path: "/",
-  },
+  { id: "tasks", title: "Tasks", icon: <FiCheckSquare />, path: "/" },
 
   {
     id: "members",
     title: "Members",
     icon: <FiUsers />,
     children: [
-      { title: "Enquiry", path: "/adminDashboard/members/enquiry" },
       { title: "Members", path: "/adminDashboard/members" },
+      { title: "Enquiry", path: "/adminDashboard/members/enquiry" },
     ],
   },
 
@@ -77,54 +63,26 @@ const MENU = [
     title: "Class Schedule",
     icon: <FiBookOpen />,
     children: [
-      {
-        title: "All Schedules",
-        path: "/adminDashboard/allClassScheduleList",
-      },
-      {
-        title: "Days Schedules",
-        path: "/adminDashboard/createDaysSchedule",
-      },
-      {
-        title: "Weeks Schedules",
-        path: "/adminDashboard/weeks-schedule",
-      },
+      { title: "All Schedules", path: "/adminDashboard/allClassScheduleList" },
+      { title: "Days Schedules", path: "/adminDashboard/createDaysSchedule" },
+      { title: "Weeks Schedules", path: "/adminDashboard/weeks-schedule" },
     ],
   },
 
-  {
-    id: "orders",
-    title: "Orders",
-    icon: <FiShoppingCart />,
-    path: "/",
-  },
+  { id: "orders", title: "Orders", icon: <FiShoppingCart />, path: "/" },
 
-  {
-    id: "products",
-    title: "Products",
-    icon: <FiBox />,
-    path: "/",
-  },
+  { id: "products", title: "Products", icon: <FiBox />, path: "/" },
 
-  {
-    id: "reports",
-    title: "Reports",
-    icon: <FiBarChart2 />,
-    path: "/",
-  },
+  { id: "reports", title: "Reports", icon: <FiBarChart2 />, path: "/" },
 
-  {
-    id: "feedbacks",
-    title: "Feedbacks",
-    icon: <FiMessageCircle />,
-    path: "/",
-  },
+  { id: "feedbacks", title: "Feedbacks", icon: <FiMessageCircle />, path: "/" },
 ];
 
 export default function SidebarMenu({ collapsed = false }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // open dropdown states
+  // Open dropdown state
   const [open, setOpen] = useState(() => {
     const obj = {};
     MENU.forEach((item) => {
@@ -137,7 +95,18 @@ export default function SidebarMenu({ collapsed = false }) {
     return obj;
   });
 
-  const toggle = (id) => setOpen((s) => ({ ...s, [id]: !s[id] }));
+  // Dropdown click handler with AUTO NAVIGATION
+  const handleParentClick = (item) => {
+    const isOpen = open[item.id];
+
+    // Toggle state
+    setOpen((state) => ({ ...state, [item.id]: !state[item.id] }));
+
+    // Auto-navigate ONLY when opening
+    if (!isOpen && item.children?.length > 0) {
+      navigate(item.children[0].path);
+    }
+  };
 
   return (
     <nav className="sidebar-menu space-y-1">
@@ -148,9 +117,9 @@ export default function SidebarMenu({ collapsed = false }) {
             location.pathname.startsWith(item.path + "/"));
 
         //
-        // ───────────────────────────────
-        // DROPDOWN MENU ITEM
-        // ───────────────────────────────
+        // ---------------------------
+        // DROPDOWN MENU ITEMS
+        // ---------------------------
         //
         if (item.children) {
           const isOpen = open[item.id];
@@ -158,12 +127,12 @@ export default function SidebarMenu({ collapsed = false }) {
           return (
             <div key={item.id} className="rounded-lg">
               <button
-                onClick={() => toggle(item.id)}
+                onClick={() => handleParentClick(item)}
                 className={`
                   w-full flex items-center gap-3 px-3 py-2 rounded-lg transition
                   ${
                     isOpen
-                      ? "bg-gray-100 dark:bg-[#1f1f23] text-gray-900 dark:text-white"
+                      ? "bg-gray-200 dark:bg-[#1f1f23] text-gray-900 dark:text-white"
                       : "text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#1f1f23]"
                   }
                 `}
@@ -183,13 +152,13 @@ export default function SidebarMenu({ collapsed = false }) {
                 )}
 
                 {!collapsed && (
-                  <span className="text-gray-500 dark:text-gray-300">
+                  <span className="text-gray-600 dark:text-gray-300">
                     {isOpen ? <FiChevronDown /> : <FiChevronRight />}
                   </span>
                 )}
               </button>
 
-              {/* Submenu */}
+              {/* SUBMENU */}
               <div
                 className={`pl-10 mt-1 space-y-1 overflow-hidden transition-all ${
                   isOpen ? "max-h-96" : "max-h-0"
@@ -208,7 +177,7 @@ export default function SidebarMenu({ collapsed = false }) {
                         block px-3 py-2 rounded-lg text-sm transition
                         ${
                           subActive
-                            ? "bg-gray-200 text-gray-900 dark:bg-[#2A2A2C] dark:text-white font-medium"
+                            ? "bg-gray-200 dark:bg-[#2A2A2C] text-gray-900 dark:text-white font-medium"
                             : "text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
                         }
                       `}
@@ -223,9 +192,9 @@ export default function SidebarMenu({ collapsed = false }) {
         }
 
         //
-        // ───────────────────────────────
-        // SINGLE NORMAL MENU ITEM
-        // ───────────────────────────────
+        // ---------------------------
+        // SINGLE MENU ITEMS
+        // ---------------------------
         //
         return (
           <NavLink
@@ -242,7 +211,7 @@ export default function SidebarMenu({ collapsed = false }) {
               `
             }
           >
-            {/* icon container */}
+            {/* ICON WRAPPER */}
             <div
               className={`
                 p-2 rounded-xl transition
