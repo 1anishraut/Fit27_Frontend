@@ -71,6 +71,7 @@ const MENU = [
     icon: <FiBookOpen />,
     path: "/adminDashboard/classes",
   },
+
   {
     id: "class schedule",
     title: "Class Schedule",
@@ -90,6 +91,7 @@ const MENU = [
       },
     ],
   },
+
   {
     id: "orders",
     title: "Orders",
@@ -103,6 +105,7 @@ const MENU = [
     icon: <FiBox />,
     path: "/",
   },
+
   {
     id: "reports",
     title: "Reports",
@@ -121,6 +124,7 @@ const MENU = [
 export default function SidebarMenu({ collapsed = false }) {
   const location = useLocation();
 
+  // open dropdown states
   const [open, setOpen] = useState(() => {
     const obj = {};
     MENU.forEach((item) => {
@@ -144,7 +148,9 @@ export default function SidebarMenu({ collapsed = false }) {
             location.pathname.startsWith(item.path + "/"));
 
         //
-        // 🔻 DROPDOWN MENU
+        // ───────────────────────────────
+        // DROPDOWN MENU ITEM
+        // ───────────────────────────────
         //
         if (item.children) {
           const isOpen = open[item.id];
@@ -166,14 +172,11 @@ export default function SidebarMenu({ collapsed = false }) {
 
                 {!collapsed && (
                   <span
-                    className={`
-                      flex-1 text-sm transition
-                      ${
-                        isOpen
-                          ? "text-gray-900 dark:text-black"
-                          : "text-gray-900 dark:text-gray-300"
-                      }
-                    `}
+                    className={`flex-1 text-sm transition ${
+                      isOpen
+                        ? "text-gray-900 dark:text-white"
+                        : "text-gray-900 dark:text-gray-300"
+                    }`}
                   >
                     {item.title}
                   </span>
@@ -186,6 +189,7 @@ export default function SidebarMenu({ collapsed = false }) {
                 )}
               </button>
 
+              {/* Submenu */}
               <div
                 className={`pl-10 mt-1 space-y-1 overflow-hidden transition-all ${
                   isOpen ? "max-h-96" : "max-h-0"
@@ -204,7 +208,7 @@ export default function SidebarMenu({ collapsed = false }) {
                         block px-3 py-2 rounded-lg text-sm transition
                         ${
                           subActive
-                            ? "bg-gray-200 dark:bg-white text-gray-900 dark:text-black font-medium"
+                            ? "bg-gray-200 text-gray-900 dark:bg-[#2A2A2C] dark:text-white font-medium"
                             : "text-gray-900 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
                         }
                       `}
@@ -219,7 +223,9 @@ export default function SidebarMenu({ collapsed = false }) {
         }
 
         //
-        // 🔹 SINGLE-LEVEL MENU ITEM
+        // ───────────────────────────────
+        // SINGLE NORMAL MENU ITEM
+        // ───────────────────────────────
         //
         return (
           <NavLink
@@ -236,7 +242,7 @@ export default function SidebarMenu({ collapsed = false }) {
               `
             }
           >
-            {/* ICON BOX */}
+            {/* icon container */}
             <div
               className={`
                 p-2 rounded-xl transition
@@ -250,7 +256,6 @@ export default function SidebarMenu({ collapsed = false }) {
               <span className="text-lg">{item.icon}</span>
             </div>
 
-            {/* TITLE */}
             {!collapsed && (
               <span
                 className={`
