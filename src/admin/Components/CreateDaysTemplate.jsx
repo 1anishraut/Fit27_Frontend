@@ -29,16 +29,16 @@ const CreateDaysTemplates = () => {
   const [label, setLabel] = useState("");
   const [active, setActive] = useState(true);
 
-  // ✅ EVERY DAY STARTS WITH ONE EMPTY ROW
+  // One default row for each day
   const [rowsByDay, setRowsByDay] = useState(() => {
     const obj = {};
     DAYS.forEach((d) => {
-      obj[d] = [{ ...emptyRow }]; // FIXED
+      obj[d] = [{ ...emptyRow }];
     });
     return obj;
   });
 
-  // Only Monday open by default
+  // Only Monday open initially
   const [openDay, setOpenDay] = useState(() => {
     const o = {};
     DAYS.forEach((d) => {
@@ -50,23 +50,18 @@ const CreateDaysTemplates = () => {
   const [classes, setClasses] = useState([]);
   const [locations, setLocations] = useState([]);
   const [instructors, setInstructors] = useState([]);
-
   const [loading, setLoading] = useState(false);
 
-  // ===============================
-  // FETCH CLASSES / LOCATIONS / INSTRUCTORS
-  // ===============================
+  // Fetch dropdown lists
   useEffect(() => {
     const fetchAll = async () => {
       try {
         const clsReq = axios.get(`${BASE_URL}/classes/all`, {
           withCredentials: true,
         });
-
         const locReq = axios.get(`${BASE_URL}/location/all`, {
           withCredentials: true,
         });
-
         const instReq = axios.get(`${BASE_URL}/instructor/all`, {
           withCredentials: true,
         });
@@ -81,17 +76,15 @@ const CreateDaysTemplates = () => {
         setLocations(locRes.data.data || []);
         setInstructors(instRes.data.data || []);
       } catch (err) {
-        console.error("Dropdown Load Error → ", err);
-        alert("Failed to load Classes / Locations / Instructors");
+        console.error("Dropdown fetch error:", err);
+        alert("Failed to load classes / locations / instructors");
       }
     };
 
     fetchAll();
   }, []);
 
-  // ===============================
-  // ADD / REMOVE ROWS
-  // ===============================
+  // Add & remove row
   const addRow = (day) => {
     setRowsByDay((prev) => ({
       ...prev,
@@ -114,9 +107,7 @@ const CreateDaysTemplates = () => {
     });
   };
 
-  // ===============================
-  // RESET FORM
-  // ===============================
+  // Reset form
   const resetForm = () => {
     setLabel("");
     setActive(true);
@@ -134,9 +125,7 @@ const CreateDaysTemplates = () => {
     setOpenDay(o);
   };
 
-  // ===============================
-  // SUBMIT HANDLER
-  // ===============================
+  // Submit template
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -145,52 +134,43 @@ const CreateDaysTemplates = () => {
       return;
     }
 
-    const payloads = [];
+    let daysPayload = {};
 
-    DAYS.forEach((day) => {
-      rowsByDay[day].forEach((row) => {
+    // Validate and build final days object
+    for (let day of DAYS) {
+      const rows = rowsByDay[day];
+      let filtered = [];
+
+      for (let row of rows) {
         const { startedAt, endedAt, classId, location, instructorId } = row;
 
         const hasAny =
           startedAt || endedAt || classId || location || instructorId;
-
         const isComplete =
           startedAt && endedAt && classId && location && instructorId;
 
         if (hasAny && !isComplete) {
-          throw new Error(`Please complete all fields for ${day}`);
+          alert(`Please complete all fields for ${day}`);
+          return;
         }
 
-        if (isComplete) {
-          payloads.push({
-            label: label.trim(),
-            active,
-            dayName: day,
-            startedAt,
-            endedAt,
-            classId,
-            location,
-            instructorId,
-          });
-        }
-      });
-    });
+        if (isComplete) filtered.push(row);
+      }
 
-    if (!payloads.length) {
-      alert("Add at least one schedule row");
-      return;
+      daysPayload[day] = filtered;
     }
+
+    const finalPayload = {
+      label,
+      active,
+      days: daysPayload,
+    };
 
     try {
       setLoading(true);
-
-      await Promise.all(
-        payloads.map((p) =>
-          axios.post(`${BASE_URL}/days-template/add`, p, {
-            withCredentials: true,
-          })
-        )
-      );
+      await axios.post(`${BASE_URL}/days-template/add`, finalPayload, {
+        withCredentials: true,
+      });
 
       alert("Template created successfully");
       navigate("/adminDashboard/days-templates");
@@ -206,30 +186,31 @@ const CreateDaysTemplates = () => {
     }
   };
 
-  // ===============================
-  // UI RETURN
-  // ===============================
+  const inputClass =
+    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-xs bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
+
+  const selectClass =
+    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-xs bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 pb-10 text-sm text-gray-800 dark:text-gray-100"
-    >
-      {/* =======================
-          GENERAL INFORMATION
-      ========================= */}
-      <div className="bg-white dark:bg-[#111218] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h2 className="text-lg font-semibold mb-4">General information</h2>
+    <form onSubmit={handleSubmit} className="space-y-6 pb-10 text-sm">
+      {/* GENERAL INFO */}
+      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          General Information
+        </h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium mb-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
               Label <span className="text-red-500">*</span>
             </label>
+
             <input
               type="text"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c]"
+              className={inputClass}
               placeholder="Morning weekday template"
             />
           </div>
@@ -239,17 +220,20 @@ const CreateDaysTemplates = () => {
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
+              className="h-4 w-4 border-gray-400 dark:border-gray-600"
             />
-            <span className="text-xs font-medium">Active</span>
+            <span className="text-xs text-gray-700 dark:text-gray-300">
+              Active
+            </span>
           </label>
         </div>
       </div>
 
-      {/* =======================
-          TEMPLATE SCHEDULES
-      ========================= */}
-      <div className="bg-white dark:bg-[#111218] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h2 className="text-lg font-semibold mb-4">Template schedules</h2>
+      {/* TEMPLATE SCHEDULES */}
+      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Template Schedules
+        </h2>
 
         <div className="divide-y divide-gray-200 dark:divide-gray-800">
           {DAYS.map((day) => {
@@ -258,15 +242,17 @@ const CreateDaysTemplates = () => {
 
             return (
               <div key={day} className="py-3">
-                {/* Header */}
+                {/* Day header */}
                 <div className="flex items-center justify-between">
-                  <div className="font-medium text-sm">{day}</div>
+                  <span className="font-medium text-sm text-gray-900 dark:text-gray-200">
+                    {day}
+                  </span>
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => addRow(day)}
-                      className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-300 dark:border-gray-700"
+                      className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
                     >
                       <FiPlus />
                     </button>
@@ -274,118 +260,130 @@ const CreateDaysTemplates = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setOpenDay((prev) => ({
-                          ...prev,
-                          [day]: !prev[day],
-                        }))
+                        setOpenDay((prev) => ({ ...prev, [day]: !prev[day] }))
                       }
-                      className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-300 dark:border-gray-700"
+                      className="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
                     >
                       {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                     </button>
                   </div>
                 </div>
 
-                {/* Rows */}
+                {/* Day rows */}
                 {isOpen && (
-                  <div className="mt-3">
-                    {/* Table Header */}
-                    <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-semibold bg-gray-100 dark:bg-[#181920] rounded-md px-3 py-2 mb-2">
-                      <div className="col-span-2">Start at</div>
-                      <div className="col-span-2">End at</div>
+                  <div className="mt-3 space-y-2">
+                    {/* Desktop header */}
+                    <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-semibold bg-gray-100 dark:bg-[#181920] p-2 rounded">
+                      <div className="col-span-2">Start</div>
+                      <div className="col-span-2">End</div>
                       <div className="col-span-3">Class</div>
                       <div className="col-span-3">Location</div>
                       <div className="col-span-2">Instructor</div>
                     </div>
 
-                    <div className="space-y-2">
-                      {rows.map((row, idx) => (
-                        <div
-                          key={idx}
-                          className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-gray-50 dark:bg-[#181920] rounded-md px-3 py-3"
-                        >
-                          {/* Start time */}
-                          <div className="md:col-span-2">
-                            <input
-                              type="time"
-                              value={row.startedAt}
-                              onChange={(e) =>
-                                handleRowChange(
-                                  day,
-                                  idx,
-                                  "startedAt",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full border rounded-md px-2 py-1 text-xs"
-                            />
-                          </div>
+                    {rows.map((row, idx) => (
+                      <div
+                        key={idx}
+                        className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-gray-50 dark:bg-[#181920] rounded-md p-3"
+                      >
+                        {/* Start time */}
+                        <div className="md:col-span-2">
+                          <label className="md:hidden text-xs text-gray-500">
+                            Start
+                          </label>
+                          <input
+                            type="time"
+                            value={row.startedAt}
+                            onChange={(e) =>
+                              handleRowChange(
+                                day,
+                                idx,
+                                "startedAt",
+                                e.target.value
+                              )
+                            }
+                            className={inputClass}
+                          />
+                        </div>
 
-                          {/* End time */}
-                          <div className="md:col-span-2">
-                            <input
-                              type="time"
-                              value={row.endedAt}
-                              onChange={(e) =>
-                                handleRowChange(
-                                  day,
-                                  idx,
-                                  "endedAt",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full border rounded-md px-2 py-1 text-xs"
-                            />
-                          </div>
+                        {/* End time */}
+                        <div className="md:col-span-2">
+                          <label className="md:hidden text-xs text-gray-500">
+                            End
+                          </label>
+                          <input
+                            type="time"
+                            value={row.endedAt}
+                            onChange={(e) =>
+                              handleRowChange(
+                                day,
+                                idx,
+                                "endedAt",
+                                e.target.value
+                              )
+                            }
+                            className={inputClass}
+                          />
+                        </div>
 
-                          {/* Class */}
-                          <div className="md:col-span-3">
-                            <select
-                              value={row.classId}
-                              onChange={(e) =>
-                                handleRowChange(
-                                  day,
-                                  idx,
-                                  "classId",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full border rounded-md px-2 py-1 text-xs"
-                            >
-                              <option value="">Select class</option>
-                              {classes.map((c) => (
-                                <option key={c._id} value={c._id}>
-                                  {c.className}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                        {/* Class */}
+                        <div className="md:col-span-3">
+                          <label className="md:hidden text-xs text-gray-500">
+                            Class
+                          </label>
+                          <select
+                            value={row.classId}
+                            onChange={(e) =>
+                              handleRowChange(
+                                day,
+                                idx,
+                                "classId",
+                                e.target.value
+                              )
+                            }
+                            className={selectClass}
+                          >
+                            <option value="">Select Class</option>
+                            {classes.map((c) => (
+                              <option key={c._id} value={c._id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                          {/* Location */}
-                          <div className="md:col-span-3">
-                            <select
-                              value={row.location}
-                              onChange={(e) =>
-                                handleRowChange(
-                                  day,
-                                  idx,
-                                  "location",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full border rounded-md px-2 py-1 text-xs"
-                            >
-                              <option value="">Select location</option>
-                              {locations.map((l) => (
-                                <option key={l._id} value={l._id}>
-                                  {l.locationName}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                        {/* Location */}
+                        <div className="md:col-span-3">
+                          <label className="md:hidden text-xs text-gray-500">
+                            Location
+                          </label>
+                          <select
+                            value={row.location}
+                            onChange={(e) =>
+                              handleRowChange(
+                                day,
+                                idx,
+                                "location",
+                                e.target.value
+                              )
+                            }
+                            className={selectClass}
+                          >
+                            <option value="">Select Location</option>
+                            {locations.map((l) => (
+                              <option key={l._id} value={l._id}>
+                                {l.locationName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
 
-                          {/* Instructor */}
-                          <div className="md:col-span-2 flex items-center gap-2">
+                        {/* Instructor */}
+                        <div className="md:col-span-2 flex items-center gap-2">
+                          <div className="flex-1">
+                            <label className="md:hidden text-xs text-gray-500">
+                              Instructor
+                            </label>
                             <select
                               value={row.instructorId}
                               onChange={(e) =>
@@ -396,27 +394,28 @@ const CreateDaysTemplates = () => {
                                   e.target.value
                                 )
                               }
-                              className="w-full border rounded-md px-2 py-1 text-xs"
+                              className={selectClass}
                             >
-                              <option value="">Select instructor</option>
+                              <option value="">Select Instructor</option>
                               {instructors.map((ins) => (
                                 <option key={ins._id} value={ins._id}>
-                                  {ins.firstName} {ins.lastName}
+                                  {ins.firstName} {ins.surName}
                                 </option>
                               ))}
                             </select>
-
-                            <button
-                              type="button"
-                              onClick={() => removeRow(day, idx)}
-                              className="h-8 w-8 flex items-center justify-center rounded-full border border-red-300 text-red-500 hover:bg-red-50"
-                            >
-                              <FiTrash2 />
-                            </button>
                           </div>
+
+                          {/* Delete row */}
+                          <button
+                            type="button"
+                            onClick={() => removeRow(day, idx)}
+                            className="h-8 w-8 rounded-full border border-red-300 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
+                            <FiTrash2 className="mx-auto" />
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -425,12 +424,12 @@ const CreateDaysTemplates = () => {
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER BUTTONS */}
       <div className="flex justify-end gap-3">
         <button
           type="button"
           onClick={resetForm}
-          className="px-4 py-2 rounded-lg border text-xs"
+          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
         >
           Reset
         </button>
@@ -438,7 +437,7 @@ const CreateDaysTemplates = () => {
         <button
           type="submit"
           disabled={loading}
-          className="px-5 py-2 rounded-lg bg-black text-white text-xs disabled:opacity-50"
+          className="px-5 py-2 rounded-lg bg-black text-white text-xs dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save"}
         </button>
