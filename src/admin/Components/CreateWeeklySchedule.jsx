@@ -1,4 +1,3 @@
-// src/admin/Classes/WeeksSchedulesEditor.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -21,15 +20,13 @@ const MONTHS = [
   "December",
 ];
 
-// Get all calendar weeks (Mon–Sun) that touch the given month
+// compute exactly 4 visible weeks for the UI
 const getWeeksForMonth = (year, monthIndex) => {
-  const firstOfMonth = dayjs().year(year).month(monthIndex).date(1);
-  const lastOfMonth = firstOfMonth.endOf("month");
+  const first = dayjs().year(year).month(monthIndex).date(1);
+  const last = first.endOf("month");
 
-  // Start from Monday of the first display week
-  let weekStart = firstOfMonth;
+  let weekStart = first;
   if (weekStart.day() !== 1) {
-    // day() 0=Sun,1=Mon,... so go to previous Monday
     weekStart = weekStart.startOf("week").add(1, "day");
   }
 
@@ -37,26 +34,24 @@ const getWeeksForMonth = (year, monthIndex) => {
   let i = 1;
 
   while (
-    weekStart.isBefore(lastOfMonth) ||
-    weekStart.isSame(lastOfMonth, "day")
+    (weekStart.isBefore(last) || weekStart.isSame(last, "day")) &&
+    i <= 4
   ) {
-    const weekEnd = weekStart.add(6, "day");
     weeks.push({
       key: `week${i}`,
       index: i,
       startDate: weekStart.format("DD/MM/YYYY"),
-      endDate: weekEnd.format("DD/MM/YYYY"),
+      endDate: weekStart.add(6, "day").format("DD/MM/YYYY"),
     });
 
     weekStart = weekStart.add(7, "day");
     i++;
-    if (i > 4) break; // only 4 weeks as per schema
   }
 
   return weeks;
 };
 
-const WeeksSchedulesEditor = () => {
+export default function WeeksSchedulesEditor() {
   const navigate = useNavigate();
 
   const currentYear = new Date().getFullYear();
@@ -64,120 +59,97 @@ const WeeksSchedulesEditor = () => {
   const [month, setMonth] = useState(dayjs().format("MMMM"));
 
   const [daysTemplates, setDaysTemplates] = useState([]);
-  const [monthDocId, setMonthDocId] = useState(null);
   const [weeks, setWeeks] = useState([]);
+  const [monthDocId, setMonthDocId] = useState(null);
 
+  const [expandedWeek, setExpandedWeek] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [expandedWeek, setExpandedWeek] = useState(null);
 
   const yearOptions = useMemo(() => {
-    const arr = [];
-    for (let y = currentYear - 1; y <= currentYear + 2; y++) {
-      arr.push(y.toString());
-    }
-    return arr;
+    return [
+      (currentYear - 1).toString(),
+      currentYear.toString(),
+      (currentYear + 1).toString(),
+      (currentYear + 2).toString(),
+    ];
   }, [currentYear]);
 
-  /* ============================
-      FETCH DAYS TEMPLATES
-  ============================ */
+  /* ---------------------------
+      LOAD ONLY ACTIVE TEMPLATES
+  ---------------------------- */
   const fetchDaysTemplates = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/days-template/all`, {
+      const res = await axios.get(`${BASE_URL}/days-template/active`, {
         withCredentials: true,
       });
 
-      const raw = res.data?.data;
-      let list = [];
+      // Ensure only active templates appear in dropdown
+      const activeOnly = (res.data?.data || []).filter(
+        (tpl) => tpl.active === true
+      );
 
-      // In case backend ever returns grouped object, normalize to flat list
-      if (Array.isArray(raw)) {
-        list = raw;
-      } else if (raw && typeof raw === "object") {
-        list = Object.values(raw).flat().filter(Boolean);
-      }
-
-      setDaysTemplates(list);
+      setDaysTemplates(activeOnly);
+      console.log("Active Templates Loaded:", activeOnly);
     } catch (err) {
-      console.error("Failed to load Days Templates:", err);
+      console.error("Failed to load templates:", err);
     }
   };
 
-  /* ============================
-      FETCH MONTH TEMPLATE
-      GET /month-template?year=YYYY&month=MMMM
-  ============================ */
-  const fetchMonthTemplate = async (selectedYear, selectedMonth) => {
+  /* ---------------------------
+      LOAD EXISTING MONTH TEMPLATE
+  ---------------------------- */
+  const fetchMonthTemplate = async (year, month) => {
     setLoading(true);
+
     try {
-      const res = await axios.get(`${BASE_URL}/month-template/create`, {
-        params: { year: selectedYear, month: selectedMonth },
+      const res = await axios.get(`${BASE_URL}/month-template`, {
+        params: { year, month },
         withCredentials: true,
       });
 
-      const doc = res.data?.data || null;
-
-      const baseWeeks = getWeeksForMonth(
-        Number(selectedYear),
-        MONTHS.indexOf(selectedMonth)
-      );
+      const doc = res.data?.data;
+      const baseWeeks = getWeeksForMonth(Number(year), MONTHS.indexOf(month));
 
       if (!doc) {
-        // No document yet → use computed weeks, empty template selection
-        const mapped = baseWeeks.map((w) => ({
-          ...w,
-          templateId: "",
-        }));
-        setWeeks(mapped);
         setMonthDocId(null);
+        setWeeks(baseWeeks.map((w) => ({ ...w, templateId: "" })));
       } else {
         setMonthDocId(doc._id);
 
         const mapped = baseWeeks.map((w) => {
-          const block = doc[w.key]; // week1, week2, week3, week4
+          const block = doc[w.key];
+
           let templateId = "";
-
           if (block?.template) {
-            // template may be ObjectId string or populated object
-            if (typeof block.template === "string") {
-              templateId = block.template;
-            } else if (typeof block.template === "object") {
-              templateId = block.template._id;
-            }
+            templateId =
+              typeof block.template === "string"
+                ? block.template
+                : block.template._id;
           }
-
-          const startDate = block?.startDate || w.startDate;
-          const endDate = block?.endDate || w.endDate;
 
           return {
             ...w,
             templateId,
-            startDate,
-            endDate,
+            startDate: block?.startDate || w.startDate,
+            endDate: block?.endDate || w.endDate,
           };
         });
 
         setWeeks(mapped);
       }
     } catch (err) {
-      console.error("Failed to load Month Template:", err);
-
-      // Fallback: just show computed weeks
+      console.error("Failed to load month template:", err);
       const baseWeeks = getWeeksForMonth(
-        Number(selectedYear),
-        MONTHS.indexOf(selectedMonth)
+        Number(year),
+        MONTHS.indexOf(month)
       ).map((w) => ({ ...w, templateId: "" }));
       setWeeks(baseWeeks);
-      setMonthDocId(null);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
-  /* ============================
-      INIT
-  ============================ */
   useEffect(() => {
     fetchDaysTemplates();
   }, []);
@@ -186,27 +158,28 @@ const WeeksSchedulesEditor = () => {
     fetchMonthTemplate(year, month);
   }, [year, month]);
 
-  /* ============================
-      HANDLERS
-  ============================ */
+  /* ---------------------------
+      UPDATE SELECTED TEMPLATE
+  ---------------------------- */
   const handleTemplateChange = (weekKey, value) => {
     setWeeks((prev) =>
       prev.map((w) => (w.key === weekKey ? { ...w, templateId: value } : w))
     );
   };
 
+  /* ---------------------------
+      SAVE TO BACKEND
+  ---------------------------- */
   const handleSave = async () => {
-    // enforce at least ONE week has template assigned
-    const hasAtLeastOne = weeks.some((w) => w.templateId);
-    if (!hasAtLeastOne) {
-      alert("Assign at least one week template before saving.");
+    const hasAny = weeks.some((w) => w.templateId);
+    if (!hasAny) {
+      alert("Assign at least one template.");
       return;
     }
 
     setSaving(true);
 
     const body = { year, month };
-
     weeks.forEach((w) => {
       body[w.key] = {
         template: w.templateId || null,
@@ -228,133 +201,96 @@ const WeeksSchedulesEditor = () => {
         });
       }
 
-      alert("Week schedules updated successfully");
+      alert("Updated successfully");
     } catch (err) {
       console.error("Save failed:", err);
-      alert(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to save week schedules"
-      );
-    } finally {
-      setSaving(false);
+      alert("Failed to save");
     }
+
+    setSaving(false);
   };
 
-  const containerClass =
-    "p-6 min-h-screen bg-gray-100 dark:bg-[#09090B] transition-colors";
-
   return (
-    <div className={containerClass}>
+    <div className="p-6 min-h-screen bg-gray-100 dark:bg-[#09090B]">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <FiCalendar />
-          Edit Weeks Schedules
+          <FiCalendar /> Edit Weeks Schedules
         </h1>
 
         <button
           onClick={() => navigate(-1)}
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-[#1f1f23]"
+          className="px-3 py-2 border rounded-lg text-xs dark:border-gray-700"
         >
           Close
         </button>
       </div>
 
-      {/* CARD */}
-      <div className="bg-white dark:bg-[#111118] border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg max-w-3xl mx-auto">
-        {/* TOP CONTROLS */}
-        <div className="flex flex-col md:flex-row gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
-          {/* Year select */}
+      {/* MAIN CARD */}
+      <div className="bg-white dark:bg-[#111118] rounded-xl border shadow-lg max-w-3xl mx-auto">
+        {/* YEAR + MONTH SELECT */}
+        <div className="flex flex-col md:flex-row gap-4 p-4 border-b">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="text-xs text-gray-600 dark:text-gray-300">
               Year
             </label>
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c]"
             >
               {yearOptions.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
+                <option key={y}>{y}</option>
               ))}
             </select>
           </div>
 
-          {/* Month select */}
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="text-xs text-gray-600 dark:text-gray-300">
               Month
             </label>
             <select
               value={month}
               onChange={(e) => setMonth(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c]"
             >
               {MONTHS.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
+                <option key={m}>{m}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* WARNING BANNER */}
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-yellow-50 dark:bg-[#2b2110] flex gap-3">
-          <div className="mt-1 text-yellow-600 dark:text-yellow-400">⚠</div>
-          <p className="text-xs text-yellow-800 dark:text-yellow-200">
-            Be careful when assigning templates. If you remove or change a
-            week&apos;s template, all data attached to that week will be treated
-            as a new week. For day-level changes, use the &quot;Week
-            Schedules&quot; / days templates section.
-          </p>
-        </div>
-
-        {/* WEEKS LIST */}
+        {/* WEEKS */}
         <div className="p-4 space-y-3">
           {loading ? (
-            <div className="text-center text-xs text-gray-500 dark:text-gray-400 py-6">
-              Loading weeks…
-            </div>
+            <div className="text-center text-xs">Loading...</div>
           ) : (
             weeks.map((week) => {
               const isOpen = expandedWeek === week.key;
-
               return (
                 <div
                   key={week.key}
-                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-[#151519]"
+                  className="border rounded-lg bg-gray-50 dark:bg-[#151519]"
                 >
-                  {/* Row header */}
                   <button
-                    type="button"
-                    onClick={() =>
-                      setExpandedWeek((prev) =>
-                        prev === week.key ? null : week.key
-                      )
-                    }
-                    className="w-full flex items-center justify-between px-4 py-3 text-sm"
+                    onClick={() => setExpandedWeek(isOpen ? null : week.key)}
+                    className="w-full flex justify-between px-4 py-3"
                   >
                     <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-black text-white dark:bg-white dark:text-black text-xs">
+                      <span className="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black text-xs">
                         {week.index}
                       </span>
                       <span>
                         {week.startDate} – {week.endDate}
                       </span>
                     </div>
-                    <span className="text-gray-500 dark:text-gray-300">
-                      {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
+                    {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                   </button>
 
-                  {/* Row body */}
                   {isOpen && (
-                    <div className="px-4 pb-4 pt-1 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#14151c]">
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <div className="px-4 pb-4 pt-1 border-t dark:border-gray-700">
+                      <label className="text-xs text-gray-600 dark:text-gray-300">
                         Assign Days Template
                       </label>
                       <select
@@ -362,9 +298,9 @@ const WeeksSchedulesEditor = () => {
                         onChange={(e) =>
                           handleTemplateChange(week.key, e.target.value)
                         }
-                        className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#181920] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                        className="w-full border rounded-lg px-3 py-2 mt-1 text-sm bg-white dark:bg-[#181920]"
                       >
-                        <option value="">-- Select template --</option>
+                        <option value="">-- Select Template --</option>
                         {daysTemplates.map((tpl) => (
                           <option key={tpl._id} value={tpl._id}>
                             {tpl.label}
@@ -379,28 +315,17 @@ const WeeksSchedulesEditor = () => {
           )}
         </div>
 
-        {/* FOOTER BUTTONS */}
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-3 bg-gray-50 dark:bg-[#151519]">
+        {/* SAVE BUTTON */}
+        <div className="p-4 border-t flex justify-end bg-gray-50 dark:bg-[#151519]">
           <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 rounded-lg bg-black text-white text-xs dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-50"
+            className="px-5 py-2 bg-black text-white text-xs rounded-lg dark:bg:white dark:text:black"
           >
-            {saving ? "Updating..." : "Update"}
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default WeeksSchedulesEditor;
+}
