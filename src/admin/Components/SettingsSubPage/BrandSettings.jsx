@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
 import { useDispatch } from "react-redux";
-import { addBrandData } from "../../../Utils/brandData";
+import { addAdminBrandData } from "../../../Utils/brandDataAdmin";
 
 export default function BrandSettings() {
   const dispatch = useDispatch();
@@ -27,29 +27,29 @@ export default function BrandSettings() {
   useEffect(() => {
     const fetchBrand = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/brand/all`, {
+        const res = await axios.get(`${BASE_URL}/adminBrand/all`, {
           withCredentials: true,
         });
 
         if (res.data.data.length > 0) {
           const brand = res.data.data[0];
 
-          // SET TO LOCAL STATES
+          // SET TEXT FIELDS
           setName(brand.name || "");
           setTitleText(brand.titleText || "");
           setFooterText(brand.footerText || "");
 
-          if (brand.logoDark)
-            setLogoDarkPreview(`${BASE_URL}/${brand.logoDark}`);
+          // SET PREVIEW IMAGES (correct field names)
+          if (brand.adminLogoDark)
+            setLogoDarkPreview(`${BASE_URL}/${brand.adminLogoDark}`);
 
-          if (brand.logoLight)
-            setLogoLightPreview(`${BASE_URL}/${brand.logoLight}`);
+          if (brand.adminLogoLight)
+            setLogoLightPreview(`${BASE_URL}/${brand.adminLogoLight}`);
 
-          if (brand.faviIcon)
-            setFaviconPreview(`${BASE_URL}/${brand.faviIcon}`);
+          if (brand.adminFaviIcon)
+            setFaviconPreview(`${BASE_URL}/${brand.adminFaviIcon}`);
 
-          // 🔥 DISPATCH TO REDUX
-          dispatch(addBrandData(brand));
+          dispatch(addAdminBrandData(brand));
         }
       } catch (err) {
         console.error("Brand Load Error:", err);
@@ -60,7 +60,6 @@ export default function BrandSettings() {
 
     fetchBrand();
   }, [dispatch]);
-
 
   // ------------------------- FILE HANDLER -------------------------
   const handleFile = (e, setPreview, setFile) => {
@@ -80,25 +79,23 @@ export default function BrandSettings() {
       formData.append("titleText", titleText);
       formData.append("footerText", footerText);
 
-      if (logoDarkFile) formData.append("logoDark", logoDarkFile);
-      if (logoLightFile) formData.append("logoLight", logoLightFile);
-      if (faviconFile) formData.append("faviIcon", faviconFile);
+      // MUST MATCH MULTER FIELD NAMES!
+      if (logoDarkFile) formData.append("adminLogoDark", logoDarkFile);
+      if (logoLightFile) formData.append("adminLogoLight", logoLightFile);
+      if (faviconFile) formData.append("adminFaviIcon", faviconFile);
 
-      await axios.post(`${BASE_URL}/brand/create`, formData, {
+      await axios.post(`${BASE_URL}/adminBrand/create`, formData, {
         withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("Brand updated successfully!");
+      window.location.reload();
     } catch (err) {
       console.error("Brand Save Error:", err);
       alert("Failed to save brand");
     }
   };
-
-  const handleCancel = () => window.location.reload();
 
   if (loading) return <p>Loading...</p>;
 
@@ -119,6 +116,7 @@ export default function BrandSettings() {
               <span className="text-gray-400">No Image</span>
             )}
           </div>
+
           <label className="block mt-3 cursor-pointer">
             <div className="bg-black text-white text-sm rounded-lg px-3 py-2 text-center">
               Choose file here
@@ -136,13 +134,14 @@ export default function BrandSettings() {
         {/* Logo Light */}
         <div className="border rounded-xl bg-white p-4 shadow-sm">
           <p className="font-medium text-gray-700 mb-2">Logo Light</p>
-          <div className="w-full h-32 bg-gray-500 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-full h-32 bg-gray-300 flex items-center justify-center rounded-lg overflow-hidden">
             {logoLightPreview ? (
               <img src={logoLightPreview} className="h-full object-contain" />
             ) : (
               <span className="text-gray-400">No Image</span>
             )}
           </div>
+
           <label className="block mt-3 cursor-pointer">
             <div className="bg-black text-white text-sm rounded-lg px-3 py-2 text-center">
               Choose file here
@@ -160,13 +159,14 @@ export default function BrandSettings() {
         {/* Favicon */}
         <div className="border rounded-xl bg-white p-4 shadow-sm">
           <p className="font-medium text-gray-700 mb-2">Favicon</p>
-          <div className="w-full h-32 bg-gray-500 flex items-center justify-center rounded-lg overflow-hidden">
+          <div className="w-full h-32 bg-gray-300 flex items-center justify-center rounded-lg overflow-hidden">
             {faviconPreview ? (
               <img src={faviconPreview} className="h-full object-contain" />
             ) : (
               <span className="text-gray-400">No Image</span>
             )}
           </div>
+
           <label className="block mt-3 cursor-pointer">
             <div className="bg-black text-white text-sm rounded-lg px-3 py-2 text-center">
               Choose file here
@@ -216,7 +216,7 @@ export default function BrandSettings() {
       {/* BUTTONS */}
       <div className="flex justify-end gap-4 mt-10">
         <button
-          onClick={handleCancel}
+          onClick={() => window.location.reload()}
           className="px-6 py-2 rounded-lg border border-gray-400 hover:bg-gray-100"
         >
           Cancel

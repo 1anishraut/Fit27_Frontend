@@ -7,6 +7,7 @@ import adminPlanReducer from "./adminPlansSlice"
 import membersReducer from "./membersSlice";
 import plansReducer from "./plansSlice";
 import brandReducer from "./brandData"
+import adminBrandReducer from "./brandDataAdmin"
 import classesRedducer from "./classesSlice"
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
@@ -24,7 +25,8 @@ const rootReducer = combineReducers({
   members: membersReducer,
   plans: plansReducer,
   classes: classesRedducer,
-  brand: brandReducer
+  brand: brandReducer,
+  adminBrand: adminBrandReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
