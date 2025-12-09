@@ -35,7 +35,7 @@ export default function Members() {
       const res = await axios.get(`${BASE_URL}/allUsers`, {
         withCredentials: true,
       });
-      console.log(res.data.data);
+      // console.log(res.data.data);
       
 
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
