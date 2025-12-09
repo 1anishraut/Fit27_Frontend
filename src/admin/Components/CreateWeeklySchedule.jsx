@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-import { FiCalendar, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FiCalendar } from "react-icons/fi";
 import { BASE_URL } from "../../Utils/Constants";
 
 const MONTHS = [
@@ -20,7 +20,7 @@ const MONTHS = [
   "December",
 ];
 
-// compute exactly 4 visible weeks for the UI
+// compute exactly 4 weeks
 const getWeeksForMonth = (year, monthIndex) => {
   const first = dayjs().year(year).month(monthIndex).date(1);
   const last = first.endOf("month");
@@ -31,21 +31,14 @@ const getWeeksForMonth = (year, monthIndex) => {
   }
 
   const weeks = [];
-  let i = 1;
-
-  while (
-    (weekStart.isBefore(last) || weekStart.isSame(last, "day")) &&
-    i <= 4
-  ) {
+  for (let i = 1; i <= 4; i++) {
     weeks.push({
       key: `week${i}`,
       index: i,
       startDate: weekStart.format("DD/MM/YYYY"),
       endDate: weekStart.add(6, "day").format("DD/MM/YYYY"),
     });
-
     weekStart = weekStart.add(7, "day");
-    i++;
   }
 
   return weeks;
@@ -62,43 +55,79 @@ export default function WeeksSchedulesEditor() {
   const [weeks, setWeeks] = useState([]);
   const [monthDocId, setMonthDocId] = useState(null);
 
-  const [expandedWeek, setExpandedWeek] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const yearOptions = useMemo(() => {
     return [
+      (currentYear - 2).toString(),
       (currentYear - 1).toString(),
       currentYear.toString(),
       (currentYear + 1).toString(),
       (currentYear + 2).toString(),
+      (currentYear + 3).toString(),
     ];
   }, [currentYear]);
 
-  /* ---------------------------
-      LOAD ONLY ACTIVE TEMPLATES
-  ---------------------------- */
+  /* ------------------------------------------------
+      REMOVE DUPLICATES FROM TEMPLATE LIST
+  ------------------------------------------------ */
+  const uniqueTemplates = (templates) => {
+    const map = new Map();
+    templates.forEach((tpl) => {
+      if (!map.has(tpl._id)) map.set(tpl._id, tpl);
+    });
+    return [...map.values()];
+  };
+
+  /* ------------------------------------------------
+      MERGE ACTIVE + ASSIGNED TEMPLATES
+  ------------------------------------------------ */
+  const mergeAssignedTemplates = async (activeTemplates, weekBlocks) => {
+    const assignedIds = weekBlocks
+      .map((w) => w.templateId)
+      .filter((id) => id && id !== "");
+
+    if (assignedIds.length === 0) return uniqueTemplates(activeTemplates);
+
+    try {
+      const results = await Promise.all(
+        assignedIds.map((id) =>
+          axios.get(`${BASE_URL}/days-template/${id}`, {
+            withCredentials: true,
+          })
+        )
+      );
+
+      const assignedTemplates = results
+        .map((r) => r.data?.data)
+        .filter((tpl) => tpl);
+
+      return uniqueTemplates([...activeTemplates, ...assignedTemplates]);
+    } catch (err) {
+      console.error("Failed loading assigned templates:", err);
+      return uniqueTemplates(activeTemplates);
+    }
+  };
+
+  /* ------------------------------------------------
+      LOAD ACTIVE TEMPLATES
+  ------------------------------------------------ */
   const fetchDaysTemplates = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/days-template/active`, {
         withCredentials: true,
       });
 
-      // Ensure only active templates appear in dropdown
-      const activeOnly = (res.data?.data || []).filter(
-        (tpl) => tpl.active === true
-      );
-
-      setDaysTemplates(activeOnly);
-      console.log("Active Templates Loaded:", activeOnly);
+      setDaysTemplates(res.data?.data || []);
     } catch (err) {
-      console.error("Failed to load templates:", err);
+      console.error("Failed loading templates:", err);
     }
   };
 
-  /* ---------------------------
-      LOAD EXISTING MONTH TEMPLATE
-  ---------------------------- */
+  /* ------------------------------------------------
+      LOAD MONTH TEMPLATE
+  ------------------------------------------------ */
   const fetchMonthTemplate = async (year, month) => {
     setLoading(true);
 
@@ -113,14 +142,19 @@ export default function WeeksSchedulesEditor() {
 
       if (!doc) {
         setMonthDocId(null);
-        setWeeks(baseWeeks.map((w) => ({ ...w, templateId: "" })));
+
+        const wk = baseWeeks.map((w) => ({ ...w, templateId: "" }));
+        setWeeks(wk);
+
+        const merged = await mergeAssignedTemplates(daysTemplates, wk);
+        setDaysTemplates(merged);
       } else {
         setMonthDocId(doc._id);
 
         const mapped = baseWeeks.map((w) => {
           const block = doc[w.key];
-
           let templateId = "";
+
           if (block?.template) {
             templateId =
               typeof block.template === "string"
@@ -137,14 +171,20 @@ export default function WeeksSchedulesEditor() {
         });
 
         setWeeks(mapped);
+
+        const merged = await mergeAssignedTemplates(daysTemplates, mapped);
+        setDaysTemplates(merged);
       }
     } catch (err) {
-      console.error("Failed to load month template:", err);
-      const baseWeeks = getWeeksForMonth(
-        Number(year),
-        MONTHS.indexOf(month)
-      ).map((w) => ({ ...w, templateId: "" }));
-      setWeeks(baseWeeks);
+      console.error("Month load failed:", err);
+
+      const wk = getWeeksForMonth(Number(year), MONTHS.indexOf(month)).map(
+        (w) => ({ ...w, templateId: "" })
+      );
+      setWeeks(wk);
+
+      const merged = await mergeAssignedTemplates(daysTemplates, wk);
+      setDaysTemplates(merged);
     }
 
     setLoading(false);
@@ -158,24 +198,21 @@ export default function WeeksSchedulesEditor() {
     fetchMonthTemplate(year, month);
   }, [year, month]);
 
-  /* ---------------------------
-      UPDATE SELECTED TEMPLATE
-  ---------------------------- */
+  /* ------------------------------------------------
+      CHANGE TEMPLATE FOR A WEEK
+  ------------------------------------------------ */
   const handleTemplateChange = (weekKey, value) => {
     setWeeks((prev) =>
       prev.map((w) => (w.key === weekKey ? { ...w, templateId: value } : w))
     );
   };
 
-  /* ---------------------------
-      SAVE TO BACKEND
-  ---------------------------- */
+  /* ------------------------------------------------
+      SAVE
+  ------------------------------------------------ */
   const handleSave = async () => {
     const hasAny = weeks.some((w) => w.templateId);
-    if (!hasAny) {
-      alert("Assign at least one template.");
-      return;
-    }
+    if (!hasAny) return alert("Assign at least one template.");
 
     setSaving(true);
 
@@ -220,24 +257,24 @@ export default function WeeksSchedulesEditor() {
 
         <button
           onClick={() => navigate(-1)}
-          className="px-3 py-2 border rounded-lg text-xs dark:border-gray-700"
+          className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
         >
           Close
         </button>
       </div>
 
-      {/* MAIN CARD */}
-      <div className="bg-white dark:bg-[#111118] rounded-xl border shadow-lg max-w-3xl mx-auto">
-        {/* YEAR + MONTH SELECT */}
-        <div className="flex flex-col md:flex-row gap-4 p-4 border-b">
+      {/* MAIN BODY CARD */}
+      <div className="bg-white dark:bg-[#111118] rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg max-w-4xl mx-auto">
+        {/* YEAR + MONTH */}
+        <div className="flex gap-4 p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex-1">
-            <label className="text-xs text-gray-600 dark:text-gray-300">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
               Year
             </label>
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c]"
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             >
               {yearOptions.map((y) => (
                 <option key={y}>{y}</option>
@@ -246,13 +283,13 @@ export default function WeeksSchedulesEditor() {
           </div>
 
           <div className="flex-1">
-            <label className="text-xs text-gray-600 dark:text-gray-300">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
               Month
             </label>
             <select
               value={month}
               onChange={(e) => setMonth(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c]"
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
             >
               {MONTHS.map((m) => (
                 <option key={m}>{m}</option>
@@ -261,66 +298,69 @@ export default function WeeksSchedulesEditor() {
           </div>
         </div>
 
-        {/* WEEKS */}
-        <div className="p-4 space-y-3">
+        {/* WEEKS INLINE ROWS */}
+        <div className="p-6 space-y-4">
           {loading ? (
             <div className="text-center text-xs">Loading...</div>
           ) : (
-            weeks.map((week) => {
-              const isOpen = expandedWeek === week.key;
-              return (
-                <div
-                  key={week.key}
-                  className="border rounded-lg bg-gray-50 dark:bg-[#151519]"
-                >
-                  <button
-                    onClick={() => setExpandedWeek(isOpen ? null : week.key)}
-                    className="w-full flex justify-between px-4 py-3"
-                  >
-                    <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                      <span className="w-7 h-7 flex items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black text-xs">
-                        {week.index}
-                      </span>
-                      <span>
-                        {week.startDate} – {week.endDate}
-                      </span>
-                    </div>
-                    {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-                  </button>
+            weeks.map((week) => (
+              <div
+                key={week.key}
+                className="flex items-center gap-8 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-[#151519]"
+              >
+                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black text-xs">
+                  {week.index}
+                </span>
 
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 border-t dark:border-gray-700">
-                      <label className="text-xs text-gray-600 dark:text-gray-300">
-                        Assign Days Template
-                      </label>
-                      <select
-                        value={week.templateId}
-                        onChange={(e) =>
-                          handleTemplateChange(week.key, e.target.value)
-                        }
-                        className="w-full border rounded-lg px-3 py-2 mt-1 text-sm bg-white dark:bg-[#181920]"
-                      >
-                        <option value="">-- Select Template --</option>
-                        {daysTemplates.map((tpl) => (
-                          <option key={tpl._id} value={tpl._id}>
-                            {tpl.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Start Date
+                  </span>
+                  <span className="text-sm text-gray-900 dark:text-gray-100">
+                    {week.startDate}
+                  </span>
                 </div>
-              );
-            })
+
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    End Date
+                  </span>
+                  <span className="text-sm text-gray-900 dark:text-gray-100">
+                    {week.endDate}
+                  </span>
+                </div>
+
+                <div className="flex-1 pl-20">
+                  <label className="text-xs text-gray-600 dark:text-gray-300">
+                    Assign Days Template
+                  </label>
+                  <select
+                    value={week.templateId}
+                    onChange={(e) =>
+                      handleTemplateChange(week.key, e.target.value)
+                    }
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 mt-1 text-sm bg-white dark:bg-[#181920] text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                  >
+                    <option value="">-- Select Template --</option>
+
+                    {daysTemplates.map((tpl) => (
+                      <option key={tpl._id} value={tpl._id}>
+                        {tpl.label} {tpl.active ? "" : "(Inactive)"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))
           )}
         </div>
 
         {/* SAVE BUTTON */}
-        <div className="p-4 border-t flex justify-end bg-gray-50 dark:bg-[#151519]">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-[#151519] rounded-b-xl">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 bg-black text-white text-xs rounded-lg dark:bg:white dark:text:black"
+            className="px-5 py-2 bg-black text-white text-xs rounded-lg dark:bg-white dark:text-black hover:opacity-80 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>

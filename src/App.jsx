@@ -15,6 +15,7 @@ import EmailTemplate from "./SuperAdmin/EmailTemplate";
 import Settings from "./SuperAdmin/Settings";
 import AdminLayout from "./admin/AdminLayout";
 
+
 // import Plans from "./admin/Plans";
 import AllDetails from "./admin/AllDetails";
 import CreateMembers from "./admin/Components/CreateMembers";
@@ -32,6 +33,7 @@ import EditMember from "./admin/Components/EditMember";
 import AllClassScheduleList from "./admin/AllClassScheduleList";
 import CreateDaysSchedule from "./admin/Components/CreateDaysTemplate";
 import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
+import AdminSettings from "./admin/AdminSettings";
 
 function App() {
   return (
@@ -77,6 +79,7 @@ function App() {
               <Route path="instructors" element={<Instructors />} />
               <Route path="createInstructor" element={<CreateInstructor />} />
               <Route path="editInstructor/:id" element={<EditInstructor />} />
+              <Route path="adminSettings" element={<AdminSettings/>}/>
             </Route>
           </Routes>
         </BrowserRouter>
