@@ -34,6 +34,7 @@ import AllClassScheduleList from "./admin/AllClassScheduleList";
 import CreateDaysSchedule from "./admin/Components/CreateDaysTemplate";
 import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
 import AdminSettings from "./admin/AdminSettings";
+import ScanQR from "./admin/Components/ScanQR";
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="/admin" element={<SuperAdminLogin />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
+              <Route path="scanQR" element={<ScanQR/>} />
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="editClasses/:id" element={<EditClasses />} />

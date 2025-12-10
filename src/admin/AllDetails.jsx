@@ -30,7 +30,7 @@ const AllDetails = () => {
           <DashboardCard
             icon={<HiOutlineQrCode />}
             title="Scan QR Code"
-            route="/scanQR"
+            route="/adminDashboard/scanQR"
           />
         </div>
       </section>
