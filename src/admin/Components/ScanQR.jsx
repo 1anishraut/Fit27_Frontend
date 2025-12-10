@@ -5,6 +5,13 @@ import { BASE_URL } from "../../Utils/Constants";
 import { FiRefreshCw, FiX } from "react-icons/fi";
 import dummyProfile from "../../assets/dummyProfile.png";
 
+import beep from "../../assets/beep.wav";
+import granted from "../../assets/granted.mp3";
+import denied from "../../assets/denied.mp3";
+
+import { FaCheck } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
+
 export default function ScanQR() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -13,6 +20,10 @@ export default function ScanQR() {
   const [qrResult, setQrResult] = useState("");
   const [userData, setUserData] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const beepSound = new Audio(beep);
+  const grantedSound = new Audio(granted);
+  const deniedSound = new Audio(denied);
 
   // -------------------------
   // START SCANNER
@@ -40,6 +51,9 @@ export default function ScanQR() {
         (result) => {
           if (result) {
             const scannedId = result.getText().trim();
+
+            beepSound.play(); // 🔊 Play beep sound when QR detected
+
             stopScanner();
             setQrResult(scannedId);
             fetchUser(scannedId);
@@ -102,8 +116,19 @@ export default function ScanQR() {
   // CLOSE PAGE
   // -------------------------
   const handleClose = () => {
-    stopScanner(); // Stop camera + decoding
-    window.history.back(); // Navigate(-1)
+    stopScanner();
+    window.history.back();
+  };
+
+  // -------------------------
+  // SOUND BUTTON FUNCTIONS
+  // -------------------------
+  const handleGrant = () => {
+    grantedSound.play();
+  };
+
+  const handleDeny = () => {
+    deniedSound.play();
   };
 
   const formatDate = (d) => {
@@ -187,25 +212,55 @@ export default function ScanQR() {
               </div>
 
               <div className="space-y-3">
-                {[
-                  ["Plan Name", userData?.selectedPlan?.planName || "N/A"],
-                  ["Start Date", formatDate(userData.startedAt)],
-                  ["End Date", formatDate(userData.endedAt)],
-                  ["Hold Start", formatDate(userData.holdStartDate)],
-                  ["Hold End", formatDate(userData.holdEndDate)],
-                ].map(([label, value], idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl"
-                  >
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {label}
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {value}
-                    </span>
-                  </div>
-                ))}
+                {/* PLAN NAME */}
+                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Plan Name
+                  </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {userData?.selectedPlan?.planName || "N/A"}
+                  </span>
+                </div>
+
+                {/* START DATE - GREEN */}
+                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Start Date
+                  </span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">
+                    {formatDate(userData.startedAt)}
+                  </span>
+                </div>
+
+                {/* END DATE - RED */}
+                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    End Date
+                  </span>
+                  <span className="font-semibold text-red-600 dark:text-red-400">
+                    {formatDate(userData.endedAt)}
+                  </span>
+                </div>
+
+                {/* HOLD START */}
+                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Hold Start
+                  </span>
+                  <span className="font-semibold text-yellow-700">
+                    {formatDate(userData.holdStartDate)}
+                  </span>
+                </div>
+
+                {/* HOLD END */}
+                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Hold End
+                  </span>
+                  <span className="font-semibold text-yellow-700">
+                    {formatDate(userData.holdEndDate)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -243,8 +298,31 @@ export default function ScanQR() {
 
       {/* RIGHT SIDE SCANNER */}
       <div className="w-[30%] flex flex-col gap-6">
-        <div className="bg-black rounded-3xl overflow-hidden shadow-xl border border-gray-700">
-          <video ref={videoRef} className="w-full" muted autoPlay></video>
+        <div className="relative bg-black  overflow-hidden shadow-xl border border-gray-700 h-[350px]">
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            muted
+            autoPlay
+          ></video>
+
+          {/* GREEN SCANNING LINE */}
+          {!userData && !errorMsg && (
+            <div
+              className="absolute left-0 w-full h-[3px] bg-green-400 shadow-[0_0_10px_2px_#22c55e] animate-scan"
+              style={{
+                animation: "scan 2s linear infinite",
+              }}
+            ></div>
+          )}
+
+          {/* green corner */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400"></div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400"></div>
+          </div>
         </div>
 
         {errorMsg && <p className="text-center text-red-500">{errorMsg}</p>}
@@ -254,7 +332,7 @@ export default function ScanQR() {
           </p>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex justify-evenly gap-4">
           <button
             onClick={resetScan}
             className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow"
@@ -267,6 +345,25 @@ export default function ScanQR() {
             className="flex items-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow"
           >
             <FiX /> Close
+          </button>
+        </div>
+
+        {/* GRANT / DENY BUTTONS — Modern UI */}
+        <div className="flex gap-4 justify-evenly items-center mt-2">
+          {/* DENY */}
+          <button
+            onClick={handleDeny}
+            className="flex items-center gap-2 px-5 py-2 bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 rounded-xl shadow"
+          >
+            <IoClose size={18} /> Denied
+          </button>
+
+          {/* GRANT */}
+          <button
+            onClick={handleGrant}
+            className="flex items-center gap-2 px-5 py-2 bg-green-100 text-green-700 border border-green-300 hover:bg-green-200 rounded-xl shadow"
+          >
+            <FaCheck size={16} /> Granted
           </button>
         </div>
       </div>
