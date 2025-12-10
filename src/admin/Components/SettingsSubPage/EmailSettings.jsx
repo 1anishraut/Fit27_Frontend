@@ -7,6 +7,8 @@ export default function EmailSettings() {
   const [testLoading, setTestLoading] = useState(false);
   const [testEmail, setTestEmail] = useState("");
 
+  const [settingsId, setSettingsId] = useState(null);
+
   const [form, setForm] = useState({
     mailDriver: "",
     mailHost: "",
@@ -19,16 +21,31 @@ export default function EmailSettings() {
   });
 
   /* ================================
-     FETCH SETTINGS ON LOAD
+     FETCH ADMIN EMAIL SETTINGS
   ================================= */
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/email-settings`, {
+        const res = await axios.get(`${BASE_URL}/admin/email-settings/all`, {
           withCredentials: true,
         });
 
-        if (res.data?.data) setForm(res.data.data);
+        // Admin router returns: {success, count, data: []}
+        if (res.data?.data?.length > 0) {
+          const s = res.data.data[0];
+          setSettingsId(s._id);
+
+          setForm({
+            mailDriver: s.mailDriver,
+            mailHost: s.mailHost,
+            mailPort: s.mailPort,
+            mailUsername: s.mailUsername,
+            mailPassword: s.mailPassword,
+            mailEncryption: s.mailEncryption,
+            mailFromAddress: s.mailFromAddress,
+            mailFromName: s.mailFromName,
+          });
+        }
       } catch (err) {
         console.log(err);
         alert("Failed to load email settings");
@@ -39,24 +56,42 @@ export default function EmailSettings() {
   }, []);
 
   /* ================================
-     HANDLE FIELD CHANGE
+     HANDLE FORM FIELD UPDATES
   ================================= */
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   /* ================================
-     SAVE SETTINGS
+     CREATE OR UPDATE SETTINGS
   ================================= */
   const saveChanges = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(`${BASE_URL}/email-settings/save`, form, {
+      let url = "";
+      let method = "";
+
+      if (settingsId) {
+        url = `${BASE_URL}/admin/email-settings/update/${settingsId}`;
+        method = "put";
+      } else {
+        url = `${BASE_URL}/admin/email-settings/create`;
+        method = "post";
+      }
+
+      const res = await axios({
+        url,
+        method,
+        data: form,
         withCredentials: true,
       });
 
       alert(res.data.message || "Settings saved successfully");
+
+      if (res.data?.data?._id) {
+        setSettingsId(res.data.data._id);
+      }
     } catch (err) {
       console.log(err);
       alert(err?.response?.data?.message || "Failed to save settings");
@@ -78,7 +113,7 @@ export default function EmailSettings() {
       setTestLoading(true);
 
       const res = await axios.post(
-        `${BASE_URL}/email-settings/send-test`,
+        `${BASE_URL}/admin/email-settings/send-test`,
         { email: testEmail },
         { withCredentials: true }
       );
@@ -160,7 +195,7 @@ export default function EmailSettings() {
         ))}
       </div>
 
-      {/* Test Mail + Save Buttons */}
+      {/* Test Email + Save Buttons */}
       <div className="flex flex-col md:flex-row gap-3 mt-8 items-center">
         {/* Test Email Input */}
         <input

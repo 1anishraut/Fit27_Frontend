@@ -60,8 +60,8 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
     : null;
 
   // Debugging
-  console.log("Dark Logo:", backendDarkLogo);
-  console.log("Light Logo:", backendLightLogo);
+  // console.log("Dark Logo:", backendDarkLogo);
+  // console.log("Light Logo:", backendLightLogo);
 
   // ----------------------------------------------------------
   // 🔥 FIXED: THEME-BASED DYNAMIC LOGO SWITCHING
@@ -154,7 +154,7 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
 
       {/* MOBILE SIDEBAR */}
       {isMobile && mobileOpen && (
-        <div className="fixed inset-0 z-[90] lg:hidden">
+        <div className="fixed inset-0 z-100 lg:hidden">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}

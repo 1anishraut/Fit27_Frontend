@@ -23,7 +23,6 @@ const MONTHS = [
 // compute exactly 4 weeks
 const getWeeksForMonth = (year, monthIndex) => {
   const first = dayjs().year(year).month(monthIndex).date(1);
-  const last = first.endOf("month");
 
   let weekStart = first;
   if (weekStart.day() !== 1) {
@@ -51,7 +50,7 @@ export default function WeeksSchedulesEditor() {
   const [year, setYear] = useState(currentYear.toString());
   const [month, setMonth] = useState(dayjs().format("MMMM"));
 
-  const [daysTemplates, setDaysTemplates] = useState([]);
+  const [daysTemplates, setDaysTemplates] = useState([]); // ONLY active templates
   const [weeks, setWeeks] = useState([]);
   const [monthDocId, setMonthDocId] = useState(null);
 
@@ -70,50 +69,9 @@ export default function WeeksSchedulesEditor() {
   }, [currentYear]);
 
   /* ------------------------------------------------
-      REMOVE DUPLICATES FROM TEMPLATE LIST
+      LOAD ACTIVE TEMPLATES ONLY
   ------------------------------------------------ */
-  const uniqueTemplates = (templates) => {
-    const map = new Map();
-    templates.forEach((tpl) => {
-      if (!map.has(tpl._id)) map.set(tpl._id, tpl);
-    });
-    return [...map.values()];
-  };
-
-  /* ------------------------------------------------
-      MERGE ACTIVE + ASSIGNED TEMPLATES
-  ------------------------------------------------ */
-  const mergeAssignedTemplates = async (activeTemplates, weekBlocks) => {
-    const assignedIds = weekBlocks
-      .map((w) => w.templateId)
-      .filter((id) => id && id !== "");
-
-    if (assignedIds.length === 0) return uniqueTemplates(activeTemplates);
-
-    try {
-      const results = await Promise.all(
-        assignedIds.map((id) =>
-          axios.get(`${BASE_URL}/days-template/${id}`, {
-            withCredentials: true,
-          })
-        )
-      );
-
-      const assignedTemplates = results
-        .map((r) => r.data?.data)
-        .filter((tpl) => tpl);
-
-      return uniqueTemplates([...activeTemplates, ...assignedTemplates]);
-    } catch (err) {
-      console.error("Failed loading assigned templates:", err);
-      return uniqueTemplates(activeTemplates);
-    }
-  };
-
-  /* ------------------------------------------------
-      LOAD ACTIVE TEMPLATES
-  ------------------------------------------------ */
-  const fetchDaysTemplates = async () => {
+  const fetchActiveTemplates = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/days-template/active`, {
         withCredentials: true,
@@ -121,7 +79,8 @@ export default function WeeksSchedulesEditor() {
 
       setDaysTemplates(res.data?.data || []);
     } catch (err) {
-      console.error("Failed loading templates:", err);
+      console.error("Error loading active templates:", err);
+      setDaysTemplates([]);
     }
   };
 
@@ -141,13 +100,11 @@ export default function WeeksSchedulesEditor() {
       const baseWeeks = getWeeksForMonth(Number(year), MONTHS.indexOf(month));
 
       if (!doc) {
+        // No month template exists
         setMonthDocId(null);
 
         const wk = baseWeeks.map((w) => ({ ...w, templateId: "" }));
         setWeeks(wk);
-
-        const merged = await mergeAssignedTemplates(daysTemplates, wk);
-        setDaysTemplates(merged);
       } else {
         setMonthDocId(doc._id);
 
@@ -171,9 +128,6 @@ export default function WeeksSchedulesEditor() {
         });
 
         setWeeks(mapped);
-
-        const merged = await mergeAssignedTemplates(daysTemplates, mapped);
-        setDaysTemplates(merged);
       }
     } catch (err) {
       console.error("Month load failed:", err);
@@ -182,16 +136,16 @@ export default function WeeksSchedulesEditor() {
         (w) => ({ ...w, templateId: "" })
       );
       setWeeks(wk);
-
-      const merged = await mergeAssignedTemplates(daysTemplates, wk);
-      setDaysTemplates(merged);
     }
 
     setLoading(false);
   };
 
+  /* ------------------------------------------------
+      LOADS
+  ------------------------------------------------ */
   useEffect(() => {
-    fetchDaysTemplates();
+    fetchActiveTemplates();
   }, []);
 
   useEffect(() => {
@@ -199,7 +153,7 @@ export default function WeeksSchedulesEditor() {
   }, [year, month]);
 
   /* ------------------------------------------------
-      CHANGE TEMPLATE FOR A WEEK
+      CHANGE TEMPLATE
   ------------------------------------------------ */
   const handleTemplateChange = (weekKey, value) => {
     setWeeks((prev) =>
@@ -208,7 +162,7 @@ export default function WeeksSchedulesEditor() {
   };
 
   /* ------------------------------------------------
-      SAVE
+      SAVE MONTH TEMPLATE
   ------------------------------------------------ */
   const handleSave = async () => {
     const hasAny = weeks.some((w) => w.templateId);
@@ -217,6 +171,7 @@ export default function WeeksSchedulesEditor() {
     setSaving(true);
 
     const body = { year, month };
+
     weeks.forEach((w) => {
       body[w.key] = {
         template: w.templateId || null,
@@ -257,24 +212,22 @@ export default function WeeksSchedulesEditor() {
 
         <button
           onClick={() => navigate(-1)}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+          className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-xs"
         >
           Close
         </button>
       </div>
 
-      {/* MAIN BODY CARD */}
-      <div className="bg-white dark:bg-[#111118] rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg max-w-4xl mx-auto">
-        {/* YEAR + MONTH */}
-        <div className="flex gap-4 p-6 border-b border-gray-200 dark:border-gray-700">
+      {/* BODY CARD */}
+      <div className="bg-white dark:bg-[#111118] rounded-xl border border-gray-300 dark:border-gray-700 max-w-4xl mx-auto shadow-lg">
+        {/* YEAR + MONTH SELECT */}
+        <div className="flex gap-4 p-6 border-b dark:border-gray-700">
           <div className="flex-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
-              Year
-            </label>
+            <label className="text-xs font-medium">Year</label>
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              className="w-full border rounded-md px-3 py-2 text-sm"
             >
               {yearOptions.map((y) => (
                 <option key={y}>{y}</option>
@@ -283,13 +236,11 @@ export default function WeeksSchedulesEditor() {
           </div>
 
           <div className="flex-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
-              Month
-            </label>
+            <label className="text-xs font-medium">Month</label>
             <select
               value={month}
               onChange={(e) => setMonth(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              className="w-full border rounded-md px-3 py-2 text-sm"
             >
               {MONTHS.map((m) => (
                 <option key={m}>{m}</option>
@@ -298,7 +249,7 @@ export default function WeeksSchedulesEditor() {
           </div>
         </div>
 
-        {/* WEEKS INLINE ROWS */}
+        {/* WEEKS */}
         <div className="p-6 space-y-4">
           {loading ? (
             <div className="text-center text-xs">Loading...</div>
@@ -306,46 +257,36 @@ export default function WeeksSchedulesEditor() {
             weeks.map((week) => (
               <div
                 key={week.key}
-                className="flex items-center gap-8 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-[#151519]"
+                className="flex items-center gap-8 border rounded-lg px-4 py-3 bg-gray-50 dark:bg-[#151519]"
               >
                 <span className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black text-xs">
                   {week.index}
                 </span>
 
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Start Date
-                  </span>
-                  <span className="text-sm text-gray-900 dark:text-gray-100">
-                    {week.startDate}
-                  </span>
+                <div>
+                  <span className="text-xs text-gray-500">Start Date</span>
+                  <div className="text-sm">{week.startDate}</div>
                 </div>
 
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    End Date
-                  </span>
-                  <span className="text-sm text-gray-900 dark:text-gray-100">
-                    {week.endDate}
-                  </span>
+                <div>
+                  <span className="text-xs text-gray-500">End Date</span>
+                  <div className="text-sm">{week.endDate}</div>
                 </div>
 
                 <div className="flex-1 pl-20">
-                  <label className="text-xs text-gray-600 dark:text-gray-300">
-                    Assign Days Template
-                  </label>
+                  <label className="text-xs">Assign Template</label>
                   <select
                     value={week.templateId}
                     onChange={(e) =>
                       handleTemplateChange(week.key, e.target.value)
                     }
-                    className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 mt-1 text-sm bg-white dark:bg-[#181920] text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    className="w-full border rounded-md px-3 py-2 mt-1 text-sm"
                   >
                     <option value="">-- Select Template --</option>
 
                     {daysTemplates.map((tpl) => (
                       <option key={tpl._id} value={tpl._id}>
-                        {tpl.label} {tpl.active ? "" : "(Inactive)"}
+                        {tpl.label}
                       </option>
                     ))}
                   </select>
@@ -356,11 +297,11 @@ export default function WeeksSchedulesEditor() {
         </div>
 
         {/* SAVE BUTTON */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-[#151519] rounded-b-xl">
+        <div className="p-6 border-t flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2 bg-black text-white text-xs rounded-lg dark:bg-white dark:text-black hover:opacity-80 disabled:opacity-50"
+            className="px-5 py-2 bg-black text-white rounded-lg text-xs disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>

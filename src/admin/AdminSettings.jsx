@@ -14,6 +14,7 @@ import {
 
 import BrandSettings from "../admin/Components/SettingsSubPage/BrandSettings";
 import EmailSettings from "../admin/Components/SettingsSubPage/EmailSettings";
+import LocationSettings from "../admin/Components/SettingsSubPage/LocationSettings";
 import PaymentSettings from "../admin/Components/SettingsSubPage/PaymentSettings";
 import PusherSettings from "../admin/Components/SettingsSubPage/PusherSettings";
 import ReCaptchaSettings from "../admin/Components/SettingsSubPage/ReCaptchaSettings";
@@ -31,12 +32,18 @@ const sections = [
     icon: FiSettings,
     component: <BrandSettings />,
   },
-  // {
-  //   id: "email-settings",
-  //   label: "Email",
-  //   icon: FiMail,
-  //   component: <EmailSettings />,
-  // },
+  {
+    id: "email-settings",
+    label: "Email",
+    icon: FiMail,
+    component: <EmailSettings />,
+  },
+  {
+    id: "location-settings",
+    label: "Location",
+    icon: FiMail,
+    component: <LocationSettings />,
+  },
   // {
   //   id: "payment-settings",
   //   label: "Payment ",
