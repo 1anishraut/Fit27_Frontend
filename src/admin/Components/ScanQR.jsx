@@ -20,14 +20,13 @@ export default function ScanQR() {
   const [qrResult, setQrResult] = useState("");
   const [userData, setUserData] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const beepSound = new Audio(beep);
   const grantedSound = new Audio(granted);
   const deniedSound = new Audio(denied);
 
-  // -------------------------
   // START SCANNER
-  // -------------------------
   const startScanner = async () => {
     try {
       const codeReader = new BrowserQRCodeReader();
@@ -52,9 +51,9 @@ export default function ScanQR() {
           if (result) {
             const scannedId = result.getText().trim();
 
-            beepSound.play(); // 🔊 Play beep sound when QR detected
-
+            beepSound.play(); // QR detected sound
             stopScanner();
+
             setQrResult(scannedId);
             fetchUser(scannedId);
           }
@@ -66,9 +65,7 @@ export default function ScanQR() {
     }
   };
 
-  // -------------------------
   // STOP SCANNER
-  // -------------------------
   const stopScanner = () => {
     try {
       codeReaderRef.current?.stopContinuousDecode();
@@ -85,9 +82,7 @@ export default function ScanQR() {
     return () => stopScanner();
   }, []);
 
-  // -------------------------
-  // FETCH USER DATA
-  // -------------------------
+  // FETCH USER
   const fetchUser = async (id) => {
     try {
       const res = await axios.get(`${BASE_URL}/user/byUserId/${id}`, {
@@ -101,34 +96,50 @@ export default function ScanQR() {
     }
   };
 
-  // -------------------------
-  // RESET SCAN
-  // -------------------------
+  // RESET
   const resetScan = () => {
     setQrResult("");
     setUserData(null);
     setErrorMsg("");
+    setSuccessMsg("");
     stopScanner();
     setTimeout(() => startScanner(), 300);
   };
 
-  // -------------------------
   // CLOSE PAGE
-  // -------------------------
   const handleClose = () => {
     stopScanner();
     window.history.back();
   };
 
-  // -------------------------
-  // SOUND BUTTON FUNCTIONS
-  // -------------------------
-  const handleGrant = () => {
-    grantedSound.play();
-  };
-
+  // ----------- DENIED ----------
   const handleDeny = () => {
     deniedSound.play();
+    setSuccessMsg(""); // clear success msg
+  };
+
+  // ----------- GRANT ----------
+  const handleGrant = async () => {
+    if (!userData?._id) return;
+
+    try {
+      grantedSound.play();
+
+      const res = await axios.post(
+        `${BASE_URL}/access/grant`,
+        {
+          memberId: userData._id,
+          note: "Access Granted from QR scanner",
+        },
+        { withCredentials: true }
+      );
+
+      setSuccessMsg("Access Granted & Log Saved ✔");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save access log");
+    }
   };
 
   const formatDate = (d) => {
@@ -144,7 +155,13 @@ export default function ScanQR() {
     <div className="p-8 min-h-screen flex gap-8 bg-[#F2F0EF] dark:bg-[#0b0b0c] transition-all">
       {/* LEFT SIDE */}
       <div className="w-[70%] flex flex-col gap-8">
-        {/* PROFILE CARD */}
+        {successMsg && (
+          <div className="px-4 py-2 bg-green-600 text-white rounded-xl shadow text-center">
+            {successMsg}
+          </div>
+        )}
+
+        {/* PROFILE */}
         <div className="bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl flex gap-8 items-center border border-gray-200 dark:border-gray-800">
           <div className="h-64 w-56 rounded-2xl overflow-hidden shadow-lg">
             <img
@@ -190,59 +207,55 @@ export default function ScanQR() {
           </div>
         </div>
 
-        {/* PLAN + BILLING ROW */}
+        {/* PLAN + BILLING */}
         {userData && (
           <div className="flex gap-8 w-full">
             {/* PLAN CARD */}
-            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800">
+            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border">
               <div className="flex justify-between items-center mb-5">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                   Membership Plan
                 </h3>
-
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold shadow ${
-                    userData.subscription === "active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold shadow 
+                    ${
+                      userData.subscription === "active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
                 >
                   {userData.subscription.toUpperCase()}
                 </span>
               </div>
 
               <div className="space-y-3">
-                {/* PLAN NAME */}
                 <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">
                     Plan Name
                   </span>
-                  <span className="font-semibold text-gray-900 dark:text-white">
+                  <span className="font-semibold">
                     {userData?.selectedPlan?.planName || "N/A"}
                   </span>
                 </div>
 
-                {/* START DATE - GREEN */}
                 <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">
                     Start Date
                   </span>
-                  <span className="font-semibold text-green-600 dark:text-green-400">
+                  <span className="font-semibold text-green-600">
                     {formatDate(userData.startedAt)}
                   </span>
                 </div>
 
-                {/* END DATE - RED */}
                 <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">
                     End Date
                   </span>
-                  <span className="font-semibold text-red-600 dark:text-red-400">
+                  <span className="font-semibold text-red-600">
                     {formatDate(userData.endedAt)}
                   </span>
                 </div>
 
-                {/* HOLD START */}
                 <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">
                     Hold Start
@@ -252,7 +265,6 @@ export default function ScanQR() {
                   </span>
                 </div>
 
-                {/* HOLD END */}
                 <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
                   <span className="text-gray-600 dark:text-gray-400">
                     Hold End
@@ -265,7 +277,7 @@ export default function ScanQR() {
             </div>
 
             {/* BILLING CARD */}
-            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800">
+            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
                 Billing Address
               </h3>
@@ -298,7 +310,7 @@ export default function ScanQR() {
 
       {/* RIGHT SIDE SCANNER */}
       <div className="w-[30%] flex flex-col gap-6">
-        <div className="relative bg-black  overflow-hidden shadow-xl border border-gray-700 h-[350px]">
+        <div className="relative bg-black overflow-hidden shadow-xl border border-gray-700 h-[350px]">
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
@@ -306,17 +318,14 @@ export default function ScanQR() {
             autoPlay
           ></video>
 
-          {/* GREEN SCANNING LINE */}
           {!userData && !errorMsg && (
             <div
               className="absolute left-0 w-full h-[3px] bg-green-400 shadow-[0_0_10px_2px_#22c55e] animate-scan"
-              style={{
-                animation: "scan 2s linear infinite",
-              }}
+              style={{ animation: "scan 2s linear infinite" }}
             ></div>
           )}
 
-          {/* green corner */}
+          {/* Green frame */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
@@ -348,9 +357,8 @@ export default function ScanQR() {
           </button>
         </div>
 
-        {/* GRANT / DENY BUTTONS — Modern UI */}
+        {/* GRANT / DENY */}
         <div className="flex gap-4 justify-evenly items-center mt-2">
-          {/* DENY */}
           <button
             onClick={handleDeny}
             className="flex items-center gap-2 px-5 py-2 bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 rounded-xl shadow"
@@ -358,7 +366,6 @@ export default function ScanQR() {
             <IoClose size={18} /> Denied
           </button>
 
-          {/* GRANT */}
           <button
             onClick={handleGrant}
             className="flex items-center gap-2 px-5 py-2 bg-green-100 text-green-700 border border-green-300 hover:bg-green-200 rounded-xl shadow"
