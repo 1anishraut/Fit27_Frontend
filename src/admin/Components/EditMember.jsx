@@ -141,7 +141,7 @@ export default function EditMember() {
 
       if (res.status === 200) {
         alert("Member updated successfully");
-        navigate("/adminDashboard/allDetails");
+        navigate(-1);
       }
     } catch (err) {
       console.error(err?.response?.data || err);

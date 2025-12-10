@@ -93,7 +93,7 @@ const CreateMembers = () => {
 
       if (res.status === 201) {
         alert("Member created successfully");
-        navigate("/adminDashboard/allDetails");
+        navigate("/adminDashboard/members");
       }
     } catch (error) {
       alert(error.response?.data?.message || "Something went wrong");

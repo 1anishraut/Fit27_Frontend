@@ -3,13 +3,21 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FiEdit2, FiTrash2, FiAlertTriangle } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiAlertTriangle,
+  FiChevronDown,
+} from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 export default function Members() {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
+
+  // ⭐ NEW: Toggle email/contact per user
+  const [toggleMap, setToggleMap] = useState({});
 
   const menuRef = useRef(null);
 
@@ -28,15 +36,13 @@ export default function Members() {
   }, []);
 
   /* -----------------------------
-      FETCH MEMBERS (ACCORDING TO BACKEND)
+      FETCH MEMBERS
   ----------------------------- */
   const fetchMembers = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/allUsers`, {
         withCredentials: true,
       });
-      // console.log(res.data.data);
-      
 
       const list = Array.isArray(res.data?.data) ? res.data.data : [];
       setMembers(list);
@@ -114,7 +120,6 @@ export default function Members() {
           <thead className="bg-[#121214] text-gray-200">
             <tr>
               <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Contact</th>
               <th className="p-3 text-left">Plan</th>
               <th className="p-3 text-left">Member Status</th>
@@ -146,30 +151,49 @@ export default function Members() {
                     ? "bg-blue-100 text-blue-800"
                     : user.status === "lost"
                     ? "bg-gray-300 text-gray-800"
-                    : "bg-red-100 text-red-800"; 
+                    : "bg-red-100 text-red-800";
 
                 return (
                   <tr
                     key={user._id}
                     className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
                   >
+                    {/* ⭐ USER ID + NAME */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
-                      {user.firstName} {user.surName}
+                      <div className="font-semibold">
+                        {user.customUserId} — {user.firstName} {user.surName}
+                      </div>
                     </td>
 
+                    {/* ⭐ CONTACT COLUMN WITH TOGGLE */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
-                      {user.emailId}
+                      <div className="flex items-center gap-2 text-sm">
+                        {/* Contact (default) OR Email (when toggled) */}
+                        <span>
+                          {toggleMap[user._id] ? user.emailId : user.contact}
+                        </span>
+
+                        {/* Toggle Arrow */}
+                        <FiChevronDown
+                          onClick={() =>
+                            setToggleMap((prev) => ({
+                              ...prev,
+                              [user._id]: !prev[user._id],
+                            }))
+                          }
+                          className={`cursor-pointer transition-transform ${
+                            toggleMap[user._id] ? "rotate-180" : "rotate-0"
+                          }`}
+                        />
+                      </div>
                     </td>
 
-                    <td className="p-3 text-gray-900 dark:text-gray-200">
-                      {user.contact}
-                    </td>
-
+                    {/* PLAN */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
                       {getPlanName(user)}
                     </td>
 
-                    {/* ⭐ NEW MEMBER STATUS BADGE */}
+                    {/* MEMBER STATUS */}
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 text-xs rounded-full font-medium ${statusColor}`}
@@ -179,7 +203,7 @@ export default function Members() {
                       </span>
                     </td>
 
-                    {/* Subscription Badge */}
+                    {/* SUBSCRIPTION */}
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 text-xs rounded-full font-medium ${
@@ -192,6 +216,7 @@ export default function Members() {
                       </span>
                     </td>
 
+                    {/* Expiring Date */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
                       {formatDate(user.endedAt)}
                     </td>
@@ -239,7 +264,7 @@ export default function Members() {
               <tr className="bg-[#121214] text-gray-200 font-semibold">
                 <td className="p-3">Total Members</td>
                 <td className="p-3">{members.length}</td>
-                <td colSpan={6}></td>
+                <td colSpan={5}></td>
               </tr>
             )}
           </tbody>
