@@ -2,64 +2,78 @@ import React, { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader } from "@zxing/browser";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/Constants";
+import { FiRefreshCw, FiX } from "react-icons/fi";
+import dummyProfile from "../../assets/dummyProfile.png";
 
 export default function ScanQR() {
   const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const codeReaderRef = useRef(null);
+
   const [qrResult, setQrResult] = useState("");
   const [userData, setUserData] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    const codeReader = new BrowserQRCodeReader();
-    let allowScan = true;
+  // -------------------------
+  // START SCANNER
+  // -------------------------
+  const startScanner = async () => {
+    try {
+      const codeReader = new BrowserQRCodeReader();
+      codeReaderRef.current = codeReader;
 
-    async function startScanner() {
-      try {
-        const devices = await BrowserQRCodeReader.listVideoInputDevices();
+      const devices = await BrowserQRCodeReader.listVideoInputDevices();
+      const backCam =
+        devices.find((d) => d.label?.toLowerCase().includes("back")) ||
+        devices[0];
 
-        // Prefer back camera
-        const backCam =
-          devices.find((d) => d.label?.toLowerCase().includes("back")) ||
-          devices[0];
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: backCam.deviceId },
+      });
 
-        codeReader.decodeFromVideoDevice(
-          backCam.deviceId,
-          videoRef.current,
-          (result, err) => {
-            if (result && allowScan) {
-              allowScan = false;
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
 
-              // IMPORTANT → trim the result (fix "user not found")
-              const scannedId = result.getText().trim();
-
-              setQrResult(scannedId);
-              fetchUser(scannedId);
-
-              // Allow scanning again after 2 seconds
-              setTimeout(() => {
-                allowScan = true;
-              }, 2000);
-            }
+      codeReader.decodeFromVideoDevice(
+        backCam.deviceId,
+        videoRef.current,
+        (result) => {
+          if (result) {
+            const scannedId = result.getText().trim();
+            stopScanner();
+            setQrResult(scannedId);
+            fetchUser(scannedId);
           }
-        );
-      } catch (err) {
-        console.error(err);
-        setErrorMsg("Camera access denied or unavailable.");
-      }
+        }
+      );
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Camera access denied or unavailable.");
     }
+  };
 
+  // -------------------------
+  // STOP SCANNER
+  // -------------------------
+  const stopScanner = () => {
+    try {
+      codeReaderRef.current?.stopContinuousDecode();
+    } catch {}
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  };
+
+  useEffect(() => {
     startScanner();
-
-    // Proper cleanup for @zxing/browser
-    return () => {
-      try {
-        codeReader.stopContinuousDecode();
-      } catch (e) {
-        console.warn("Cleanup ignore:", e.message);
-      }
-    };
+    return () => stopScanner();
   }, []);
 
+  // -------------------------
+  // FETCH USER DATA
+  // -------------------------
   const fetchUser = async (id) => {
     try {
       const res = await axios.get(`${BASE_URL}/user/byUserId/${id}`, {
@@ -67,93 +81,193 @@ export default function ScanQR() {
       });
       setUserData(res.data.data);
       setErrorMsg("");
-    } catch (err) {
+    } catch {
       setUserData(null);
       setErrorMsg("No member found!");
     }
   };
 
-  return (
-    <div className="flex justify-between gap-8  bg-[#F2F0EF] dark:bg-[#09090B]">
-      {/* Left SIde || USER DETAILS */}
-      <div className="border w-[70%]">
+  // -------------------------
+  // RESET SCAN
+  // -------------------------
+  const resetScan = () => {
+    setQrResult("");
+    setUserData(null);
+    setErrorMsg("");
+    stopScanner();
+    setTimeout(() => startScanner(), 300);
+  };
 
-        <div className="flex gap-4 items-center">
-          <div className="border h-[250px] w-auto">
-            <img src="" alt="Profile image " className="h-full w-full" />
+  // -------------------------
+  // CLOSE PAGE
+  // -------------------------
+  const handleClose = () => {
+    stopScanner(); // Stop camera + decoding
+    window.history.back(); // Navigate(-1)
+  };
+
+  const formatDate = (d) => {
+    if (!d) return "N/A";
+    return new Date(d).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div className="p-8 min-h-screen flex gap-8 bg-[#F2F0EF] dark:bg-[#0b0b0c] transition-all">
+      {/* LEFT SIDE */}
+      <div className="w-[70%] flex flex-col gap-8">
+        {/* PROFILE CARD */}
+        <div className="bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl flex gap-8 items-center border border-gray-200 dark:border-gray-800">
+          <div className="h-64 w-56 rounded-2xl overflow-hidden shadow-lg">
+            <img
+              src={
+                userData?.avatar
+                  ? `${BASE_URL}${userData.avatar}`
+                  : dummyProfile
+              }
+              className="h-full w-full object-cover"
+            />
           </div>
-          <div>
-            <h1>Name</h1>
-            <h1>Email</h1>
-            <h1>Contact</h1>
+
+          <div className="space-y-3">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {userData
+                ? `${userData.firstName} ${userData.surName}`
+                : "Scan to view"}
+            </h2>
+
+            <p className="text-gray-700 dark:text-gray-300">
+              {userData?.emailId}
+            </p>
+            <p className="text-gray-700 dark:text-gray-300">
+              {userData?.contact}
+            </p>
+
+            {userData && (
+              <span
+                className={`px-4 py-1 rounded-full text-sm font-bold shadow 
+                ${
+                  userData.status === "active"
+                    ? "bg-green-100 text-green-700"
+                    : userData.status === "hold"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : userData.status === "lost"
+                    ? "bg-gray-300 text-gray-800"
+                    : "bg-red-200 text-red-700"
+                }`}
+              >
+                {userData.status.toUpperCase()}
+              </span>
+            )}
           </div>
         </div>
-        <div>
-          <h1>Plan Details</h1>
-          <div>
-            <h1>Plan Name</h1>
-            <h1>Start Date</h1>
-            <h1>End Date</h1>
-            <h1>Hold Start Date</h1>
-            <h1>Hold End Date</h1>
+
+        {/* PLAN + BILLING ROW */}
+        {userData && (
+          <div className="flex gap-8 w-full">
+            {/* PLAN CARD */}
+            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800">
+              <div className="flex justify-between items-center mb-5">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Membership Plan
+                </h3>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold shadow ${
+                    userData.subscription === "active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {userData.subscription.toUpperCase()}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  ["Plan Name", userData?.selectedPlan?.planName || "N/A"],
+                  ["Start Date", formatDate(userData.startedAt)],
+                  ["End Date", formatDate(userData.endedAt)],
+                  ["Hold Start", formatDate(userData.holdStartDate)],
+                  ["Hold End", formatDate(userData.holdEndDate)],
+                ].map(([label, value], idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl"
+                  >
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {label}
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* BILLING CARD */}
+            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
+                Billing Address
+              </h3>
+
+              <div className="space-y-3">
+                {[
+                  ["Address", userData.fullAddress || "N/A"],
+                  ["Country", userData.country || "N/A"],
+                  ["State", userData.state || "N/A"],
+                  ["City", userData.city || "N/A"],
+                  ["Zip Code", userData.zip || "N/A"],
+                ].map(([label, value], idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl"
+                  >
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {label}
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <h1>Billing Address</h1>
-          <div>
-            <h1>Full Address</h1>
-            <h1>Country</h1>
-            <h1>State</h1>
-            <h1>City</h1>
-            <h1>Zip Code</h1>
-          </div>
-        </div>
-        
+        )}
       </div>
 
-      {/* Right SIde  */}
-      <div className="border  w-[30%] flex flex-col items-center p-4 gap-4">
-        {/* 1 Camera */}
-        <div>
-          <div className="max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-xl border">
-            <video
-              ref={videoRef}
-              className="w-full h-auto"
-              muted
-              autoPlay
-            ></video>
-          </div>
-
-          {qrResult && (
-            <p className="text-center mt-4 text-gray-700 dark:text-gray-300">
-              Scanned ID: <strong>{qrResult}</strong>
-            </p>
-          )}
-
-          {errorMsg && (
-            <p className="mt-4 text-center text-red-500">{errorMsg}</p>
-          )}
-        </div>
-        {/* 2 Message */}
-        <div className="border w-full rounded-xl">
-          <h1>Message</h1>
-          <p>This is a dummy message for checking </p>
+      {/* RIGHT SIDE SCANNER */}
+      <div className="w-[30%] flex flex-col gap-6">
+        <div className="bg-black rounded-3xl overflow-hidden shadow-xl border border-gray-700">
+          <video ref={videoRef} className="w-full" muted autoPlay></video>
         </div>
 
-        {/* 3 Status  */}
-        <div className="border w-full rounded-xl">
-          <h1>Status</h1>
-          <p>
-            Subscription: <span></span>
+        {errorMsg && <p className="text-center text-red-500">{errorMsg}</p>}
+        {qrResult && (
+          <p className="text-center text-gray-700 dark:text-gray-300">
+            Scanned: {qrResult}
           </p>
-          <p>
-            User: <span></span>
-          </p>
-        </div>
-        {/* 4 Buttons  */}
-        <div className="border w-full rounded-xl">
-          <button>Reset</button>
-          <button>Close</button>
+        )}
+
+        <div className="flex gap-4">
+          <button
+            onClick={resetScan}
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow"
+          >
+            <FiRefreshCw /> Reset
+          </button>
+
+          <button
+            onClick={handleClose}
+            className="flex items-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow"
+          >
+            <FiX /> Close
+          </button>
         </div>
       </div>
     </div>
