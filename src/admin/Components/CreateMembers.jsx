@@ -7,8 +7,11 @@ const CreateMembers = () => {
   const navigate = useNavigate();
 
   const [plans, setPlans] = useState([]);
+  const [classesList, setClassesList] = useState([]);
+
   const [avatar, setAvatar] = useState(null);
 
+  // ⭐ FIXED: unified selectedClasses (not "classes")
   const [formData, setFormData] = useState({
     firstName: "",
     surName: "",
@@ -22,15 +25,20 @@ const CreateMembers = () => {
     city: "",
     zip: "",
     selectedPlan: "",
+    selectedClasses: [], // ⭐ correct place
     bookingFrom: "Manual Booking",
     specialNote: "",
   });
+
+  // ⭐ FIXED missing states
+  const [showClassModal, setShowClassModal] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const inputClass =
     "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
 
   /* --------------------------------------------------
-        FETCH ONLY ACTIVE PLANS  
+        FETCH PLANS 
   -------------------------------------------------- */
   const fetchPlans = async () => {
     try {
@@ -38,21 +46,52 @@ const CreateMembers = () => {
         withCredentials: true,
       });
 
-      const planList = res?.data?.data || [];
-      setPlans(planList);
+      setPlans(res?.data?.data || []);
     } catch (error) {
       console.log("Error fetching plans:", error);
     }
   };
 
+  /* --------------------------------------------------
+        FETCH ACTIVE CLASSES 
+  -------------------------------------------------- */
+  const fetchClasses = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/classes/active`, {
+        withCredentials: true,
+      });
+
+      setClassesList(res?.data?.data || []);
+    } catch (error) {
+      console.log("Error fetching classes:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPlans();
+    fetchClasses();
   }, []);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleAvatarChange = (e) => setAvatar(e.target.files[0]);
+
+  /* --------------------------------------------------
+        HANDLE CLASS SELECTION
+  -------------------------------------------------- */
+  const handleClassCheckbox = (classId) => {
+    setFormData((prev) => {
+      const exists = prev.selectedClasses.includes(classId);
+
+      return {
+        ...prev,
+        selectedClasses: exists
+          ? prev.selectedClasses.filter((id) => id !== classId)
+          : [...prev.selectedClasses, classId],
+      };
+    });
+  };
 
   const handleCancel = () => navigate("/adminDashboard/allDetails");
 
@@ -67,7 +106,6 @@ const CreateMembers = () => {
       return;
     }
 
-    // AUTO SET SUBSCRIPTION BASED ON PLAN
     const subscriptionValue =
       formData.selectedPlan && formData.selectedPlan !== ""
         ? "active"
@@ -76,12 +114,18 @@ const CreateMembers = () => {
     try {
       const payload = new FormData();
 
-      // Append normal fields
-      Object.entries(formData).forEach(([key, value]) =>
-        payload.append(key, value)
+      // Append simple fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== "selectedClasses") {
+          payload.append(key, value);
+        }
+      });
+
+      // ⭐ Correctly append selected classes array
+      formData.selectedClasses.forEach((classId) =>
+        payload.append("selectedClasses[]", classId)
       );
 
-      // Append subscription
       payload.append("subscription", subscriptionValue);
 
       if (avatar) payload.append("avatar", avatar);
@@ -100,11 +144,14 @@ const CreateMembers = () => {
     }
   };
 
-  /* -------------------------------------------------- */
+  /* --------------------------------------------------
+        UI
+  -------------------------------------------------- */
 
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       <form onSubmit={handleSubmit}>
+        {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Create new member
@@ -124,6 +171,7 @@ const CreateMembers = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                {/* Names */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     First Name
@@ -156,11 +204,12 @@ const CreateMembers = () => {
                     name="emailId"
                     value={formData.emailId}
                     onChange={handleChange}
-                    className={inputClass}
                     type="email"
+                    className={inputClass}
                   />
                 </div>
 
+                {/* Contact */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Phone Number
@@ -173,7 +222,7 @@ const CreateMembers = () => {
                   />
                 </div>
 
-                {/* ACTIVE PLANS */}
+                {/* PLAN SELECT */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Plan
@@ -193,6 +242,7 @@ const CreateMembers = () => {
                   </select>
                 </div>
 
+                {/* BOOKING FROM */}
                 <div>
                   <label className="text-sm font-medium dark:text-white">
                     Booking From
@@ -207,6 +257,86 @@ const CreateMembers = () => {
                     <option value="Online SignUp">Online SignUp</option>
                   </select>
                 </div>
+              </div>
+
+              {/* ASSIGN CLASSES */}
+              <div className="border rounded-xl p-6 mt-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-semibold dark:text-white">
+                    Assign Classes
+                  </h2>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowClassModal(!showClassModal)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md"
+                  >
+                    {showClassModal ? "Hide Classes" : "Browse Classes"}
+                  </button>
+                </div>
+
+                {/* Selected List */}
+                {formData.selectedClasses.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-100 dark:bg-[#1A1A1C] rounded-md">
+                    <h3 className="font-semibold text-gray-700 dark:text-gray-300">
+                      Selected:
+                    </h3>
+
+                    <ul className="mt-2 space-y-1 text-gray-800 dark:text-gray-200">
+                      {formData.selectedClasses.map((id) => {
+                        const cls = classesList.find((c) => c._id === id);
+                        return (
+                          <li key={id}>
+                            • {cls?.name} — ₹{cls?.cost}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Class Browser */}
+                {showClassModal && (
+                  <div className="mt-4">
+                    <input
+                      type="text"
+                      placeholder="Search classes..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className={`${inputClass} mb-3`}
+                    />
+
+                    <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                      {classesList
+                        .filter((cls) =>
+                          cls.name
+                            ?.toLowerCase()
+                            .includes(searchText.toLowerCase())
+                        )
+                        .map((cls) => (
+                          <label
+                            key={cls._id}
+                            className="flex items-center gap-3 p-3 rounded-lg border 
+                               border-gray-200 dark:border-gray-700 
+                               bg-gray-50 dark:bg-[#14151c] 
+                               hover:bg-gray-200 dark:hover:bg-[#1A1A1A] cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.selectedClasses.includes(
+                                cls._id
+                              )}
+                              onChange={() => handleClassCheckbox(cls._id)}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-gray-900 dark:text-gray-200 text-sm">
+                              {cls.name} — ₹{cls.cost}
+                            </span>
+                          </label>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -293,8 +423,8 @@ const CreateMembers = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={inputClass}
                     type="password"
+                    className={inputClass}
                   />
                 </div>
 
@@ -306,8 +436,8 @@ const CreateMembers = () => {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={inputClass}
                     type="password"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -319,7 +449,7 @@ const CreateMembers = () => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SIDE */}
           <div className="space-y-6">
             {/* SPECIAL NOTE */}
             <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
@@ -361,6 +491,7 @@ const CreateMembers = () => {
           </div>
         </div>
 
+        {/* FOOTER BUTTONS */}
         <div className="flex justify-end gap-3 mt-8">
           <button
             type="button"
