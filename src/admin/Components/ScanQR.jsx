@@ -191,13 +191,10 @@ export default function ScanQR() {
     }
   };
 
-
-
   return (
     <div className="min-h-screen flex gap-8 bg-[#F2F0EF] dark:bg-[#0b0b0c] transition-all">
       {/* LEFT SIDE */}
       <div className="w-[70%] flex flex-col gap-8">
-
         {/* PROFILE CARD */}
         <div className="bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex gap-8">
           <div className="h-64 w-56 overflow-hidden rounded-2xl shadow-lg">
@@ -245,7 +242,23 @@ export default function ScanQR() {
           <div className="flex gap-8">
             {/* PLAN */}
             <div className="w-1/2 bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700">
-              <h3 className="text-xl font-bold mb-4">Membership Plan</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold ">Membership Plan</h3>
+                <span
+                  className={`
+    px-4 py-1 rounded-full text-sm font-semibold
+    ${
+      userData?.subscription === "active"
+        ? "bg-green-100 text-green-700"
+        : userData?.subscription === "inactive"
+        ? "bg-red-200 text-red-700"
+        : "bg-yellow-100 text-yellow-700"
+    }
+  `}
+                >
+                  {userData?.subscription?.toUpperCase()}
+                </span>
+              </div>
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between bg-gray-100 dark:bg-[#181920] p-2 rounded-xl">
