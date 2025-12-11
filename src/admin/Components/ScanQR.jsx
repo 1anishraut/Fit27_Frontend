@@ -1,3 +1,5 @@
+// UPDATED WITH SAME THEME AS CreateDaysTemplates
+
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader } from "@zxing/browser";
 import axios from "axios";
@@ -51,7 +53,7 @@ export default function ScanQR() {
           if (result) {
             const scannedId = result.getText().trim();
 
-            beepSound.play(); // QR detected sound
+            beepSound.play();
             stopScanner();
 
             setQrResult(scannedId);
@@ -65,7 +67,6 @@ export default function ScanQR() {
     }
   };
 
-  // STOP SCANNER
   const stopScanner = () => {
     try {
       codeReaderRef.current?.stopContinuousDecode();
@@ -82,7 +83,6 @@ export default function ScanQR() {
     return () => stopScanner();
   }, []);
 
-  // FETCH USER
   const fetchUser = async (id) => {
     try {
       const res = await axios.get(`${BASE_URL}/user/byUserId/${id}`, {
@@ -96,7 +96,6 @@ export default function ScanQR() {
     }
   };
 
-  // RESET
   const resetScan = () => {
     setQrResult("");
     setUserData(null);
@@ -106,26 +105,23 @@ export default function ScanQR() {
     setTimeout(() => startScanner(), 300);
   };
 
-  // CLOSE PAGE
   const handleClose = () => {
     stopScanner();
     window.history.back();
   };
 
-  // ----------- DENIED ----------
   const handleDeny = () => {
     deniedSound.play();
-    setSuccessMsg(""); // clear success msg
+    setSuccessMsg("");
   };
 
-  // ----------- GRANT ----------
   const handleGrant = async () => {
     if (!userData?._id) return;
 
     try {
       grantedSound.play();
 
-      const res = await axios.post(
+      await axios.post(
         `${BASE_URL}/access/grant`,
         {
           memberId: userData._id,
@@ -152,17 +148,10 @@ export default function ScanQR() {
   };
 
   return (
-    <div className="p-8 min-h-screen flex gap-8 bg-[#F2F0EF] dark:bg-[#0b0b0c] transition-all">
-      {/* LEFT SIDE */}
+    <div className=" min-h-screen flex gap-8 bg-[#F2F0EF] dark:bg-[#0b0b0c] transition-all">
       <div className="w-[70%] flex flex-col gap-8">
-        {successMsg && (
-          <div className="px-4 py-2 bg-green-600 text-white rounded-xl shadow text-center">
-            {successMsg}
-          </div>
-        )}
-
-        {/* PROFILE */}
-        <div className="bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl flex gap-8 items-center border border-gray-200 dark:border-gray-800">
+        {/* PROFILE CARD */}
+        <div className="bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl flex gap-8 items-center border border-gray-200 dark:border-gray-700">
           <div className="h-64 w-56 rounded-2xl overflow-hidden shadow-lg">
             <img
               src={
@@ -175,7 +164,7 @@ export default function ScanQR() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               {userData
                 ? `${userData.firstName} ${userData.surName}`
                 : "Scan to view"}
@@ -211,9 +200,9 @@ export default function ScanQR() {
         {userData && (
           <div className="flex gap-8 w-full">
             {/* PLAN CARD */}
-            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border">
+            <div className="w-1/2 bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center mb-5">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   Membership Plan
                 </h3>
                 <span
@@ -229,76 +218,63 @@ export default function ScanQR() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Plan Name
-                  </span>
-                  <span className="font-semibold">
-                    {userData?.selectedPlan?.planName || "N/A"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Start Date
-                  </span>
-                  <span className="font-semibold text-green-600">
-                    {formatDate(userData.startedAt)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    End Date
-                  </span>
-                  <span className="font-semibold text-red-600">
-                    {formatDate(userData.endedAt)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Hold Start
-                  </span>
-                  <span className="font-semibold text-yellow-700">
-                    {formatDate(userData.holdStartDate)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Hold End
-                  </span>
-                  <span className="font-semibold text-yellow-700">
-                    {formatDate(userData.holdEndDate)}
-                  </span>
-                </div>
+                {[
+                  ["Plan Name", userData?.selectedPlan?.planName || "N/A"],
+                  [
+                    "Start Date",
+                    formatDate(userData.startedAt),
+                    "text-green-600",
+                  ],
+                  ["End Date", formatDate(userData.endedAt), "text-red-600"],
+                  [
+                    "Hold Start",
+                    formatDate(userData.holdStartDate),
+                    "text-yellow-700",
+                  ],
+                  [
+                    "Hold End",
+                    formatDate(userData.holdEndDate),
+                    "text-yellow-700",
+                  ],
+                ].map(([label, val, color], i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between items-center bg-gray-100 dark:bg-[#181920] px-4 py-2 rounded-xl"
+                  >
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {label}
+                    </span>
+                    <span className={`font-semibold ${color || ""}`}>
+                      {val}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* BILLING CARD */}
-            <div className="w-1/2 bg-white dark:bg-[#121214] p-6 rounded-3xl shadow-xl border">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
+            <div className="w-1/2 bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-5">
                 Billing Address
               </h3>
 
               <div className="space-y-3">
                 {[
-                  ["Address", userData.fullAddress || "N/A"],
-                  ["Country", userData.country || "N/A"],
-                  ["State", userData.state || "N/A"],
-                  ["City", userData.city || "N/A"],
-                  ["Zip Code", userData.zip || "N/A"],
-                ].map(([label, value], idx) => (
+                  ["Address", userData.fullAddress],
+                  ["Country", userData.country],
+                  ["State", userData.state],
+                  ["City", userData.city],
+                  ["Zip Code", userData.zip],
+                ].map(([label, val], idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center bg-gray-100 dark:bg-[#1b1b1f] px-4 py-2 rounded-xl"
+                    className="flex justify-between items-center bg-gray-100 dark:bg-[#181920] px-4 py-2 rounded-xl"
                   >
                     <span className="text-gray-600 dark:text-gray-400">
                       {label}
                     </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {value}
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                      {val || "N/A"}
                     </span>
                   </div>
                 ))}
@@ -310,7 +286,7 @@ export default function ScanQR() {
 
       {/* RIGHT SIDE SCANNER */}
       <div className="w-[30%] flex flex-col gap-6">
-        <div className="relative bg-black overflow-hidden shadow-xl border border-gray-700 h-[350px]">
+        <div className="relative bg-black overflow-hidden shadow-xl border border-gray-700 h-[350px] rounded-xl">
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
@@ -325,7 +301,7 @@ export default function ScanQR() {
             ></div>
           )}
 
-          {/* Green frame */}
+          {/* frame */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
@@ -344,14 +320,22 @@ export default function ScanQR() {
         <div className="flex justify-evenly gap-4">
           <button
             onClick={resetScan}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow"
+            className="
+              flex items-center gap-2 px-5 py-2 
+              bg-blue-600 hover:bg-blue-700 
+              text-white rounded-xl shadow
+            "
           >
             <FiRefreshCw /> Reset
           </button>
 
           <button
             onClick={handleClose}
-            className="flex items-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow"
+            className="
+              flex items-center gap-2 px-5 py-2 
+              bg-red-600 hover:bg-red-700 
+              text-white rounded-xl shadow
+            "
           >
             <FiX /> Close
           </button>
@@ -361,17 +345,36 @@ export default function ScanQR() {
         <div className="flex gap-4 justify-evenly items-center mt-2">
           <button
             onClick={handleDeny}
-            className="flex items-center gap-2 px-5 py-2 bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 rounded-xl shadow"
+            className="
+              flex items-center gap-2 px-5 py-2 
+              bg-red-100 text-red-700 
+              border border-red-300 
+              hover:bg-red-200 
+              rounded-xl shadow
+            "
           >
             <IoClose size={18} /> Denied
           </button>
 
           <button
             onClick={handleGrant}
-            className="flex items-center gap-2 px-5 py-2 bg-green-100 text-green-700 border border-green-300 hover:bg-green-200 rounded-xl shadow"
+            className="
+              flex items-center gap-2 px-5 py-2 
+              bg-green-100 text-green-700 
+              border border-green-300 
+              hover:bg-green-200 
+              rounded-xl shadow
+            "
           >
             <FaCheck size={16} /> Granted
           </button>
+        </div>
+        <div>
+          {successMsg && (
+            <div className="px-4 py-2 bg-green-600 text-white rounded-xl shadow text-center">
+              {successMsg}
+            </div>
+          )}
         </div>
       </div>
     </div>
