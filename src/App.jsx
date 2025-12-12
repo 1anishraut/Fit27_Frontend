@@ -36,6 +36,7 @@ import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
 import AdminSettings from "./admin/AdminSettings";
 import ScanQR from "./admin/Components/ScanQR";
 import UserLayout from "./client/UserLayout";
+import UserHome from "./client/UserHome";
 
 function App() {
   return (
@@ -57,7 +58,7 @@ function App() {
             <Route path="/user" element={<SuperAdminLogin />}>
               
               <Route path="/userDashboard" element={<UserLayout />} />
-              {/* <Route path="/booking" element={<Booking />} /> */}
+              <Route path="userhome" element={<UserHome />} />
               {/* <Route path="/stays" element={<Stays />} /> */}
               {/* <Route path="/adventures" element={<Adventures />} /> */}
             </Route>

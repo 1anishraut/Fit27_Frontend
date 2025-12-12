@@ -75,7 +75,7 @@ const SuperAdminLogin = () => {
       localStorage.setItem("role", "user");
       dispatch(addUser(user));
 
-      return navigate("/userDashboard");
+      return navigate("/userDashboard/userhome");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password");
     }
