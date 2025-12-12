@@ -51,8 +51,8 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
   // ⭐ Choose correct logo based on theme
   const finalLogo =
     theme === "dark"
-      ? backendLightLogo || logoLightFallback
-      : backendDarkLogo || logoDarkFallback;
+      ? backendLightLogo || ""
+      : backendDarkLogo ||"";
 
   return (
     <>

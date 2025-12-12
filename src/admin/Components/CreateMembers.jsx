@@ -26,8 +26,9 @@ const CreateMembers = () => {
     specialNote: "",
   });
 
+  // UPDATED THEME INPUT STYLE
   const inputClass =
-    "w-full border p-2 rounded-md bg-white dark:bg-[#0D0D0F] text-gray-900 dark:text-white border-gray-300 dark:border-gray-700";
+    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
   /* --------------------------------------------------
         FETCH ONLY ACTIVE PLANS  
@@ -67,7 +68,6 @@ const CreateMembers = () => {
       return;
     }
 
-    // AUTO SET SUBSCRIPTION BASED ON PLAN
     const subscriptionValue =
       formData.selectedPlan && formData.selectedPlan !== ""
         ? "active"
@@ -76,12 +76,10 @@ const CreateMembers = () => {
     try {
       const payload = new FormData();
 
-      // Append normal fields
       Object.entries(formData).forEach(([key, value]) =>
         payload.append(key, value)
       );
 
-      // Append subscription
       payload.append("subscription", subscriptionValue);
 
       if (avatar) payload.append("avatar", avatar);
@@ -100,11 +98,10 @@ const CreateMembers = () => {
     }
   };
 
-  /* -------------------------------------------------- */
-
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       <form onSubmit={handleSubmit}>
+        {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Create new member
@@ -118,14 +115,14 @@ const CreateMembers = () => {
           {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-6">
             {/* GENERAL INFO */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">
+            <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 General information
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     First Name
                   </label>
                   <input
@@ -137,7 +134,7 @@ const CreateMembers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     Surname
                   </label>
                   <input
@@ -149,7 +146,7 @@ const CreateMembers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     Email Address
                   </label>
                   <input
@@ -162,7 +159,7 @@ const CreateMembers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     Phone Number
                   </label>
                   <input
@@ -175,7 +172,7 @@ const CreateMembers = () => {
 
                 {/* ACTIVE PLANS */}
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     Plan
                   </label>
                   <select
@@ -194,7 +191,7 @@ const CreateMembers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium text-gray-800 dark:text-gray-300">
                     Booking From
                   </label>
                   <select
@@ -211,14 +208,14 @@ const CreateMembers = () => {
             </div>
 
             {/* BILLING */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">
+            <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Billing address
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     Address Line
                   </label>
                   <input
@@ -229,7 +226,7 @@ const CreateMembers = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     Zip
                   </label>
                   <input
@@ -243,7 +240,7 @@ const CreateMembers = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     Country
                   </label>
                   <input
@@ -254,7 +251,7 @@ const CreateMembers = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     State
                   </label>
                   <input
@@ -265,7 +262,7 @@ const CreateMembers = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     City
                   </label>
                   <input
@@ -279,14 +276,14 @@ const CreateMembers = () => {
             </div>
 
             {/* SECURITY */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">
+            <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Security
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     Password
                   </label>
                   <input
@@ -299,7 +296,7 @@ const CreateMembers = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium dark:text-white">
+                  <label className="text-sm font-medium dark:text-gray-300">
                     Confirm Password
                   </label>
                   <input
@@ -319,11 +316,11 @@ const CreateMembers = () => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SIDE */}
           <div className="space-y-6">
             {/* SPECIAL NOTE */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">
+            <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Special Note
               </h2>
               <textarea
@@ -335,8 +332,10 @@ const CreateMembers = () => {
             </div>
 
             {/* AVATAR */}
-            <div className="border rounded-xl p-6 bg-white dark:bg-[#0D0D0F] shadow-xl border-gray-300 dark:border-gray-700">
-              <h2 className="text-lg font-semibold dark:text-white">Avatar</h2>
+            <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Avatar
+              </h2>
 
               <input
                 type="file"
@@ -361,17 +360,19 @@ const CreateMembers = () => {
           </div>
         </div>
 
+        {/* FOOTER BUTTONS */}
         <div className="flex justify-end gap-3 mt-8">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-5 py-2 border border-gray-300 dark:border-gray-700 rounded-md"
+            className="px-5 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-gray-800 dark:text-gray-200"
           >
             Cancel
           </button>
+
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Save
           </button>

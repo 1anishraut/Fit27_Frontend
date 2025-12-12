@@ -1,8 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
+
 import { addAdmin } from "../Utils/adminSlice";
 import { addSuperAdmin } from "../Utils/superAdminSlice";
+import { addUser } from "../Utils/userSlice"; 
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 
@@ -18,45 +20,64 @@ const SuperAdminLogin = () => {
     e.preventDefault();
     setError("");
 
+    /* ------------------------------------------------------------------
+       1️⃣ TRY SUPER ADMIN LOGIN
+    ------------------------------------------------------------------ */
     try {
-      /* ---------------------
-         1) TRY SUPER ADMIN LOGIN
-      --------------------- */
-      const superAdminRes = await axios.post(
+      const res = await axios.post(
         `${BASE_URL}/superAdmin/login`,
         { emailId, password },
         { withCredentials: true }
       );
 
-      const user = superAdminRes.data.data;
+      const user = res.data.data;
 
       localStorage.setItem("role", "superAdmin");
       dispatch(addSuperAdmin(user));
 
       return navigate("/superAdminDashboard/home");
-    } catch (err1) {
-      // If super admin login fails → continue to admin login
+    } catch (err) {
+      // continue
     }
 
+    /* ------------------------------------------------------------------
+       2️⃣ TRY ADMIN LOGIN
+    ------------------------------------------------------------------ */
     try {
-      /* ---------------------
-         2) TRY ADMIN LOGIN
-      --------------------- */
-      const adminRes = await axios.post(
+      const res = await axios.post(
         `${BASE_URL}/admin/login`,
         { emailId, password },
         { withCredentials: true }
       );
 
-      const user = adminRes.data.data;
+      const admin = res.data.data;
 
       localStorage.setItem("role", "admin");
-      dispatch(addAdmin(user));
+      dispatch(addAdmin(admin));
 
       return navigate("/adminDashboard/allDetails");
-    } catch (err2) {
-      // If both fail → show error
-      setError(err2.response?.data?.message || "Invalid email or password");
+    } catch (err) {
+      // continue
+    }
+
+    /* ------------------------------------------------------------------
+       3️⃣ TRY USER LOGIN
+    ------------------------------------------------------------------ */
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/user/login`,
+        { emailId, password },
+        { withCredentials: true }
+      );
+
+      const user = res.data.data;
+
+      localStorage.setItem("role", "user");
+      dispatch(addUser(user));
+
+      return navigate("/userDashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid email or password");
     }
   };
 

@@ -6,6 +6,8 @@ import DashboardStats from "./Components/Dashboard/DashboardStates";
 import MemberChart from "./Components/Dashboard/MemberChart";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
+import CalendarView from "../CalendarView";
+import CalendarFull from "../CalendarFull";
 
 const AllDetails = () => {
   // MAIN STATES
@@ -33,7 +35,7 @@ const AllDetails = () => {
         withCredentials: true,
       });
       setTodayVisits(todayRes.data.totalTodayVisits || 0);
-      console.log(todayRes.data);
+      // console.log(todayRes.data);
       
 
       // Total visits
@@ -41,7 +43,7 @@ const AllDetails = () => {
         withCredentials: true,
       });
       setTotalVisits(totalRes.data.totalMemberVisits || 0);
-      console.log(totalRes.data);
+      // console.log(totalRes.data);
 
       // Members list
       const membersRes = await axios.get(`${BASE_URL}/allUsers`, {
@@ -137,6 +139,10 @@ const AllDetails = () => {
           name="Revenue"
           color="#3851b5"
         />
+      </section>
+      <section>
+        <CalendarFull/>
+        {/* <CalendarView/> */}
       </section>
     </>
   );

@@ -16,28 +16,22 @@ export default function Members() {
   const [members, setMembers] = useState([]);
   const [menuOpenId, setMenuOpenId] = useState(null);
 
-  // ⭐ NEW: Toggle email/contact per user
   const [toggleMap, setToggleMap] = useState({});
 
   const menuRef = useRef(null);
 
-  /* -----------------------------
-        CLOSE DROPDOWN WHEN CLICK OUTSIDE
-  ----------------------------- */
+  /* CLOSE DROPDOWN WHEN CLICK OUTSIDE */
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpenId(null);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* -----------------------------
-      FETCH MEMBERS
-  ----------------------------- */
+  /* FETCH MEMBERS */
   const fetchMembers = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/allUsers`, {
@@ -56,9 +50,7 @@ export default function Members() {
     fetchMembers();
   }, []);
 
-  /* -----------------------------
-      DELETE MEMBER
-  ----------------------------- */
+  /* DELETE MEMBER */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this member?")) return;
 
@@ -74,9 +66,7 @@ export default function Members() {
     }
   };
 
-  /* -----------------------------
-      HELPERS
-  ----------------------------- */
+  /* HELPERS */
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
 
@@ -92,7 +82,6 @@ export default function Members() {
 
   const getPlanName = (user) => {
     if (!user.selectedPlan) return "N/A";
-
     return typeof user.selectedPlan === "object"
       ? user.selectedPlan.planName
       : user.selectedPlan;
@@ -115,17 +104,24 @@ export default function Members() {
       </div>
 
       {/* TABLE */}
-      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-xl border border-gray-400 dark:border-gray-700">
+      <div className="w-full bg-white dark:bg-[#0D0D0F] rounded-xl p-4 shadow-xl border border-gray-300 dark:border-gray-700">
         <table className="w-full border-collapse">
-          <thead className="bg-[#121214] text-gray-200">
+          {/* ⭐ UPDATED LIGHT-MODE TABLE HEADER */}
+          <thead className="bg-gray-100 dark:bg-[#121214] text-gray-800 dark:text-gray-200 border-b border-gray-300 dark:border-gray-700">
             <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Contact</th>
-              <th className="p-3 text-left">Plan</th>
-              <th className="p-3 text-left">Member Status</th>
-              <th className="p-3 text-left">Subscription</th>
-              <th className="p-3 text-left">Expiring On</th>
-              <th className="p-3 text-right">Actions</th>
+              <th className="p-3 text-left text-sm font-semibold">Name</th>
+              <th className="p-3 text-left text-sm font-semibold">Contact</th>
+              <th className="p-3 text-left text-sm font-semibold">Plan</th>
+              <th className="p-3 text-left text-sm font-semibold">
+                Member Status
+              </th>
+              <th className="p-3 text-left text-sm font-semibold">
+                Subscription
+              </th>
+              <th className="p-3 text-left text-sm font-semibold">
+                Expiring On
+              </th>
+              <th className="p-3 text-right text-sm font-semibold">Actions</th>
             </tr>
           </thead>
 
@@ -133,7 +129,7 @@ export default function Members() {
             {members.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-16 text-center">
-                  <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-col items-center text-gray-600 dark:text-gray-400">
                     <FiAlertTriangle className="text-4xl mb-2" />
                     No members found
                   </div>
@@ -141,7 +137,6 @@ export default function Members() {
               </tr>
             ) : (
               members.map((user) => {
-                // ⭐ STATUS BADGE COLOR LOGIC
                 const statusColor =
                   user.status === "active"
                     ? "bg-green-100 text-green-800"
@@ -156,24 +151,21 @@ export default function Members() {
                 return (
                   <tr
                     key={user._id}
-                    className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+                    className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0D0D0F] hover:bg-gray-50 dark:hover:bg-[#1A1A1C] transition"
                   >
-                    {/* ⭐ USER ID + NAME */}
+                    {/* NAME */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
                       <div className="font-semibold">
                         {user.customUserId} — {user.firstName} {user.surName}
                       </div>
                     </td>
 
-                    {/* ⭐ CONTACT COLUMN WITH TOGGLE */}
+                    {/* CONTACT TOGGLE */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
                       <div className="flex items-center gap-2 text-sm">
-                        {/* Contact (default) OR Email (when toggled) */}
                         <span>
                           {toggleMap[user._id] ? user.emailId : user.contact}
                         </span>
-
-                        {/* Toggle Arrow */}
                         <FiChevronDown
                           onClick={() =>
                             setToggleMap((prev) => ({
@@ -182,7 +174,7 @@ export default function Members() {
                             }))
                           }
                           className={`cursor-pointer transition-transform ${
-                            toggleMap[user._id] ? "rotate-180" : "rotate-0"
+                            toggleMap[user._id] ? "rotate-180" : ""
                           }`}
                         />
                       </div>
@@ -216,13 +208,13 @@ export default function Members() {
                       </span>
                     </td>
 
-                    {/* Expiring Date */}
+                    {/* EXPIRY */}
                     <td className="p-3 text-gray-900 dark:text-gray-200">
                       {formatDate(user.endedAt)}
                     </td>
 
-                    {/* ACTIONS */}
-                    <td className="p-3 relative text-right">
+                    {/* ACTION MENU */}
+                    <td className="p-3 text-right relative">
                       <BsThreeDotsVertical
                         className="text-xl cursor-pointer text-gray-600 dark:text-gray-300"
                         onClick={() =>
@@ -260,8 +252,9 @@ export default function Members() {
               })
             )}
 
+            {/* FOOTER TOTAL ROW */}
             {members.length > 0 && (
-              <tr className="bg-[#121214] text-gray-200 font-semibold">
+              <tr className="bg-gray-100 dark:bg-[#121214] text-gray-800 dark:text-gray-200 font-semibold">
                 <td className="p-3">Total Members</td>
                 <td className="p-3">{members.length}</td>
                 <td colSpan={5}></td>

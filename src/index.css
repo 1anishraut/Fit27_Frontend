@@ -34,3 +34,8 @@ button {
   50% { top: 100%; }
   100% { top: 0%; }
 }
+import "@fullcalendar/core/main.css";
+import "@fullcalendar/daygrid/main.css";
+import "@fullcalendar/timegrid/main.css";
+import "@fullcalendar/list/main.css";
+

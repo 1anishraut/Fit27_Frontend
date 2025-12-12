@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import superAdminReducer from "./superAdminSlice"
-
+import userReducer from "./userSlice"
 import adminReducer from "./adminSlice";
 import adminPlanReducer from "./adminPlansSlice"
 
@@ -26,7 +26,8 @@ const rootReducer = combineReducers({
   plans: plansReducer,
   classes: classesRedducer,
   brand: brandReducer,
-  adminBrand: adminBrandReducer
+  adminBrand: adminBrandReducer,
+  user: userReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

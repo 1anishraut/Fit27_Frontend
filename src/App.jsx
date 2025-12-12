@@ -35,6 +35,7 @@ import CreateDaysSchedule from "./admin/Components/CreateDaysTemplate";
 import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
 import AdminSettings from "./admin/AdminSettings";
 import ScanQR from "./admin/Components/ScanQR";
+import UserLayout from "./client/UserLayout";
 
 function App() {
   return (
@@ -42,7 +43,7 @@ function App() {
       <PersistGate loading={null} persistor={persistor}>
         <BrowserRouter basename="/">
           <Routes>
-            {/* -------- Admin Routes -------- */}
+            {/* -------- Super Admin Routes -------- */}
             <Route path="/superadmin" element={<SuperAdminLogin />} />
             <Route path="/superadminDashboard" element={<SuperAdminLayout />}>
               <Route path="home" element={<Home />} />
@@ -53,25 +54,34 @@ function App() {
               <Route path="settings" element={<Settings />} />
             </Route>
             {/* -------- Client Routes -------- */}
-            <Route path="/" element={""}></Route>
-            {/* 
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/booking" element={<Booking />} />
-              <Route path="/stays" element={<Stays />} />
-              <Route path="/adventures" element={<Adventures />} />
-            </Route> */}
+            <Route path="/user" element={<SuperAdminLogin />}>
+              
+              <Route path="/userDashboard" element={<UserLayout />} />
+              {/* <Route path="/booking" element={<Booking />} /> */}
+              {/* <Route path="/stays" element={<Stays />} /> */}
+              {/* <Route path="/adventures" element={<Adventures />} /> */}
+            </Route>
 
             {/* -------- Admin Routes -------- */}
             <Route path="/admin" element={<SuperAdminLogin />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
-              <Route path="scanQR" element={<ScanQR/>} />
+              <Route path="scanQR" element={<ScanQR />} />
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="editClasses/:id" element={<EditClasses />} />
-              <Route path="allClassScheduleList" element={<AllClassScheduleList />} />
-              <Route path="createDaysSchedule" element={<CreateDaysSchedule />} />
-              <Route path="createWeeklySchedule" element={<CreateWeeklySchedule/>}/>
+              <Route
+                path="allClassScheduleList"
+                element={<AllClassScheduleList />}
+              />
+              <Route
+                path="createDaysSchedule"
+                element={<CreateDaysSchedule />}
+              />
+              <Route
+                path="createWeeklySchedule"
+                element={<CreateWeeklySchedule />}
+              />
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />
@@ -81,7 +91,7 @@ function App() {
               <Route path="instructors" element={<Instructors />} />
               <Route path="createInstructor" element={<CreateInstructor />} />
               <Route path="editInstructor/:id" element={<EditInstructor />} />
-              <Route path="adminSettings" element={<AdminSettings/>}/>
+              <Route path="adminSettings" element={<AdminSettings />} />
             </Route>
           </Routes>
         </BrowserRouter>
