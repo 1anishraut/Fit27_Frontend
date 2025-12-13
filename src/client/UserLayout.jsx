@@ -5,44 +5,68 @@ import { BASE_URL } from "../Utils/Constants";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import Sidebar from "./SideBar/Sidebar";
-// import Header from "./Header/Header";
+import Header from "./Header/Header";
+import Sidebar from "./SideBar/Sidebar";
 
 const UserLayout = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
 
+  const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
-  // VALIDATE USER SESSION
+  /* =====================================================
+     VALIDATE USER SESSION
+  ===================================================== */
   useEffect(() => {
+    let isMounted = true;
+
     const verifyUser = async () => {
       try {
         const res = await axios.get(`${BASE_URL}/user/me`, {
           withCredentials: true,
         });
 
-        // If unauthorized → go to user login
-        if (!res.data?.user) return navigate("/user");
+        if (!isMounted) return;
+
+        /* 🔧 FIX #3 — STRICT SUCCESS CHECK */
+        if (res.data?.success !== true) {
+          navigate("/user", { replace: true });
+          return;
+        }
+
+        console.log(res.data.user);
 
         setLoading(false);
       } catch (err) {
-        navigate("/user"); // redirect to user login
+        if (!isMounted) return;
+        navigate("/user", { replace: true });
       }
     };
 
     verifyUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
-  // THEME HANDLING
+  /* =====================================================
+     THEME HANDLING
+  ===================================================== */
   useEffect(() => {
-    if (theme === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
 
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  /* =====================================================
+     LOADING STATE
+  ===================================================== */
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center text-xl">
@@ -51,27 +75,31 @@ const UserLayout = () => {
     );
   }
 
+  /* =====================================================
+     LAYOUT
+  ===================================================== */
   return (
     <div className="relative h-screen w-full overflow-hidden bg-[#F2F0EF] dark:bg-[#09090B]">
       <ToastContainer position="top-center" autoClose={3000} />
 
-      {/* <Sidebar
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        theme={theme}
-        setTheme={setTheme}
-      /> */}
-
       <div
-        className={`flex flex-col h-full transition-all duration-300 
-            ${collapsed ? "lg:ml-20" : "lg:ml-64"}`}
+        className={`flex flex-col h-full transition-all duration-300 ${
+          collapsed ? "lg:ml-20" : "lg:ml-64"
+        }`}
       >
-        {/* <Header
+        {/* SIDEBAR */}
+        <Sidebar
           collapsed={collapsed}
           setCollapsed={setCollapsed}
           theme={theme}
           setTheme={setTheme}
-        /> */}
+        />
+        <Header
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          theme={theme}
+          setTheme={setTheme}
+        />
 
         <div className="flex-1 mt-16 overflow-y-auto p-6 dark:bg-[#09090B]">
           <Outlet context={{ theme, setTheme }} />

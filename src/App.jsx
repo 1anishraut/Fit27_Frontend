@@ -36,7 +36,9 @@ import CreateWeeklySchedule from "./admin/Components/CreateWeeklySchedule";
 import AdminSettings from "./admin/AdminSettings";
 import ScanQR from "./admin/Components/ScanQR";
 import UserLayout from "./client/UserLayout";
-import UserHome from "./client/UserHome";
+import UserDashboard from "./client/UserAllDetails";
+
+
 
 function App() {
   return (
@@ -55,12 +57,14 @@ function App() {
               <Route path="settings" element={<Settings />} />
             </Route>
             {/* -------- Client Routes -------- */}
-            <Route path="/user" element={<SuperAdminLogin />}>
-              
-              <Route path="/userDashboard" element={<UserLayout />} />
-              <Route path="userhome" element={<UserHome />} />
-              {/* <Route path="/stays" element={<Stays />} /> */}
-              {/* <Route path="/adventures" element={<Adventures />} /> */}
+            <Route path="/user" element={<SuperAdminLogin />} />
+            <Route path="/userDashboard" element={<UserLayout />}>
+              <Route path="userAllDetails" element={<UserDashboard />} />
+              {/* <Route path="fitnessHubs" element={<FitnessHubs />} /> */}
+              {/* <Route path="plans" element={<Plans />} /> */}
+              {/* <Route path="coupon" element={<Coupon />} /> */}
+              {/* <Route path="emailTemplate" element={<EmailTemplate />} /> */}
+              {/* <Route path="settings" element={<Settings />} /> */}
             </Route>
 
             {/* -------- Admin Routes -------- */}

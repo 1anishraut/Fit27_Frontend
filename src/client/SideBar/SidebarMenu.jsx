@@ -22,65 +22,41 @@ const MENU = [
     id: "dashboard",
     title: "Dashboard",
     icon: <MdDashboard />,
-    path: "/adminDashboard/allDetails",
+    path: "/userDashboard/userAllDetails",
   },
 
   { id: "enquiries", title: "Enquiries", icon: <FiMessageSquare />, path: "/" },
 
-  { id: "tasks", title: "Tasks", icon: <FiCheckSquare />, path: "/" },
-
-  {
-    id: "members",
-    title: "Members",
-    icon: <FiUsers />,
-    children: [
-      { title: "Members", path: "/adminDashboard/members" },
-      { title: "Enquiry", path: "/adminDashboard/members/enquiry" },
-    ],
-  },
-
-  {
-    id: "adminPlans",
-    title: "Plans",
-    icon: <FiBox />,
-    path: "/adminDashboard/adminPlans",
-  },
-
-  {
-    id: "instructors",
-    title: "Instructors",
-    icon: <FiUserCheck />,
-    path: "/adminDashboard/instructors",
-  },
-
   {
     id: "classes",
     title: "Classes",
-    icon: <FiBookOpen />,
-    path: "/adminDashboard/classes",
-  },
-
-  {
-    id: "class schedule",
-    title: "Class Schedule",
-    icon: <FiBookOpen />,
+    icon: <FiUsers />,
     children: [
-      { title: "All Schedules", path: "/adminDashboard/allClassScheduleList" },
-      { title: "Days Schedules", path: "/adminDashboard/createDaysSchedule" },
-      {
-        title: "Weeks Schedules",
-        path: "/adminDashboard/createWeeklySchedule",
-      },
+      { title: "Booked Classes", path: "" },
+      { title: "Book new class", path: "" },
     ],
   },
 
-  { id: "orders", title: "Orders", icon: <FiShoppingCart />, path: "/" },
+  {
+    id: "guestpass",
+    title: "Guest Pass",
+    icon: <FiBox />,
+    path: "",
+  },
 
-  { id: "products", title: "Products", icon: <FiBox />, path: "/" },
+  {
+    id: "checkinhistry",
+    title: "Check-In History",
+    icon: <FiUserCheck />,
+    path: "",
+  },
 
-  { id: "reports", title: "Reports", icon: <FiBarChart2 />, path: "/" },
-
-  { id: "feedbacks", title: "Feedbacks", icon: <FiMessageCircle />, path: "/" },
+  {
+    id: "billing",
+    title: "Billing",
+    icon: <FiBookOpen />,
+    path: "",
+  },
 ];
 
 // New bottom menu section

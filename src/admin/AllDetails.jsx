@@ -112,7 +112,7 @@ const AllDetails = () => {
         </div>
       </section>
 
-      {/* 🟦 STATS CARDS */}
+      {/* STATS CARDS */}
       <section>
         <DashboardStats
           newMembers={newMembers}

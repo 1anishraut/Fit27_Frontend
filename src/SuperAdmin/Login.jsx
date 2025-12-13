@@ -63,6 +63,7 @@ const SuperAdminLogin = () => {
     /* ------------------------------------------------------------------
        3️⃣ TRY USER LOGIN
     ------------------------------------------------------------------ */
+    
     try {
       const res = await axios.post(
         `${BASE_URL}/user/login`,
@@ -75,7 +76,7 @@ const SuperAdminLogin = () => {
       localStorage.setItem("role", "user");
       dispatch(addUser(user));
 
-      return navigate("/userDashboard/userhome");
+      return navigate("/userDashboard/userAllDetails");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password");
     }
