@@ -35,7 +35,7 @@ const UserLayout = () => {
           return;
         }
 
-        console.log(res.data.user);
+        // console.log(res.data.user);
 
         setLoading(false);
       } catch (err) {

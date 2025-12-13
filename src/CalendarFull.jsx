@@ -92,7 +92,7 @@ const CalendarFull = () => {
         params: { year, month: monthName },
         withCredentials: true,
       });
-      console.log(res.data.data);
+      // console.log(res.data.data);
       
 
       const mt = res?.data?.data;

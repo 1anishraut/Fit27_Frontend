@@ -60,8 +60,8 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
     : null;
 
   // Debugging
-  console.log("Dark Logo:", backendDarkLogo);
-  console.log("Light Logo:", backendLightLogo);
+  // console.log("Dark Logo:", backendDarkLogo);
+  // console.log("Light Logo:", backendLightLogo);
 
   // ----------------------------------------------------------
   // 🔥 FIXED: THEME-BASED DYNAMIC LOGO SWITCHING
@@ -71,7 +71,7 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
       ? backendLightLogo || ""
       : backendDarkLogo || "logoDarkFallback";
 
-      console.log(user.firstName);
+      // console.log(user.firstName);
       
 
   return (
