@@ -37,7 +37,7 @@ export default function UserMenu({ onClose }) {
       dispatch(removeSuperAdmin());
 
       // Navigate to login screen
-      navigate("/superAdmin");
+      navigate("/login");
 
       onClose();
     } catch (error) {

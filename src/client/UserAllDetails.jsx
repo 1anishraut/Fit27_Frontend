@@ -22,7 +22,7 @@ const UserAllDetails = () => {
           <DashboardCard
             icon={<HiOutlineIdentification size={22} />}
             title="Member Card"
-            route="/user/member-card"
+            route="/userDashboard/myCard"
           />
 
           {/* RAISE A QUERY */}

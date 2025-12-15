@@ -41,7 +41,7 @@ export default function UserMenu({ onClose }) {
 
       // Clear redux state
       dispatch(removeAdmin());
-      navigate("/admin");
+      navigate("/login");
 
       onClose();
     } catch (error) {

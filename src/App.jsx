@@ -37,6 +37,7 @@ import AdminSettings from "./admin/AdminSettings";
 import ScanQR from "./admin/Components/ScanQR";
 import UserLayout from "./client/UserLayout";
 import UserDashboard from "./client/UserAllDetails";
+import MemberCard from "./client/Components/Dashboard/MemberCard";
 
 
 
@@ -47,7 +48,7 @@ function App() {
         <BrowserRouter basename="/">
           <Routes>
             {/* -------- Super Admin Routes -------- */}
-            <Route path="/superadmin" element={<SuperAdminLogin />} />
+            <Route path="/login" element={<SuperAdminLogin />} />
             <Route path="/superadminDashboard" element={<SuperAdminLayout />}>
               <Route path="home" element={<Home />} />
               <Route path="fitnessHubs" element={<FitnessHubs />} />
@@ -57,9 +58,10 @@ function App() {
               <Route path="settings" element={<Settings />} />
             </Route>
             {/* -------- Client Routes -------- */}
-            <Route path="/user" element={<SuperAdminLogin />} />
+            <Route path="/login" element={<SuperAdminLogin />} />
             <Route path="/userDashboard" element={<UserLayout />}>
               <Route path="userAllDetails" element={<UserDashboard />} />
+              <Route path="myCard" element={<MemberCard/>}/>
               {/* <Route path="fitnessHubs" element={<FitnessHubs />} /> */}
               {/* <Route path="plans" element={<Plans />} /> */}
               {/* <Route path="coupon" element={<Coupon />} /> */}
@@ -68,7 +70,7 @@ function App() {
             </Route>
 
             {/* -------- Admin Routes -------- */}
-            <Route path="/admin" element={<SuperAdminLogin />} />
+            <Route path="/login" element={<SuperAdminLogin />} />
             <Route path="/adminDashboard" element={<AdminLayout />}>
               <Route path="allDetails" element={<AllDetails />} />
               <Route path="scanQR" element={<ScanQR />} />

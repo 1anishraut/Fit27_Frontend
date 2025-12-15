@@ -41,7 +41,7 @@ export default function UserMenu({ onClose }) {
 
       // Clear redux state
       dispatch(removeUser());
-      navigate("/user");
+      navigate("/login");
 
       onClose();
     } catch (error) {
