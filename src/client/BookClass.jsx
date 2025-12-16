@@ -211,6 +211,19 @@ const BookClass = () => {
 
   return (
     <div className="space-y-6 pb-10">
+      <style>
+        {`
+          .dark .fc .fc-col-header-cell {
+            background: #111218 !important;
+          }
+
+          .dark .fc .fc-col-header-cell-cushion {
+            color: #ffffff !important;
+            font-weight: 600;
+            opacity: 1 !important;
+          }
+        `}
+      </style>
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Class Schedule
@@ -239,7 +252,7 @@ const BookClass = () => {
                   <div className="flex flex-col items-end">
                     <span>{info.dayNumberText}</span>
                     {count > 0 && (
-                      <span className="mt-1 px-2 py-[2px] text-xs rounded bg-black text-white dark:bg-white dark:text-black">
+                      <span className="mt-1 px-2  text-xs rounded bg-black text-white dark:bg-white dark:text-black">
                         {count} class{count > 1 ? "es" : ""}
                       </span>
                     )}
