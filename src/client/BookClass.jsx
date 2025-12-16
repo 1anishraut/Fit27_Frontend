@@ -214,6 +214,34 @@ const BookClass = () => {
   const inputClass =
     "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
+    const handleBookClass = async () => {
+      try {
+        const selectedClasses = selected
+          .map((idx) => filteredEvents[idx])
+          .filter(Boolean);
+
+        const classIds = selectedClasses.map((c) => c.classId);
+
+        if (classIds.length === 0) {
+          alert("Please select at least one class");
+          return;
+        }
+
+        await axios.post(
+          `${BASE_URL}/user/book-classes`,
+          { classIds },
+          { withCredentials: true }
+        );
+
+        alert("Classes booked successfully ✅");
+        setSelected([]);
+      } catch (error) {
+        console.error(error);
+        alert("Failed to book class");
+      }
+    };
+
+
   return (
     <div className="space-y-6 pb-10">
       <style>
@@ -380,7 +408,7 @@ const BookClass = () => {
               );
             })}
 
-            <button className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs">
+            <button onClick={handleBookClass} className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs">
               Book Class
             </button>
           </div>
