@@ -38,6 +38,7 @@ import ScanQR from "./admin/Components/ScanQR";
 import UserLayout from "./client/UserLayout";
 import UserDashboard from "./client/UserAllDetails";
 import MemberCard from "./client/Components/Dashboard/MemberCard";
+import BookClass from "./client/BookClass";
 
 
 
@@ -62,6 +63,7 @@ function App() {
             <Route path="/userDashboard" element={<UserLayout />}>
               <Route path="userAllDetails" element={<UserDashboard />} />
               <Route path="myCard" element={<MemberCard/>}/>
+              <Route path="bookClass" element={<BookClass/>}/>
               {/* <Route path="fitnessHubs" element={<FitnessHubs />} /> */}
               {/* <Route path="plans" element={<Plans />} /> */}
               {/* <Route path="coupon" element={<Coupon />} /> */}

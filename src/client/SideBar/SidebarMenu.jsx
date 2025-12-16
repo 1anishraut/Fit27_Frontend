@@ -32,7 +32,7 @@ const MENU = [
     title: "Classes",
     icon: <FiUsers />,
     children: [
-      { title: "Booked Classes", path: "" },
+      { title: "Booked Classes", path: "/userDashboard/bookClass" },
       { title: "Book new class", path: "" },
     ],
   },
