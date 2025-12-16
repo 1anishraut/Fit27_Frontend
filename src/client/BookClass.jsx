@@ -77,6 +77,7 @@ const BookClass = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState([]);
 
   const [filters, setFilters] = useState({
     className: "",
@@ -141,12 +142,14 @@ const BookClass = () => {
     );
     setEvents(list);
     setFilteredEvents(list);
+    setSelected([]);
     setLoading(false);
   };
 
   const handleDateClick = (info) => {
     const clickedDate = dayjs(info.dateStr);
     setFilters({ className: "", dayName: "", fromDate: "", toDate: "" });
+    setSelected([]);
     setFilteredEvents(
       events.filter((e) => dayjs(e.start).isSame(clickedDate, "day"))
     );
@@ -195,35 +198,46 @@ const BookClass = () => {
 
     setEvents(baseEvents);
     setFilteredEvents(list);
+    setSelected([]);
     setLoading(false);
   };
 
   const clearFilters = () => {
     setFilters({ className: "", dayName: "", fromDate: "", toDate: "" });
     setFilteredEvents(events);
+    setSelected([]);
   };
 
   const getClassCount = (date) =>
     events.filter((e) => dayjs(e.start).isSame(date, "day")).length;
 
   const inputClass =
-    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
+    "w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none";
 
   return (
     <div className="space-y-6 pb-10">
       <style>
         {`
-          .dark .fc .fc-col-header-cell {
-            background: #111218 !important;
-          }
+  .fc {
+    font-size: 10px;
+  }
 
-          .dark .fc .fc-col-header-cell-cushion {
-            color: #ffffff !important;
-            font-weight: 600;
-            opacity: 1 !important;
-          }
-        `}
+  .fc .fc-daygrid-day-number {
+    font-size: 12px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 16px;
+  }
+
+  .fc .fc-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+`}
       </style>
+
+      {/* TOP */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Class Schedule
@@ -231,7 +245,8 @@ const BookClass = () => {
 
         <div className="grid grid-cols-12 gap-6">
           {/* CALENDAR */}
-          <div className="col-span-9 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+          {/* CALENDAR */}
+          <div className="col-span-7 border border-gray-200 dark:border-gray-700 rounded-lg p-2">
             <FullCalendar
               ref={calendarRef}
               plugins={[
@@ -252,81 +267,44 @@ const BookClass = () => {
                   <div className="flex flex-col items-end">
                     <span>{info.dayNumberText}</span>
                     {count > 0 && (
-                      <span className="mt-1 px-2  text-xs rounded bg-black text-white dark:bg-white dark:text-black">
+                      <span className="mt-1 px-2 text-xs rounded bg-black text-white dark:bg-white dark:text-black">
                         {count} class{count > 1 ? "es" : ""}
                       </span>
                     )}
                   </div>
                 );
               }}
-              height="auto"
+              height={420}
             />
           </div>
 
           {/* FILTERS */}
-          <div className="col-span-3 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+          <div className="col-span-4 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Filters
             </h3>
 
-            <input
-              className={inputClass}
-              placeholder="Class name"
-              value={filters.className}
-              onChange={(e) =>
-                setFilters({ ...filters, className: e.target.value })
-              }
-            />
-
-            <select
-              className={inputClass}
-              value={filters.dayName}
-              onChange={(e) =>
-                setFilters({ ...filters, dayName: e.target.value })
-              }
-            >
-              <option value="">All Days</option>
-              {[
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
-              ].map((d) => (
-                <option key={d}>{d}</option>
-              ))}
+            <input className={inputClass} placeholder="Class name" />
+            <select className={inputClass}>
+              <option>All Days</option>
             </select>
-
-            <input
-              type="date"
-              className={inputClass}
-              value={filters.fromDate}
-              onChange={(e) =>
-                setFilters({ ...filters, fromDate: e.target.value })
-              }
-            />
-
-            <input
-              type="date"
-              className={inputClass}
-              value={filters.toDate}
-              onChange={(e) =>
-                setFilters({ ...filters, toDate: e.target.value })
-              }
-            />
+            <input type="date" className={inputClass} />
+            <input type="date" className={inputClass} />
 
             <button
               onClick={applyFilters}
-              className="w-full px-4 py-2 rounded-lg bg-black text-white text-xs dark:bg-white dark:text-black hover:opacity-90"
+              className="w-full py-2 rounded-lg bg-black text-white dark:bg-white dark:text-black"
             >
               Apply Filters
             </button>
 
+            <button className="w-full py-2 rounded-lg bg-green-600 text-white">
+              Book Class
+            </button>
+
             <button
               onClick={clearFilters}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              className="w-full py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm"
             >
               Clear Filters
             </button>
@@ -336,32 +314,62 @@ const BookClass = () => {
 
       {/* FILTERED DATA */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-          Filtered Data
-        </h3>
+        <div className="flex items-center gap-3 mb-4">
+          <input
+            type="checkbox"
+            checked={
+              selected.length === filteredEvents.length &&
+              filteredEvents.length > 0
+            }
+            onChange={(e) =>
+              setSelected(
+                e.target.checked ? filteredEvents.map((_, i) => i) : []
+              )
+            }
+          />
+          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Select All
+          </span>
+        </div>
 
-        {filteredEvents.length === 0 && (
-          <p className="text-xs text-gray-500">No classes found</p>
-        )}
-
-        <div className="space-y-2">
+        <div className="space-y-3">
           {filteredEvents.map((e, i) => (
             <div
               key={i}
-              className="grid grid-cols-12 gap-3 items-center bg-gray-50 dark:bg-[#181920] rounded-md p-3"
+              className="grid grid-cols-12 items-center px-5 py-4 rounded-lg bg-gray-100 dark:bg-[#1a1b22] border border-gray-200 dark:border-gray-700"
             >
-              <div className="col-span-6 font-medium text-sm text-gray-900 dark:text-gray-100">
+              <div className="col-span-1">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(i)}
+                  onChange={() =>
+                    setSelected((prev) =>
+                      prev.includes(i)
+                        ? prev.filter((x) => x !== i)
+                        : [...prev, i]
+                    )
+                  }
+                />
+              </div>
+
+              <div className="col-span-3 font-semibold text-gray-900 dark:text-gray-100">
                 {e.title}
               </div>
-              <div className="col-span-6 text-xs text-gray-500">
-                {dayjs(e.start).format("DD MMM YYYY, dddd • HH:mm")}
+
+              <div className="col-span-5 text-center text-sm text-gray-600 dark:text-gray-300">
+                {dayjs(e.start).format("DD MMM YYYY, dddd")}
+              </div>
+
+              <div className="col-span-3 text-right text-sm text-gray-600 dark:text-gray-300">
+                Time: {dayjs(e.start).format("HH:mm")} –{" "}
+                {e.end ? dayjs(e.end).format("HH:mm") : "--"}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {loading && <div className="text-xs text-gray-400 px-2">Loading…</div>}
+      {loading && <div className="text-xs text-gray-400">Loading…</div>}
     </div>
   );
 };
