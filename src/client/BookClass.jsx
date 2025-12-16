@@ -76,8 +76,8 @@ const BookClass = () => {
 
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
+  const [selected, setSelected] = useState([]); // ✅ NEW
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState([]);
 
   const [filters, setFilters] = useState({
     className: "",
@@ -149,10 +149,10 @@ const BookClass = () => {
   const handleDateClick = (info) => {
     const clickedDate = dayjs(info.dateStr);
     setFilters({ className: "", dayName: "", fromDate: "", toDate: "" });
-    setSelected([]);
     setFilteredEvents(
       events.filter((e) => dayjs(e.start).isSame(clickedDate, "day"))
     );
+    setSelected([]);
   };
 
   const applyFilters = async () => {
@@ -212,32 +212,38 @@ const BookClass = () => {
     events.filter((e) => dayjs(e.start).isSame(date, "day")).length;
 
   const inputClass =
-    "w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none";
+    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
   return (
     <div className="space-y-6 pb-10">
       <style>
         {`
-  .fc {
-    font-size: 10px;
-  }
+    /* 🔹 Make calendar cells smaller WITHOUT shrinking text */
+    .fc .fc-daygrid-day-frame {
+      max-height: 74px;
+         /* smaller cells */
+      padding: 0px;       /* reduce inner spacing */
+    }
 
-  .fc .fc-daygrid-day-number {
-    font-size: 12px;
-  }
+    /* 🔹 Keep date text readable */
+    .fc .fc-daygrid-day-number {
+      font-size: 12px;    /* same as default */
+      font-weight: 500;
+    }
 
-  .fc .fc-toolbar-title {
-    font-size: 16px;
-  }
+    /* 🔹 Ensure weekday headers visible in dark mode */
+    .dark .fc .fc-col-header-cell {
+      background: #111218 !important;
+    }
 
-  .fc .fc-button {
-    padding: 4px 8px;
-    font-size: 12px;
-  }
-`}
+    .dark .fc .fc-col-header-cell-cushion {
+      color: #ffffff !important;
+      opacity: 1 !important;
+      font-weight: 600;
+    }
+  `}
       </style>
 
-      {/* TOP */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Class Schedule
@@ -245,8 +251,7 @@ const BookClass = () => {
 
         <div className="grid grid-cols-12 gap-6">
           {/* CALENDAR */}
-          {/* CALENDAR */}
-          <div className="col-span-7 border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+          <div className="col-span-9 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
             <FullCalendar
               ref={calendarRef}
               plugins={[
@@ -261,6 +266,7 @@ const BookClass = () => {
               selectable
               datesSet={handleDatesSet}
               dateClick={handleDateClick}
+              height="auto"
               dayCellContent={(info) => {
                 const count = getClassCount(info.date);
                 return (
@@ -274,47 +280,89 @@ const BookClass = () => {
                   </div>
                 );
               }}
-              height={420}
             />
           </div>
 
           {/* FILTERS */}
-          <div className="col-span-4 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+          <div className="col-span-3 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Filters
             </h3>
 
-            <input className={inputClass} placeholder="Class name" />
-            <select className={inputClass}>
-              <option>All Days</option>
+            <input
+              className={inputClass}
+              placeholder="Class name"
+              value={filters.className}
+              onChange={(e) =>
+                setFilters({ ...filters, className: e.target.value })
+              }
+            />
+
+            <select
+              className={inputClass}
+              value={filters.dayName}
+              onChange={(e) =>
+                setFilters({ ...filters, dayName: e.target.value })
+              }
+            >
+              <option value="">All Days</option>
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ].map((d) => (
+                <option key={d}>{d}</option>
+              ))}
             </select>
-            <input type="date" className={inputClass} />
-            <input type="date" className={inputClass} />
+
+            <input
+              type="date"
+              className={inputClass}
+              value={filters.fromDate}
+              onChange={(e) =>
+                setFilters({ ...filters, fromDate: e.target.value })
+              }
+            />
+
+            <input
+              type="date"
+              className={inputClass}
+              value={filters.toDate}
+              onChange={(e) =>
+                setFilters({ ...filters, toDate: e.target.value })
+              }
+            />
 
             <button
               onClick={applyFilters}
-              className="w-full py-2 rounded-lg bg-black text-white dark:bg-white dark:text-black"
+              className="w-full px-4 py-2 rounded-lg bg-black text-white text-xs dark:bg-white dark:text-black"
             >
               Apply Filters
             </button>
 
-            <button className="w-full py-2 rounded-lg bg-green-600 text-white">
-              Book Class
-            </button>
-
             <button
               onClick={clearFilters}
-              className="w-full py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs"
             >
               Clear Filters
             </button>
+
+            {/* ✅ NEW */}
+            <button className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs">
+              Book Class
+            </button>
           </div>
+          
         </div>
       </div>
 
       {/* FILTERED DATA */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 mb-4">
           <input
             type="checkbox"
             checked={
@@ -331,6 +379,10 @@ const BookClass = () => {
             Select All
           </span>
         </div>
+
+        {filteredEvents.length === 0 && (
+          <p className="text-xs text-gray-500">No classes found</p>
+        )}
 
         <div className="space-y-3">
           {filteredEvents.map((e, i) => (
@@ -369,7 +421,7 @@ const BookClass = () => {
         </div>
       </div>
 
-      {loading && <div className="text-xs text-gray-400">Loading…</div>}
+      {loading && <div className="text-xs text-gray-400 px-2">Loading…</div>}
     </div>
   );
 };
