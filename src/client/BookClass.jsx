@@ -76,7 +76,7 @@ const BookClass = () => {
 
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selected, setSelected] = useState([]); // ✅ NEW
+  const [selected, setSelected] = useState([]); 
   const [loading, setLoading] = useState(false);
 
   const [filters, setFilters] = useState({
@@ -220,6 +220,7 @@ const BookClass = () => {
         {`
     /* 🔹 Make calendar cells smaller WITHOUT shrinking text */
     .fc .fc-daygrid-day-frame {
+    // max-width: 24px;
       max-height: 74px;
          /* smaller cells */
       padding: 0px;       /* reduce inner spacing */
@@ -249,7 +250,7 @@ const BookClass = () => {
           Class Schedule
         </h2>
 
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-15 gap-6">
           {/* CALENDAR */}
           <div className="col-span-9 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
             <FullCalendar
@@ -350,13 +351,39 @@ const BookClass = () => {
             >
               Clear Filters
             </button>
+          </div>
 
-            {/* ✅ NEW */}
+          {/* SELECTED CLASSES */}
+          <div className="col-span-3 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Selected Classes</h3>
+
+            {selected.length === 0 && (
+              <p className="text-xs text-gray-500">No class selected</p>
+            )}
+
+            {selected.map((idx) => {
+              const e = filteredEvents[idx];
+              if (!e) return null;
+
+              return (
+                <div
+                  key={idx}
+                  className="text-xs p-2 rounded border bg-gray-100 dark:bg-[#1a1b22]"
+                >
+                  <div className="font-semibold">{e.title}</div>
+                  <div>{dayjs(e.start).format("DD MMM YYYY, dddd")}</div>
+                  <div>
+                    {dayjs(e.start).format("HH:mm")} –{" "}
+                    {e.end ? dayjs(e.end).format("HH:mm") : "--"}
+                  </div>
+                </div>
+              );
+            })}
+
             <button className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs">
               Book Class
             </button>
           </div>
-          
         </div>
       </div>
 
