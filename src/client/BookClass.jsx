@@ -54,13 +54,9 @@ const parseDateTime = (time, date) => {
   return dt.isValid() ? dt : null;
 };
 
-/* ----------------------------------
-   NEW: GET MONTHS BETWEEN DATES
----------------------------------- */
 const getMonthsBetween = (from, to) => {
   const months = [];
   let cursor = dayjs(from).startOf("month");
-
   while (cursor.isSameOrBefore(to, "month")) {
     months.push({
       year: cursor.format("YYYY"),
@@ -89,10 +85,6 @@ const BookClass = () => {
     toDate: "",
   });
 
-  /* ----------------------------------
-     FETCH ONE MONTH (UNCHANGED LOGIC)
-  ---------------------------------- */
-
   const fetchMonthData = useCallback(async (year, month) => {
     const res = await axios.get(`${BASE_URL}/month-template`, {
       params: { year, month },
@@ -119,11 +111,9 @@ const BookClass = () => {
 
         rows.forEach((row) => {
           let cursor = start.clone();
-
           while (cursor.isSameOrBefore(end, "day")) {
             if (cursor.format("dddd") === dayName) {
               const dateOnly = cursor.format("YYYY-MM-DD");
-
               const sdt = parseDateTime(row.startedAt, dateOnly);
               const edt = parseDateTime(row.endedAt, dateOnly);
 
@@ -142,10 +132,6 @@ const BookClass = () => {
     return list;
   }, []);
 
-  /* ----------------------------------
-     CALENDAR MONTH CHANGE (UNCHANGED)
-  ---------------------------------- */
-
   const handleDatesSet = async (info) => {
     setLoading(true);
     const midDate = dayjs(info.start).add(7, "day");
@@ -158,230 +144,211 @@ const BookClass = () => {
     setLoading(false);
   };
 
-  /* ----------------------------------
-     DATE CLICK (UNCHANGED)
-  ---------------------------------- */
-
   const handleDateClick = (info) => {
     const clickedDate = dayjs(info.dateStr);
-
-    setFilters({
-      className: "",
-      dayName: "",
-      fromDate: "",
-      toDate: "",
-    });
-
-    const list = events.filter((e) =>
-      dayjs(e.start).isSame(clickedDate, "day")
+    setFilters({ className: "", dayName: "", fromDate: "", toDate: "" });
+    setFilteredEvents(
+      events.filter((e) => dayjs(e.start).isSame(clickedDate, "day"))
     );
-
-    setFilteredEvents(list);
   };
-
-  /* ----------------------------------
-     APPLY FILTERS (🔥 ONLY ENHANCED PART)
-  ---------------------------------- */
 
   const applyFilters = async () => {
     setLoading(true);
     let baseEvents = [...events];
 
-    // 🔥 Fetch missing months ONLY when date range is used
     if (filters.fromDate && filters.toDate) {
       const months = getMonthsBetween(filters.fromDate, filters.toDate);
-
       for (const m of months) {
-        const alreadyLoaded = baseEvents.some(
+        const exists = baseEvents.some(
           (e) =>
             dayjs(e.start).format("YYYY-MM") ===
             dayjs(`${m.year}-${m.month}-01`).format("YYYY-MM")
         );
-
-        if (!alreadyLoaded) {
-          const newEvents = await fetchMonthData(m.year, m.month);
-          baseEvents.push(...newEvents);
+        if (!exists) {
+          const more = await fetchMonthData(m.year, m.month);
+          baseEvents.push(...more);
         }
       }
     }
 
     let list = [...baseEvents];
 
-    if (filters.className) {
+    if (filters.className)
       list = list.filter((e) =>
         e.title.toLowerCase().includes(filters.className.toLowerCase())
       );
-    }
 
-    if (filters.dayName) {
+    if (filters.dayName)
       list = list.filter(
         (e) => dayjs(e.start).format("dddd") === filters.dayName
       );
-    }
 
-    if (filters.fromDate) {
+    if (filters.fromDate)
       list = list.filter((e) =>
         dayjs(e.start).isSameOrAfter(filters.fromDate, "day")
       );
-    }
 
-    if (filters.toDate) {
+    if (filters.toDate)
       list = list.filter((e) =>
         dayjs(e.start).isSameOrBefore(filters.toDate, "day")
       );
-    }
 
-    setEvents(baseEvents); // keep calendar in sync
+    setEvents(baseEvents);
     setFilteredEvents(list);
     setLoading(false);
   };
 
-  /* ----------------------------------
-     CLEAR FILTERS (UNCHANGED)
-  ---------------------------------- */
-
   const clearFilters = () => {
-    setFilters({
-      className: "",
-      dayName: "",
-      fromDate: "",
-      toDate: "",
-    });
+    setFilters({ className: "", dayName: "", fromDate: "", toDate: "" });
     setFilteredEvents(events);
   };
-
-  /* ----------------------------------
-     COUNT CLASSES PER DAY (UNCHANGED)
-  ---------------------------------- */
 
   const getClassCount = (date) =>
     events.filter((e) => dayjs(e.start).isSame(date, "day")).length;
 
-  /* ----------------------------------
-     UI (UNCHANGED)
-  ---------------------------------- */
+  const inputClass =
+    "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
   return (
-    <div className="p-6 space-y-6 bg-white dark:bg-[#111218]">
-      <h1 className="text-xl font-semibold">Class Schedule</h1>
+    <div className="space-y-6 pb-10">
+      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Class Schedule
+        </h2>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* CALENDAR */}
-        <div className="col-span-9 border rounded p-3">
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              listPlugin,
-              interactionPlugin,
-            ]}
-            initialView="dayGridMonth"
-            events={events}
-            eventDisplay="none"
-            selectable
-            datesSet={handleDatesSet}
-            dateClick={handleDateClick}
-            dayCellContent={(info) => {
-              const count = getClassCount(info.date);
-              return (
-                <div className="flex flex-col items-end">
-                  <span>{info.dayNumberText}</span>
-                  {count > 0 && (
-                    <span className="mt-1 px-2 py-[2px] text-xs rounded bg-blue-600 text-white">
-                      {count} class{count > 1 ? "es" : ""}
-                    </span>
-                  )}
-                </div>
-              );
-            }}
-            height="auto"
-          />
-        </div>
+        <div className="grid grid-cols-12 gap-6">
+          {/* CALENDAR */}
+          <div className="col-span-9 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+            <FullCalendar
+              ref={calendarRef}
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                listPlugin,
+                interactionPlugin,
+              ]}
+              initialView="dayGridMonth"
+              events={events}
+              eventDisplay="none"
+              selectable
+              datesSet={handleDatesSet}
+              dateClick={handleDateClick}
+              dayCellContent={(info) => {
+                const count = getClassCount(info.date);
+                return (
+                  <div className="flex flex-col items-end">
+                    <span>{info.dayNumberText}</span>
+                    {count > 0 && (
+                      <span className="mt-1 px-2 py-[2px] text-xs rounded bg-black text-white dark:bg-white dark:text-black">
+                        {count} class{count > 1 ? "es" : ""}
+                      </span>
+                    )}
+                  </div>
+                );
+              }}
+              height="auto"
+            />
+          </div>
 
-        {/* FILTERS */}
-        <div className="col-span-3 border rounded p-4 space-y-3">
-          <h3 className="font-medium">Filters</h3>
+          {/* FILTERS */}
+          <div className="col-span-3 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Filters
+            </h3>
 
-          <input
-            className="w-full border rounded px-2 py-1"
-            placeholder="Class name"
-            value={filters.className}
-            onChange={(e) =>
-              setFilters({ ...filters, className: e.target.value })
-            }
-          />
+            <input
+              className={inputClass}
+              placeholder="Class name"
+              value={filters.className}
+              onChange={(e) =>
+                setFilters({ ...filters, className: e.target.value })
+              }
+            />
 
-          <select
-            className="w-full border rounded px-2 py-1"
-            value={filters.dayName}
-            onChange={(e) =>
-              setFilters({ ...filters, dayName: e.target.value })
-            }
-          >
-            <option value="">All Days</option>
-            {[
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ].map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            <select
+              className={inputClass}
+              value={filters.dayName}
+              onChange={(e) =>
+                setFilters({ ...filters, dayName: e.target.value })
+              }
+            >
+              <option value="">All Days</option>
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ].map((d) => (
+                <option key={d}>{d}</option>
+              ))}
+            </select>
 
-          <input
-            type="date"
-            value={filters.fromDate}
-            onChange={(e) =>
-              setFilters({ ...filters, fromDate: e.target.value })
-            }
-          />
+            <input
+              type="date"
+              className={inputClass}
+              value={filters.fromDate}
+              onChange={(e) =>
+                setFilters({ ...filters, fromDate: e.target.value })
+              }
+            />
 
-          <input
-            type="date"
-            value={filters.toDate}
-            onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
-          />
+            <input
+              type="date"
+              className={inputClass}
+              value={filters.toDate}
+              onChange={(e) =>
+                setFilters({ ...filters, toDate: e.target.value })
+              }
+            />
 
-          <button
-            onClick={applyFilters}
-            className="w-full bg-blue-600 text-white py-1 rounded"
-          >
-            Apply Filters
-          </button>
+            <button
+              onClick={applyFilters}
+              className="w-full px-4 py-2 rounded-lg bg-black text-white text-xs dark:bg-white dark:text-black hover:opacity-90"
+            >
+              Apply Filters
+            </button>
 
-          <button onClick={clearFilters} className="w-full border py-1 rounded">
-            Clear Filters
-          </button>
+            <button
+              onClick={clearFilters}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
       </div>
 
       {/* FILTERED DATA */}
-      <div className="border rounded p-4">
-        <h3 className="font-medium mb-3">Filtered Data</h3>
+      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+          Filtered Data
+        </h3>
 
         {filteredEvents.length === 0 && (
-          <p className="text-gray-400">No classes found</p>
+          <p className="text-xs text-gray-500">No classes found</p>
         )}
 
-        {filteredEvents.map((e, i) => (
-          <div key={i} className="border-b py-2">
-            <div className="font-medium">{e.title}</div>
-            <div className="text-sm text-gray-500">
-              {dayjs(e.start).format("DD MMM YYYY, dddd")} •{" "}
-              {dayjs(e.start).format("HH:mm")}
+        <div className="space-y-2">
+          {filteredEvents.map((e, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-12 gap-3 items-center bg-gray-50 dark:bg-[#181920] rounded-md p-3"
+            >
+              <div className="col-span-6 font-medium text-sm text-gray-900 dark:text-gray-100">
+                {e.title}
+              </div>
+              <div className="col-span-6 text-xs text-gray-500">
+                {dayjs(e.start).format("DD MMM YYYY, dddd • HH:mm")}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {loading && <div className="text-sm text-gray-400">Loading…</div>}
+      {loading && <div className="text-xs text-gray-400 px-2">Loading…</div>}
     </div>
   );
 };
