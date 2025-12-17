@@ -36,7 +36,7 @@ const UserAllDetails = () => {
           <DashboardCard
             icon={<FaCalendarPlus size={20} />}
             title="Book New Class"
-            route="/user/classes"
+            route="/userDashboard/bookClass"
           />
 
           {/* TASKS */}

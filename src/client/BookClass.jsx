@@ -483,39 +483,47 @@ const BookClass = () => {
         )}
 
         <div className="space-y-3">
-          {filteredEvents.map((e, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-12 items-center px-5 py-4 rounded-lg bg-gray-100 dark:bg-[#1a1b22] border border-gray-200 dark:border-gray-700"
-            >
-              <div className="col-span-1">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(i)}
-                  onChange={() =>
-                    setSelected((prev) =>
-                      prev.includes(i)
-                        ? prev.filter((x) => x !== i)
-                        : [...prev, i]
-                    )
-                  }
-                />
-              </div>
+          {filteredEvents.map((e, i) => {
+            const isSelected = selected.includes(i);
 
-              <div className="col-span-3 font-semibold text-gray-900 dark:text-gray-100">
-                {e.title}
-              </div>
+            const toggleSelect = () => {
+              setSelected((prev) =>
+                prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]
+              );
+            };
 
-              <div className="col-span-5 text-center text-sm text-gray-600 dark:text-gray-300">
-                {dayjs(e.start).format("DD MMM YYYY, dddd")}
-              </div>
+            return (
+              <div
+                key={i}
+                onClick={toggleSelect} // ✅ CLICK ANYWHERE
+                className={`grid grid-cols-12 items-center px-5 py-4 rounded-lg cursor-pointer
+            bg-gray-100 dark:bg-[#1a1b22] border border-gray-200 dark:border-gray-700
+            ${isSelected ? "ring-2 ring-black dark:ring-white" : ""}`}
+              >
+                <div className="col-span-1">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onClick={(e) => e.stopPropagation()} // ✅ PREVENT DOUBLE TOGGLE
+                    onChange={toggleSelect}
+                  />
+                </div>
 
-              <div className="col-span-3 text-right text-sm text-gray-600 dark:text-gray-300">
-                Time: {dayjs(e.start).format("HH:mm")} –{" "}
-                {e.end ? dayjs(e.end).format("HH:mm") : "--"}
+                <div className="col-span-3 font-semibold text-gray-900 dark:text-gray-100">
+                  {e.title}
+                </div>
+
+                <div className="col-span-5 text-center text-sm text-gray-600 dark:text-gray-300">
+                  {dayjs(e.start).format("DD MMM YYYY, dddd")}
+                </div>
+
+                <div className="col-span-3 text-right text-sm text-gray-600 dark:text-gray-300">
+                  Time: {dayjs(e.start).format("HH:mm")} –{" "}
+                  {e.end ? dayjs(e.end).format("HH:mm") : "--"}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
