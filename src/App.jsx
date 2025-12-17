@@ -39,6 +39,7 @@ import UserLayout from "./client/UserLayout";
 import UserDashboard from "./client/UserAllDetails";
 import MemberCard from "./client/Components/Dashboard/MemberCard";
 import BookClass from "./client/BookClass";
+import BookedClass from "./client/BookedClass";
 
 
 
@@ -64,6 +65,7 @@ function App() {
               <Route path="userAllDetails" element={<UserDashboard />} />
               <Route path="myCard" element={<MemberCard/>}/>
               <Route path="bookClass" element={<BookClass/>}/>
+              <Route path="bookedClasses" element={<BookedClass/>}/>
               {/* <Route path="fitnessHubs" element={<FitnessHubs />} /> */}
               {/* <Route path="plans" element={<Plans />} /> */}
               {/* <Route path="coupon" element={<Coupon />} /> */}
