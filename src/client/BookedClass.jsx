@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 import { BASE_URL } from "../Utils/Constants";
+import CancelBookingModal from "./Components/CancelBookingModal";
 
 const BookedClass = () => {
   const [bookings, setBookings] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [cancelBookingId, setCancelBookingId] = useState(null);
 
   const [filters, setFilters] = useState({
     className: "",
@@ -27,7 +29,7 @@ const BookedClass = () => {
       if (res?.data?.success) {
         const data = res.data.data || [];
         setBookings(data);
-        setFiltered(data); //  show immediately
+        setFiltered(data); // show immediately
       } else {
         setBookings([]);
         setFiltered([]);
@@ -70,29 +72,6 @@ const BookedClass = () => {
   const clearFilters = () => {
     setFilters({ className: "", date: "" });
     setFiltered(bookings);
-  };
-
-  /* ----------------------------------
-     CANCEL BOOKING ✅ SAFE
-  ---------------------------------- */
-  const cancelBooking = async (id) => {
-    const confirm = window.confirm(
-      "Are you sure you want to cancel this class?"
-    );
-    if (!confirm) return;
-
-    try {
-      await axios.patch(
-        `${BASE_URL}/user/booked-classes/cancel/${id}`,
-        {},
-        { withCredentials: true }
-      );
-
-      setBookings((prev) => prev.filter((b) => b._id !== id));
-      setFiltered((prev) => prev.filter((b) => b._id !== id));
-    } catch (err) {
-      alert(err?.response?.data?.message || "Failed to cancel booking");
-    }
   };
 
   return (
@@ -154,6 +133,17 @@ const BookedClass = () => {
           <p className="text-sm text-gray-500">No booked classes found</p>
         )}
 
+        {/* TABLE HEADINGS */}
+        {filtered.length > 0 && (
+          <div className="grid grid-cols-12 px-5 py-3 mb-3 rounded-lg bg-gray-50 dark:bg-[#15161c] border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+            <div className="col-span-3">Class Name</div>
+            <div className="col-span-3">Date</div>
+            <div className="col-span-3">Time</div>
+            <div className="col-span-2">Instructor</div>
+            <div className="col-span-1 text-right">Action</div>
+          </div>
+        )}
+
         <div className="space-y-3">
           {filtered.map((b) => (
             <div
@@ -178,8 +168,8 @@ const BookedClass = () => {
 
               <div className="col-span-1 text-right">
                 <button
-                  onClick={() => cancelBooking(b._id)}
-                  className="px-3 py-1 text-xs rounded-md border border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                  onClick={() => setCancelBookingId(b._id)}
+                  className="text-red-600 text-sm border px-2 py-1 rounded-md"
                 >
                   Cancel
                 </button>
@@ -188,6 +178,14 @@ const BookedClass = () => {
           ))}
         </div>
       </div>
+
+      {cancelBookingId && (
+        <CancelBookingModal
+          bookingId={cancelBookingId}
+          onClose={() => setCancelBookingId(null)}
+          onSuccess={fetchBookedClasses}
+        />
+      )}
     </div>
   );
 };

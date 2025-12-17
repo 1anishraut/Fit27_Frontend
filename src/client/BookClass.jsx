@@ -260,7 +260,7 @@ const BookClass = () => {
       }));
 
       await axios.post(
-        `${BASE_URL}/user/book-classes`,
+        `${BASE_URL}/user/booking/book-classes`,
         { classes: payload },
         { withCredentials: true }
       );
