@@ -13,6 +13,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
 import { BASE_URL } from "../Utils/Constants";
+import BookClassConfirmModal from "./Components/BookClassConfirmModal";
 
 /* ----------------------------------
    DAYJS PLUGINS
@@ -25,7 +26,6 @@ dayjs.extend(isSameOrAfter);
 /* ----------------------------------
    HELPERS (UNCHANGED)
 ---------------------------------- */
-
 const normalizeDate = (d) => {
   if (!d) return null;
   const p1 = dayjs(d, "DD/MM/YYYY", true);
@@ -50,7 +50,7 @@ const normalizeDayName = (d) => {
 const parseDateTime = (time, date) => {
   if (!time) return null;
   const combined = `${date} ${time}`;
-  const dt = dayjs(combined, ["YYYY-MM-DD HH:mm", "YYYY-MM-DD H:mm"], true);
+  const dt = dayjs(combined, ["YYYY-MM-DD HH:mm"], true);
   return dt.isValid() ? dt : null;
 };
 
@@ -76,8 +76,11 @@ const BookClass = () => {
 
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selected, setSelected] = useState([]); 
+  const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
 
   const [filters, setFilters] = useState({
     className: "",
@@ -86,6 +89,9 @@ const BookClass = () => {
     toDate: "",
   });
 
+  /* ----------------------------------
+     FETCH MONTH DATA ✅ FIXED
+  ---------------------------------- */
   const fetchMonthData = useCallback(async (year, month) => {
     const res = await axios.get(`${BASE_URL}/month-template`, {
       params: { year, month },
@@ -95,7 +101,7 @@ const BookClass = () => {
     const mt = res?.data?.data;
     if (!mt) return [];
 
-    const weeks = ["week1", "week2", "week3", "week4", "week5"];
+    const weeks = ["week1", "week2", "week3", "week4"];
     const list = [];
 
     weeks.forEach((wk) => {
@@ -119,6 +125,17 @@ const BookClass = () => {
               const edt = parseDateTime(row.endedAt, dateOnly);
 
               list.push({
+                /* 🔑 REQUIRED FOR BOOKING */
+                classId: row.classId?._id,
+                instructorId: row.instructorId?._id,
+                location: row.location?._id,
+                date: dateOnly,
+                startedAt: row.startedAt,
+                endedAt: row.endedAt,
+                month: dayjs(dateOnly).format("MMMM"),
+                year: dayjs(dateOnly).format("YYYY"),
+
+                /* 🎨 REQUIRED FOR UI */
                 title: row?.classId?.name || "Class",
                 start: sdt ? sdt.toISOString() : dateOnly,
                 end: edt ? edt.toISOString() : undefined,
@@ -133,6 +150,9 @@ const BookClass = () => {
     return list;
   }, []);
 
+  /* ----------------------------------
+     CALENDAR EVENTS
+  ---------------------------------- */
   const handleDatesSet = async (info) => {
     setLoading(true);
     const midDate = dayjs(info.start).add(7, "day");
@@ -155,6 +175,9 @@ const BookClass = () => {
     setSelected([]);
   };
 
+  /* ----------------------------------
+     FILTERS (UNCHANGED)
+  ---------------------------------- */
   const applyFilters = async () => {
     setLoading(true);
     let baseEvents = [...events];
@@ -214,32 +237,43 @@ const BookClass = () => {
   const inputClass =
     "w-full border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
-    const handleBookClass = async () => {
-      try {
-        const selectedClasses = selected
-          .map((idx) => filteredEvents[idx])
-          .filter(Boolean);
+  /* ----------------------------------
+     BOOK CLASS
+  ---------------------------------- */
+  const handleBookClass = async () => {
+    try {
+      setBookingLoading(true);
 
-        const classIds = selectedClasses.map((c) => c.classId);
+      const selectedClasses = selected
+        .map((idx) => filteredEvents[idx])
+        .filter(Boolean);
 
-        if (classIds.length === 0) {
-          alert("Please select at least one class");
-          return;
-        }
+      const payload = selectedClasses.map((c) => ({
+        classId: c.classId,
+        instructorId: c.instructorId,
+        location: c.location,
+        date: c.date,
+        startedAt: c.startedAt,
+        endedAt: c.endedAt,
+        month: c.month,
+        year: c.year,
+      }));
 
-        await axios.post(
-          `${BASE_URL}/user/book-classes`,
-          { classIds },
-          { withCredentials: true }
-        );
+      await axios.post(
+        `${BASE_URL}/user/book-classes`,
+        { classes: payload },
+        { withCredentials: true }
+      );
 
-        alert("Classes booked successfully ✅");
-        setSelected([]);
-      } catch (error) {
-        console.error(error);
-        alert("Failed to book class");
-      }
-    };
+      alert("Classes booked successfully ✅");
+      setSelected([]);
+      setShowConfirm(false);
+    } catch (error) {
+      alert(error?.response?.data?.message || "Booking failed");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
 
   return (
@@ -408,7 +442,16 @@ const BookClass = () => {
               );
             })}
 
-            <button onClick={handleBookClass} className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs">
+            <button
+              onClick={() => {
+                if (selected.length === 0) {
+                  alert("Please select at least one class");
+                  return;
+                }
+                setShowConfirm(true);
+              }}
+              className="w-full px-4 py-2 rounded-lg bg-green-600 text-white text-xs"
+            >
               Book Class
             </button>
           </div>
@@ -474,6 +517,18 @@ const BookClass = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div>
+        <BookClassConfirmModal
+          open={showConfirm}
+          loading={bookingLoading}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={handleBookClass}
+          selectedClasses={selected
+            .map((idx) => filteredEvents[idx])
+            .filter(Boolean)}
+        />
       </div>
 
       {loading && <div className="text-xs text-gray-400 px-2">Loading…</div>}
