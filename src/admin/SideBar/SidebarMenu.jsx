@@ -35,7 +35,7 @@ const MENU = [
     icon: <FiUsers />,
     children: [
       { title: "Members", path: "/adminDashboard/members" },
-      { title: "Enquiry", path: "/adminDashboard/members/enquiry" },
+      { title: "Enquiry", path: "/adminDashboard/enquiry" },
     ],
   },
 
