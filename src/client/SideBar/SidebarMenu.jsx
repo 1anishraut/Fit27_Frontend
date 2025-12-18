@@ -25,7 +25,12 @@ const MENU = [
     path: "/userDashboard/userAllDetails",
   },
 
-  { id: "enquiries", title: "Enquiries", icon: <FiMessageSquare />, path: "/" },
+  {
+    id: "enquiries",
+    title: "Enquiries",
+    icon: <FiMessageSquare />,
+    path: "/userDashboard/userEnquery",
+  },
 
   {
     id: "classes",

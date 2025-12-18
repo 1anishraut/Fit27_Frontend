@@ -40,6 +40,8 @@ import UserDashboard from "./client/UserAllDetails";
 import MemberCard from "./client/Components/Dashboard/MemberCard";
 import BookClass from "./client/BookClass";
 import BookedClass from "./client/BookedClass";
+import UserEnquery from "./client/UserEnquery";
+import CreateUserEnquery from "./client/Components/CreateUserEnquery";
 
 
 
@@ -66,11 +68,8 @@ function App() {
               <Route path="myCard" element={<MemberCard/>}/>
               <Route path="bookClass" element={<BookClass/>}/>
               <Route path="bookedClasses" element={<BookedClass/>}/>
-              {/* <Route path="fitnessHubs" element={<FitnessHubs />} /> */}
-              {/* <Route path="plans" element={<Plans />} /> */}
-              {/* <Route path="coupon" element={<Coupon />} /> */}
-              {/* <Route path="emailTemplate" element={<EmailTemplate />} /> */}
-              {/* <Route path="settings" element={<Settings />} /> */}
+              <Route path="userEnquery" element={<UserEnquery/>}/>
+              <Route path="createUserEnquery" element={<CreateUserEnquery/>}/>
             </Route>
 
             {/* -------- Admin Routes -------- */}
