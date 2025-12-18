@@ -42,6 +42,8 @@ import BookClass from "./client/BookClass";
 import BookedClass from "./client/BookedClass";
 import UserEnquery from "./client/UserEnquery";
 import CreateUserEnquery from "./client/Components/CreateUserEnquery";
+import Enquiry from "./admin/Enquiry";
+import ReplyEnquiry from "./admin/Components/ReplyEnquiry";
 
 
 
@@ -95,6 +97,8 @@ function App() {
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />
+              <Route path="enquiry" element={<Enquiry/>}/>
+              <Route path="replyEnquiry/:id" element={<ReplyEnquiry/>}/>
               <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />

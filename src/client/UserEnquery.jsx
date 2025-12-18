@@ -82,8 +82,8 @@ export default function UserEnquery() {
                   hover:shadow-md transition"
               >
                 {/* SUBJECT */}
-                <div className="mb-3">
-                  <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+                <div className="mb-6">
+                  <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
                     Subject
                   </p>
                   <h3
@@ -95,8 +95,8 @@ export default function UserEnquery() {
                 </div>
 
                 {/* MESSAGE */}
-                <div className="mb-4">
-                  <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+                <div className="mb-6">
+                  <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
                     Message
                   </p>
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl">
@@ -107,8 +107,8 @@ export default function UserEnquery() {
                 {/* ATTACHMENTS */}
                 {Array.isArray(enq.attachments) &&
                   enq.attachments.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+                    <div className="mb-6">
+                      <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                         Attachments
                       </p>
                       <div className="flex gap-6 flex-wrap">
@@ -131,7 +131,7 @@ export default function UserEnquery() {
 
                 {/* RESPONSE */}
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+                  <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                     Response
                   </p>
 
