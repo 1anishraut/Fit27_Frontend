@@ -82,16 +82,31 @@ export default function UserEnquery() {
                   hover:shadow-md transition"
               >
                 {/* SUBJECT */}
-                <div className="mb-6">
-                  <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-                    Subject
-                  </p>
-                  <h3
-                    className="font-semibold text-gray-900 dark:text-gray-100
-                    text-base sm:text-lg"
+                {/* SUBJECT + STATUS */}
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[14px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+                      Subject
+                    </p>
+                    <h3
+                      className="font-semibold text-gray-900 dark:text-gray-100
+      text-base sm:text-lg"
+                    >
+                      {enq.subject}
+                    </h3>
+                  </div>
+
+                  {/* STATUS BADGE */}
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+      ${
+        enq.status === "replied"
+          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+      }`}
                   >
-                    {enq.subject}
-                  </h3>
+                    {enq.status === "replied" ? "Replied" : "Pending"}
+                  </span>
                 </div>
 
                 {/* MESSAGE */}
