@@ -29,7 +29,7 @@ const UserAllDetails = () => {
           <DashboardCard
             icon={<FaRegQuestionCircle size={20} />}
             title="Raise a Query"
-            route="/user/support"
+            route="/userDashboard/createUserEnquery"
           />
 
           {/* BOOK NEW CLASS */}

@@ -16,7 +16,7 @@ export default function ScanQR() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const codeReaderRef = useRef(null);
-  const alreadyScannedRef = useRef(false); // ⭐ Prevent repeated scanning
+  const alreadyScannedRef = useRef(false);
 
   const [qrResult, setQrResult] = useState("");
   const [userData, setUserData] = useState(null);
@@ -169,6 +169,7 @@ export default function ScanQR() {
   };
 
   /* ====================================================== ACCESS GRANTED */
+  /* ====================================================== ACCESS GRANTED */
   const handleGrant = async () => {
     if (!userData?._id) return;
 
@@ -178,7 +179,8 @@ export default function ScanQR() {
       await axios.post(
         `${BASE_URL}/access/grant`,
         {
-          memberId: userData._id,
+          userId: userData._id, // ✅ FIXED (was memberId)
+          status: "CHECK_IN", // ✅ explicit & future-proof
           note: note || "Access Granted from QR scanner",
         },
         { withCredentials: true }
@@ -186,7 +188,15 @@ export default function ScanQR() {
 
       setSuccessMsg("Access Granted & Log Saved ✔");
       setTimeout(() => setSuccessMsg(""), 3000);
-    } catch {
+
+      // 🔁 refresh last access log instantly
+      setLastLog({
+        time: new Date().toLocaleTimeString("en-IN"),
+        date: new Date(),
+        note: note || "Access Granted from QR scanner",
+      });
+    } catch (err) {
+      console.error(err);
       alert("Failed to save access log");
     }
   };

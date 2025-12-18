@@ -1,6 +1,6 @@
 // src/admin/Header/Header.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiMenu,
   FiGrid,
@@ -24,6 +24,8 @@ import MobileSidebar from "../SideBar/MobileSidebar";
 export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
   const admin = useSelector((state) => state.admin);
  const brand = useSelector((state) => state.adminBrand);
+  const navigate = useNavigate();
+
 
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -108,7 +110,10 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
             <FiGrid className="text-gray-700 dark:text-gray-200" />
           </button>
 
-          <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]">
+          <button
+            // onClick={navigate("/adminDashboard/enquiry")}
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+          >
             <FiMessageSquare className="text-gray-700 dark:text-gray-200" />
           </button>
 

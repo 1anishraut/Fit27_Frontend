@@ -119,7 +119,8 @@ export default function CreateUserEnquery() {
         {/* ATTACHMENTS */}
         <div className="mt-4">
           <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-            Attach screenshots (max 3, 1MB each. jpeg/png only)   (Optional)
+            Attach screenshots (max 3, 1MB each. jpeg/png only){" "}
+            <span className="text-white text-sm">(Optional)</span>
           </p>
 
           <div className="grid grid-cols-3 gap-15">
@@ -152,7 +153,10 @@ export default function CreateUserEnquery() {
                       className="w-full h-full object-cover rounded-md"
                     />
                   ) : (
-                    <span>Image {idx + 1} (Optional)</span>
+                    <span>
+                      Image {idx + 1}{" "}
+                      <span className="text-white text-sm">(Optional)</span>
+                    </span>
                   )}
                 </div>
               </div>
