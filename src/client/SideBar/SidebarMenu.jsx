@@ -46,21 +46,21 @@ const MENU = [
     id: "guestpass",
     title: "Guest Pass",
     icon: <FiBox />,
-    path: "",
+    path: "/",
   },
 
   {
     id: "checkinhistry",
     title: "Check-In History",
     icon: <FiUserCheck />,
-    path: "",
+    path: "/userDashboard/checkInHistory",
   },
 
   {
     id: "billing",
     title: "Billing",
     icon: <FiBookOpen />,
-    path: "",
+    path: "/",
   },
 ];
 
