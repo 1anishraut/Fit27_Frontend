@@ -163,12 +163,40 @@ export default function ScanQR() {
   };
 
   /* ====================================================== ACCESS DENIED */
-  const handleDeny = () => {
-    deniedSound.play();
-    setSuccessMsg("");
+  const handleDeny = async () => {
+    if (!userData?._id) return;
+
+    try {
+      // setNote("Access denied by Admin");
+      deniedSound.play();
+
+      await axios.post(
+        `${BASE_URL}/access/grant`,
+        {
+          userId: userData._id,
+          status: "DENIED", 
+          note: note || "Access denied from QR scanner by Admin",
+        },
+        { withCredentials: true }
+      );
+
+      setSuccessMsg("Access Denied & Logged ✖");
+      setTimeout(() => setSuccessMsg(""), 3000);
+
+      // 🔁 update last log UI instantly
+      setLastLog({
+        time: new Date().toLocaleTimeString("en-IN"),
+        date: new Date(),
+        note: note || "Access denied from QR scanner by Admin",
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to log denied access");
+    }
   };
 
-  /* ====================================================== ACCESS GRANTED */
+
+  
   /* ====================================================== ACCESS GRANTED */
   const handleGrant = async () => {
     if (!userData?._id) return;

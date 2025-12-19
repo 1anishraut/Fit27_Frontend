@@ -45,6 +45,7 @@ import CreateUserEnquery from "./client/Components/CreateUserEnquery";
 import Enquiry from "./admin/Enquiry";
 import ReplyEnquiry from "./admin/Components/ReplyEnquiry";
 import CheckInHistory from "./client/CheckInHistory";
+import GuestPass from "./client/GuestPass";
 
 
 
@@ -73,6 +74,7 @@ function App() {
               <Route path="bookedClasses" element={<BookedClass/>}/>
               <Route path="userEnquery" element={<UserEnquery/>}/>
               <Route path="createUserEnquery" element={<CreateUserEnquery/>}/>
+              <Route path="guestPass" element={<GuestPass/>}/>
               <Route path="checkInHistory" element={<CheckInHistory/>}/>
             </Route>
 

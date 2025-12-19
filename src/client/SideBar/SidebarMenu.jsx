@@ -46,7 +46,7 @@ const MENU = [
     id: "guestpass",
     title: "Guest Pass",
     icon: <FiBox />,
-    path: "/",
+    path: "/userDashboard/guestPass",
   },
 
   {
