@@ -36,6 +36,7 @@ const MENU = [
     children: [
       { title: "Members", path: "/adminDashboard/members" },
       { title: "Enquiry", path: "/adminDashboard/enquiry" },
+      { title: "Guest Pass", path: "/adminDashboard/guestPassReview" },
     ],
   },
 

@@ -46,6 +46,7 @@ import Enquiry from "./admin/Enquiry";
 import ReplyEnquiry from "./admin/Components/ReplyEnquiry";
 import CheckInHistory from "./client/CheckInHistory";
 import GuestPass from "./client/GuestPass";
+import GuestPassReview from "./admin/GuestPassReview";
 
 
 
@@ -103,6 +104,7 @@ function App() {
               <Route path="editMember/:id" element={<EditMember />} />
               <Route path="enquiry" element={<Enquiry/>}/>
               <Route path="replyEnquiry/:id" element={<ReplyEnquiry/>}/>
+              <Route path="guestPassReview" element={<GuestPassReview/>}/>
               <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />

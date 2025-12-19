@@ -159,7 +159,7 @@ export default function GuestPass() {
 
         {/* MESSAGES */}
         {error && (
-          <div className="text-xs text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 rounded-md px-3 py-2">
+          <div className="text-xs text-red-600 dark:text-red-400  px-3 py-2">
             {error}
           </div>
         )}
@@ -176,7 +176,7 @@ export default function GuestPass() {
             onClick={() => setForm(initialForm)}
             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
           >
-            Reset
+            Clear
           </button>
 
           <button
