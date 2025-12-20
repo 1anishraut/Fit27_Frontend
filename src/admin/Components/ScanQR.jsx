@@ -24,6 +24,7 @@ export default function ScanQR() {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [latestGuestPass, setLatestGuestPass] = useState(null);
 
   const [note, setNote] = useState("Access Granted from QR scanner");
 
@@ -121,6 +122,25 @@ export default function ScanQR() {
     startScanner();
     return () => stopScanner();
   }, []);
+  /* ====================================================== FETCH LATEST GUEST PASS */
+  const fetchLatestGuestPass = async (userId) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/guestPass/all`, {
+        withCredentials: true,
+      });
+
+      const list = res?.data?.data || [];
+
+      const latest = list
+        .filter((gp) => gp.user?._id === userId)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+      setLatestGuestPass(latest || null);
+    } catch (err) {
+      console.error("Failed to fetch guest pass");
+      setLatestGuestPass(null);
+    }
+  };
 
   /* ====================================================== FETCH MEMBER DATA*/
   const fetchUser = async (id) => {
@@ -132,6 +152,7 @@ export default function ScanQR() {
       setUserData(res.data.data);
       setLastLog(res.data.data.lastAccessLog || null);
       setNote("Access Granted from QR scanner");
+      fetchLatestGuestPass(res.data.data._id);
 
       setErrorMsg("");
     } catch {
@@ -174,7 +195,7 @@ export default function ScanQR() {
         `${BASE_URL}/access/grant`,
         {
           userId: userData._id,
-          status: "DENIED", 
+          status: "DENIED",
           note: note || "Access denied from QR scanner by Admin",
         },
         { withCredentials: true }
@@ -195,8 +216,6 @@ export default function ScanQR() {
     }
   };
 
-
-  
   /* ====================================================== ACCESS GRANTED */
   const handleGrant = async () => {
     if (!userData?._id) return;
@@ -234,31 +253,32 @@ export default function ScanQR() {
       {/* LEFT SIDE */}
       <div className="w-[70%] flex flex-col gap-8">
         {/* PROFILE CARD */}
-        <div className="bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex gap-8">
-          <div className="h-64 w-56 overflow-hidden rounded-2xl shadow-lg">
-            <img
-              src={
-                userData?.avatar
-                  ? `${BASE_URL}${userData.avatar}`
-                  : dummyProfile
-              }
-              className="h-full w-full object-cover"
-            />
-          </div>
+        <div className="bg-white dark:bg-[#111218] p-6 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex justify-between gap-10">
+          <div className="flex gap-10">
+            <div className="h-64 w-56 overflow-hidden rounded-2xl shadow-lg">
+              <img
+                src={
+                  userData?.avatar
+                    ? `${BASE_URL}${userData.avatar}`
+                    : dummyProfile
+                }
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold">
-              {userData
-                ? `${userData.firstName} ${userData.surName}`
-                : "Scan to view"}
-            </h2>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold">
+                {userData
+                  ? `${userData.firstName} ${userData.surName}`
+                  : "Scan to view"}
+              </h2>
 
-            <p>{userData?.emailId}</p>
-            <p>{userData?.contact}</p>
+              <p>{userData?.emailId}</p>
+              <p>{userData?.contact}</p>
 
-            {userData && (
-              <span
-                className={`px-4 py-1 rounded-full text-sm font-bold
+              {userData && (
+                <span
+                  className={`px-4 py-1 rounded-full text-sm font-bold
                 ${
                   userData.status === "active"
                     ? "bg-green-100 text-green-700"
@@ -268,9 +288,74 @@ export default function ScanQR() {
                     ? "bg-gray-300 text-gray-800"
                     : "bg-red-200 text-red-700"
                 }`}
-              >
-                {userData.status.toUpperCase()}
-              </span>
+                >
+                  {userData.status.toUpperCase()}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* LATEST GUEST PASS */}
+          {/* LATEST GUEST PASS */}
+          <div className="min-w-[260px]">
+            {latestGuestPass ? (
+              <div className="bg-gray-100 dark:bg-[#181920] border border-gray-300 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  Guest Pass
+                </h4>
+
+                {/* Guest Info */}
+                <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                  <p className="font-medium">
+                    {latestGuestPass.firstName} {latestGuestPass.surName}
+                  </p>
+
+                  {latestGuestPass.emailId && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {latestGuestPass.emailId}
+                    </p>
+                  )}
+
+                  {latestGuestPass.contact && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {latestGuestPass.contact}
+                    </p>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="my-3 h-px bg-gray-300 dark:bg-gray-700" />
+
+                {/* Status + Date */}
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold
+            ${
+              latestGuestPass.status === "GRANTED"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : latestGuestPass.status === "DENIED"
+                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+            }`}
+                  >
+                    {latestGuestPass.status}
+                  </span>
+
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {new Date(latestGuestPass.createdAt).toLocaleDateString(
+                      "en-IN",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 dark:bg-[#181920] border border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+                No guest pass found
+              </div>
             )}
           </div>
         </div>
