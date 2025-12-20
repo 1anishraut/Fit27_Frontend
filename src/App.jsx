@@ -47,6 +47,7 @@ import ReplyEnquiry from "./admin/Components/ReplyEnquiry";
 import CheckInHistory from "./client/CheckInHistory";
 import GuestPass from "./client/GuestPass";
 import GuestPassReview from "./admin/GuestPassReview";
+import AdminCreateEnquiry from "./admin/AdminCreateEnquiry";
 
 
 
@@ -99,6 +100,7 @@ function App() {
                 path="createWeeklySchedule"
                 element={<CreateWeeklySchedule />}
               />
+              <Route path="createEnquiry" element={<AdminCreateEnquiry/>}/>
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />
