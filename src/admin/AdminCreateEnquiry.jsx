@@ -19,10 +19,10 @@ export default function AdminCreateEnquiry() {
   const [loading, setLoading] = useState(false);
 
   /* -----------------------------
-     USER SEARCH STATE
+     SEARCH STATES
   ----------------------------- */
   const [searchText, setSearchText] = useState("");
-  const [userResults, setUserResults] = useState([]);
+  const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef(null);
 
@@ -41,17 +41,15 @@ export default function AdminCreateEnquiry() {
     });
 
     setSearchText("");
-    setUserResults([]);
+    setResults([]);
   };
 
   /* -----------------------------
-     USER SEARCH (DEBOUNCED)
+     USER / INSTRUCTOR SEARCH
   ----------------------------- */
   useEffect(() => {
-    if (targetType !== "USER") return;
-
-    if (!searchText.trim()) {
-      setUserResults([]);
+    if (!searchText.trim() || !targetType) {
+      setResults([]);
       return;
     }
 
@@ -60,13 +58,16 @@ export default function AdminCreateEnquiry() {
     debounceRef.current = setTimeout(async () => {
       try {
         setSearching(true);
-        const res = await axios.get(
-          `${BASE_URL}/admin/search/users?q=${searchText}`,
-          { withCredentials: true }
-        );
-        setUserResults(res.data.data || []);
+
+        const url =
+          targetType === "USER"
+            ? `${BASE_URL}/admin/search/users?q=${searchText}`
+            : `${BASE_URL}/admin/search/instructors?q=${searchText}`;
+
+        const res = await axios.get(url, { withCredentials: true });
+        setResults(res.data.data || []);
       } catch (err) {
-        console.error("User search failed", err);
+        console.error("Search failed", err);
       } finally {
         setSearching(false);
       }
@@ -101,6 +102,11 @@ export default function AdminCreateEnquiry() {
       return;
     }
 
+    if (targetType === "INSTRUCTOR" && !form.instructor) {
+      alert("Please select an instructor");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -108,9 +114,9 @@ export default function AdminCreateEnquiry() {
       formData.append("subject", form.subject);
       formData.append("message", form.message);
 
-      if (targetType === "USER") {
-        formData.append("user", form.user);
-      }
+      if (targetType === "USER") formData.append("user", form.user);
+      if (targetType === "INSTRUCTOR")
+        formData.append("instructor", form.instructor);
 
       attachments.forEach((file) => formData.append("attachments", file));
 
@@ -166,12 +172,12 @@ export default function AdminCreateEnquiry() {
             <option value="INSTRUCTOR">Instructor</option>
           </select>
 
-          {/* USER SEARCH */}
-          {targetType === "USER" && (
+          {/* SEARCH */}
+          {targetType && (
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search user (name / email / ID)"
+                placeholder={`Search ${targetType.toLowerCase()} (name / email)`}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border"
@@ -181,28 +187,38 @@ export default function AdminCreateEnquiry() {
                 <p className="text-xs text-gray-500 mt-1">Searching...</p>
               )}
 
-              {userResults.length > 0 && (
+              {results.length > 0 && (
                 <div
                   className="absolute z-10 w-full bg-white dark:bg-[#1a1b22]
                   border rounded-lg mt-1 max-h-56 overflow-auto"
                 >
-                  {userResults.map((u) => (
+                  {results.map((item) => (
                     <div
-                      key={u._id}
+                      key={item._id}
                       onClick={() => {
-                        setForm({ ...form, user: u._id });
+                        if (targetType === "USER") {
+                          setForm({ ...form, user: item._id });
+                        } else {
+                          setForm({
+                            ...form,
+                            instructor: item._id,
+                          });
+                        }
+
                         setSearchText(
-                          `${u.firstName} ${u.surName} (${u.emailId})`
+                          `${item.firstName} ${item.surName} (${
+                            item.emailId || item.contact
+                          })`
                         );
-                        setUserResults([]);
+                        setResults([]);
                       }}
                       className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#222]"
                     >
                       <p className="font-medium">
-                        {u.firstName} {u.surName}
+                        {item.firstName} {item.surName}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {u.emailId} • {u.customUserId}
+                        {item.emailId || item.contact}
                       </p>
                     </div>
                   ))}
