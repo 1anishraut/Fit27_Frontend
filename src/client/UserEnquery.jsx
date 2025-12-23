@@ -15,7 +15,7 @@ export default function UserEnquery() {
   const fetchEnquiries = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/user/get/enqueries`, {
+      const res = await axios.get(`${BASE_URL}/enquery/my`, {
         withCredentials: true,
       });
       setEnquiries(res?.data?.data || []);
