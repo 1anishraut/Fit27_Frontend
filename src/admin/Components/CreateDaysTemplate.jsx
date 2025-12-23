@@ -197,7 +197,7 @@ const CreateDaysSchedule = () => {
       {/* GENERAL INFO */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          Add New Days Schedule 
+          Add New Days Schedule
         </h2>
 
         {/* FLEX ROW */}

@@ -18,17 +18,13 @@ export default function AdminCreateEnquiry() {
   const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  /* -----------------------------
-     SEARCH STATES
-  ----------------------------- */
+  /* ----------------------------- SEARCH STATES */
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef(null);
 
-  /* -----------------------------
-     TARGET CHANGE
-  ----------------------------- */
+  /* ----------------------------- TARGET CHANGE */
   const handleTargetChange = (e) => {
     const value = e.target.value;
     setTargetType(value);
@@ -44,9 +40,7 @@ export default function AdminCreateEnquiry() {
     setResults([]);
   };
 
-  /* -----------------------------
-     USER / INSTRUCTOR SEARCH
-  ----------------------------- */
+  /* ----------------------------- SEARCH */
   useEffect(() => {
     if (!searchText.trim() || !targetType) {
       setResults([]);
@@ -74,16 +68,12 @@ export default function AdminCreateEnquiry() {
     }, 300);
   }, [searchText, targetType]);
 
-  /* -----------------------------
-     FILE CHANGE
-  ----------------------------- */
+  /* ----------------------------- FILE */
   const handleFileChange = (e) => {
     setAttachments([...e.target.files]);
   };
 
-  /* -----------------------------
-     SUBMIT
-  ----------------------------- */
+  /* ----------------------------- SUBMIT */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -135,63 +125,85 @@ export default function AdminCreateEnquiry() {
     }
   };
 
+  /* ----------------------------- INPUT STYLES */
+  const inputClass =
+    "w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
+
   return (
-    <div className="pb-10">
-      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6 max-w-3xl mx-auto">
-        <h2 className="text-xl font-semibold mb-6">Create Admin Enquiry</h2>
+    <div className="pb-10 text-sm">
+      <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6  mx-auto">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">
+          Create Admin Enquiry
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* SUBJECT */}
-          <input
-            type="text"
-            placeholder="Subject"
-            value={form.subject}
-            onChange={(e) => setForm({ ...form, subject: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border"
-            required
-          />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Subject <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={form.subject}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
+              className={inputClass}
+              placeholder="Membership related enquiry"
+              required
+            />
+          </div>
 
           {/* MESSAGE */}
-          <textarea
-            rows={5}
-            placeholder="Message"
-            value={form.message}
-            onChange={(e) => setForm({ ...form, message: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border"
-            required
-          />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Message <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              rows={5}
+              value={form.message}
+              onChange={(e) => setForm({ ...form, message: e.target.value })}
+              className={inputClass}
+              placeholder="Write your message here..."
+              required
+            />
+          </div>
 
           {/* TARGET */}
-          <select
-            value={targetType}
-            onChange={handleTargetChange}
-            className="w-full px-4 py-3 rounded-lg border"
-          >
-            <option value="">Select Enquiry For</option>
-            <option value="USER">User</option>
-            <option value="INSTRUCTOR">Instructor</option>
-          </select>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Enquiry For <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={targetType}
+              onChange={handleTargetChange}
+              className={inputClass}
+            >
+              <option value="">Select Target</option>
+              <option value="USER">User</option>
+              <option value="INSTRUCTOR">Instructor</option>
+            </select>
+          </div>
 
           {/* SEARCH */}
           {targetType && (
             <div className="relative">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Search {targetType.toLowerCase()}
+              </label>
+
               <input
                 type="text"
-                placeholder={`Search ${targetType.toLowerCase()} (name / email)`}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border"
+                placeholder="Type name / email"
+                className={inputClass}
               />
 
               {searching && (
-                <p className="text-xs text-gray-500 mt-1">Searching...</p>
+                <p className="text-xs text-gray-500 mt-1">Searching…</p>
               )}
 
               {results.length > 0 && (
-                <div
-                  className="absolute z-10 w-full bg-white dark:bg-[#1a1b22]
-                  border rounded-lg mt-1 max-h-56 overflow-auto"
-                >
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-[#1a1b22] border border-gray-200 dark:border-gray-700 rounded-lg max-h-56 overflow-auto">
                   {results.map((item) => (
                     <div
                       key={item._id}
@@ -199,10 +211,7 @@ export default function AdminCreateEnquiry() {
                         if (targetType === "USER") {
                           setForm({ ...form, user: item._id });
                         } else {
-                          setForm({
-                            ...form,
-                            instructor: item._id,
-                          });
+                          setForm({ ...form, instructor: item._id });
                         }
 
                         setSearchText(
@@ -212,9 +221,9 @@ export default function AdminCreateEnquiry() {
                         );
                         setResults([]);
                       }}
-                      className="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#222]"
+                      className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#222]"
                     >
-                      <p className="font-medium">
+                      <p className="text-sm font-medium">
                         {item.firstName} {item.surName}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -228,24 +237,34 @@ export default function AdminCreateEnquiry() {
           )}
 
           {/* ATTACHMENTS */}
-          <input type="file" multiple onChange={handleFileChange} />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Attachments (optional)
+            </label>
+            <input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="text-xs text-gray-600 dark:text-gray-300"
+            />
+          </div>
 
           {/* ACTIONS */}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg font-semibold bg-black text-white"
-            >
-              {loading ? "Submitting..." : "Create Enquiry"}
-            </button>
-
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-6 py-3 rounded-lg border"
+              className="px-4 py-2 rounded-lg text-xs border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
             >
               Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2 rounded-lg text-xs bg-black text-white dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-50"
+            >
+              {loading ? "Submitting…" : "Create Enquiry"}
             </button>
           </div>
         </form>
