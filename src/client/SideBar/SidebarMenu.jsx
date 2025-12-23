@@ -29,7 +29,11 @@ const MENU = [
     id: "enquiries",
     title: "Enquiries",
     icon: <FiMessageSquare />,
-    path: "/userDashboard/userEnquery",
+    children: [
+      { title: "My Enquiries", path: "/userDashboard/userEnquery" },
+      { title: "Admin Enquiries", path: "/userDashboard/adminEnquiries" },
+    ],
+   
   },
 
   {

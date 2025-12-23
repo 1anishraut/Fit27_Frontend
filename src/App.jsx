@@ -48,6 +48,7 @@ import CheckInHistory from "./client/CheckInHistory";
 import GuestPass from "./client/GuestPass";
 import GuestPassReview from "./admin/GuestPassReview";
 import AdminCreateEnquiry from "./admin/AdminCreateEnquiry";
+import AdminEnquery from "./client/AdminEnquery";
 
 
 
@@ -75,6 +76,7 @@ function App() {
               <Route path="bookClass" element={<BookClass/>}/>
               <Route path="bookedClasses" element={<BookedClass/>}/>
               <Route path="userEnquery" element={<UserEnquery/>}/>
+              <Route path="adminEnquiries" element={<AdminEnquery/>}/>
               <Route path="createUserEnquery" element={<CreateUserEnquery/>}/>
               <Route path="guestPass" element={<GuestPass/>}/>
               <Route path="checkInHistory" element={<CheckInHistory/>}/>
