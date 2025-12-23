@@ -17,11 +17,15 @@ export default function MemberCard() {
         });
 
         const user = res.data.user;
-        console.log(user);
-        
 
         if (user?.card?.image) {
-          setCardUrl(`${BASE_URL}${user.card.image}`);
+          // ✅ UNIVERSAL FIX
+          const imageUrl =
+            import.meta.env.MODE === "development"
+              ? `${BASE_URL}${user.card.image}`
+              : user.card.image;
+
+          setCardUrl(imageUrl);
           setUserId(user.customUserId);
         }
       } catch (err) {
@@ -34,18 +38,15 @@ export default function MemberCard() {
     fetchUser();
   }, []);
 
-  /* ================= DOWNLOAD (FIXED) ================= */
-const handleDownload = () => {
-  const link = document.createElement("a");
-  link.href = `${BASE_URL}/user/card/download`;
-  link.download = `${userId}.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+  /* ================= DOWNLOAD CARD ================= */
+  const handleDownload = () => {
+    const downloadUrl =
+      import.meta.env.MODE === "development"
+        ? `${BASE_URL}/user/card/download`
+        : "/api/user/card/download";
 
-
-
+    window.location.href = downloadUrl;
+  };
 
   /* ================= UI ================= */
   if (loading) {
@@ -64,7 +65,6 @@ const handleDownload = () => {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* CARD */}
       <div className="rounded-xl overflow-hidden shadow-lg border border-gray-700">
         <img
           src={cardUrl}
@@ -73,7 +73,6 @@ const handleDownload = () => {
         />
       </div>
 
-      {/* DOWNLOAD BUTTON */}
       <button
         onClick={handleDownload}
         className="px-6 py-2 rounded-lg bg-black text-white font-medium hover:bg-gray-900 transition"
