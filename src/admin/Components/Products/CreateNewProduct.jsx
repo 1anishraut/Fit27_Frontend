@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
 
+/* ----------------------------------
+   STYLES
+---------------------------------- */
 const inputClass =
   "w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
@@ -10,18 +13,23 @@ const selectClass = inputClass;
 
 const UNIT_TYPES = ["Piece", "Pack", "Box", "Kg"];
 
+/* ----------------------------------
+   COMPONENT
+---------------------------------- */
 const CreateProduct = () => {
   const navigate = useNavigate();
 
   const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  /* ---------------- FORM ---------------- */
   const [form, setForm] = useState({
     name: "",
-    SKU: "",
     description: "",
     brand: "",
+    productCategory: "",
     location: "",
     costPrice: "",
     sellingPrice: "",
@@ -29,9 +37,13 @@ const CreateProduct = () => {
     image: "",
   });
 
+  /* ---------------- UNITS ---------------- */
   const [units, setUnits] = useState([
     { type: "Piece", stock: "", stockAlert: "" },
   ]);
+
+  /* ---------------- VARIANTS ---------------- */
+  const [variants, setVariants] = useState([{ SKU: "", size: "", color: "" }]);
 
   /* ----------------------------------
      FETCH DROPDOWNS
@@ -39,16 +51,16 @@ const CreateProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [brandRes, locRes] = await Promise.all([
-          axios.get(`${BASE_URL}/product-brand/all`, {
+        const [brandRes, categoryRes, locRes] = await Promise.all([
+          axios.get(`${BASE_URL}/product-brand/all`, { withCredentials: true }),
+          axios.get(`${BASE_URL}/product-category/all`, {
             withCredentials: true,
           }),
-          axios.get(`${BASE_URL}/location/all`, {
-            withCredentials: true,
-          }),
+          axios.get(`${BASE_URL}/location/all`, { withCredentials: true }),
         ]);
 
         setBrands(brandRes?.data?.data || []);
+        setCategories(categoryRes?.data?.data || []);
         setLocations(locRes?.data?.data || []);
       } catch (err) {
         console.error(err);
@@ -60,26 +72,34 @@ const CreateProduct = () => {
   }, []);
 
   /* ----------------------------------
-     FORM HANDLERS
+     HANDLERS
   ---------------------------------- */
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleUnitChange = (index, field, value) => {
-    setUnits((prev) => {
-      const copy = [...prev];
-      copy[index][field] = value;
-      return copy;
-    });
+    const copy = [...units];
+    copy[index][field] = value;
+    setUnits(copy);
   };
 
-  const addUnit = () => {
+  const handleVariantChange = (index, field, value) => {
+    const copy = [...variants];
+    copy[index][field] = value;
+    setVariants(copy);
+  };
+
+  const addUnit = () =>
     setUnits((prev) => [...prev, { type: "Piece", stock: "", stockAlert: "" }]);
-  };
 
-  const removeUnit = (index) => {
+  const removeUnit = (index) =>
     setUnits((prev) => prev.filter((_, i) => i !== index));
-  };
+
+  const addVariant = () =>
+    setVariants((prev) => [...prev, { SKU: "", size: "", color: "" }]);
+
+  const removeVariant = (index) =>
+    setVariants((prev) => prev.filter((_, i) => i !== index));
 
   /* ----------------------------------
      SUBMIT
@@ -87,8 +107,18 @@ const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.SKU || !form.sellingPrice) {
-      alert("Name, SKU and Selling Price are required");
+    /* ✅ CORRECT VALIDATION */
+    const hasValidUnit = units.some((u) => u.type && u.stock !== "");
+
+    if (
+      !form.name ||
+      form.sellingPrice === "" ||
+      !form.brand ||
+      !form.productCategory ||
+      !form.location ||
+      !hasValidUnit
+    ) {
+      alert("Please fill all required fields");
       return;
     }
 
@@ -101,6 +131,7 @@ const CreateProduct = () => {
         stock: Number(u.stock || 0),
         stockAlert: Number(u.stockAlert || 0),
       })),
+      varients: variants.filter((v) => v.SKU),
     };
 
     try {
@@ -119,46 +150,56 @@ const CreateProduct = () => {
     }
   };
 
+  /* ----------------------------------
+     UI
+  ---------------------------------- */
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
       <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6">
         {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Create Product
-          </h1>
-
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-semibold">Create Product</h1>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="text-sm text-gray-600 dark:text-gray-300 hover:underline"
+            className="text-sm text-gray-500 hover:underline"
           >
             Cancel
           </button>
         </div>
 
         {/* BASIC INFO */}
-        <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Basic Information
-          </h2>
+        <div className="bg-white dark:bg-[#111218] rounded-xl p-6 space-y-4">
+          <input
+            name="name"
+            placeholder="Product Name *"
+            value={form.name}
+            onChange={handleChange}
+            className={inputClass}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              name="name"
-              placeholder="Product Name *"
-              value={form.name}
-              onChange={handleChange}
-              className={inputClass}
-            />
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
+            className={`${inputClass} h-24`}
+          />
 
-            <input
-              name="SKU"
-              placeholder="SKU *"
-              value={form.SKU}
+          <div className="grid md:grid-cols-3 gap-4">
+            <select
+              name="productCategory"
+              value={form.productCategory}
               onChange={handleChange}
-              className={inputClass}
-            />
+              className={selectClass}
+            >
+              <option value="">Select Category *</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
 
             <select
               name="brand"
@@ -166,7 +207,7 @@ const CreateProduct = () => {
               onChange={handleChange}
               className={selectClass}
             >
-              <option value="">Select Brand</option>
+              <option value="">Select Brand *</option>
               {brands.map((b) => (
                 <option key={b._id} value={b._id}>
                   {b.name}
@@ -174,31 +215,13 @@ const CreateProduct = () => {
               ))}
             </select>
 
-            <input
-              name="costPrice"
-              type="number"
-              placeholder="Cost Price"
-              value={form.costPrice}
-              onChange={handleChange}
-              className={inputClass}
-            />
-
-            <input
-              name="sellingPrice"
-              type="number"
-              placeholder="Selling Price *"
-              value={form.sellingPrice}
-              onChange={handleChange}
-              className={inputClass}
-            />
-
             <select
               name="location"
               value={form.location}
               onChange={handleChange}
               className={selectClass}
             >
-              <option value="">Select Location</option>
+              <option value="">Select Location *</option>
               {locations.map((l) => (
                 <option key={l._id} value={l._id}>
                   {l.locationName}
@@ -207,73 +230,121 @@ const CreateProduct = () => {
             </select>
           </div>
 
-          <textarea
-            name="description"
-            placeholder="Description"
-            value={form.description}
-            onChange={handleChange}
-            className={`${inputClass} mt-4 h-24`}
-          />
+          <div className="grid md:grid-cols-2 gap-4">
+            <input
+              type="number"
+              name="costPrice"
+              placeholder="Cost Price"
+              value={form.costPrice}
+              onChange={handleChange}
+              className={inputClass}
+            />
+            <input
+              type="number"
+              name="sellingPrice"
+              placeholder="Selling Price *"
+              value={form.sellingPrice}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* VARIANTS */}
+        <div className="bg-white dark:bg-[#111218] rounded-xl p-6">
+          <h2 className="font-semibold mb-3">Variants (SKU)</h2>
+
+          {variants.map((v, i) => (
+            <div key={i} className="grid md:grid-cols-4 gap-3 mb-3">
+              <input
+                placeholder="SKU"
+                value={v.SKU}
+                onChange={(e) => handleVariantChange(i, "SKU", e.target.value)}
+                className={inputClass}
+              />
+              <input
+                placeholder="Size"
+                value={v.size}
+                onChange={(e) => handleVariantChange(i, "size", e.target.value)}
+                className={inputClass}
+              />
+              <input
+                placeholder="Color"
+                value={v.color}
+                onChange={(e) =>
+                  handleVariantChange(i, "color", e.target.value)
+                }
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => removeVariant(i)}
+                disabled={variants.length === 1}
+                className="text-red-500 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addVariant}
+            className="text-blue-600 text-sm"
+          >
+            + Add Variant
+          </button>
         </div>
 
         {/* UNITS */}
-        <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Units & Stock
-          </h2>
+        <div className="bg-white dark:bg-[#111218] rounded-xl p-6">
+          <h2 className="font-semibold mb-3">Units & Stock</h2>
 
-          <div className="space-y-3">
-            {units.map((u, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center bg-gray-50 dark:bg-[#181920] p-3 rounded-lg"
+          {units.map((u, i) => (
+            <div key={i} className="grid md:grid-cols-4 gap-3 mb-3">
+              <select
+                value={u.type}
+                onChange={(e) => handleUnitChange(i, "type", e.target.value)}
+                className={selectClass}
               >
-                <select
-                  value={u.type}
-                  onChange={(e) => handleUnitChange(i, "type", e.target.value)}
-                  className={selectClass}
-                >
-                  {UNIT_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                {UNIT_TYPES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
 
-                <input
-                  type="number"
-                  placeholder="Stock"
-                  value={u.stock}
-                  onChange={(e) => handleUnitChange(i, "stock", e.target.value)}
-                  className={inputClass}
-                />
+              <input
+                type="number"
+                placeholder="Stock *"
+                value={u.stock}
+                onChange={(e) => handleUnitChange(i, "stock", e.target.value)}
+                className={inputClass}
+              />
 
-                <input
-                  type="number"
-                  placeholder="Stock Alert"
-                  value={u.stockAlert}
-                  onChange={(e) =>
-                    handleUnitChange(i, "stockAlert", e.target.value)
-                  }
-                  className={inputClass}
-                />
+              <input
+                type="number"
+                placeholder="Stock Alert"
+                value={u.stockAlert}
+                onChange={(e) =>
+                  handleUnitChange(i, "stockAlert", e.target.value)
+                }
+                className={inputClass}
+              />
 
-                <button
-                  type="button"
-                  onClick={() => removeUnit(i)}
-                  className="text-red-500 text-sm hover:underline"
-                  disabled={units.length === 1}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
+              <button
+                type="button"
+                onClick={() => removeUnit(i)}
+                disabled={units.length === 1}
+                className="text-red-500 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
 
           <button
             type="button"
             onClick={addUnit}
-            className="mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-blue-600 text-sm"
           >
             + Add Unit
           </button>
@@ -284,7 +355,7 @@ const CreateProduct = () => {
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 rounded-lg bg-black text-white dark:bg-white dark:text-black text-sm hover:opacity-90 disabled:opacity-50"
+            className="px-6 py-2 bg-black text-white rounded-lg disabled:opacity-50"
           >
             {loading ? "Saving..." : "Create Product"}
           </button>
