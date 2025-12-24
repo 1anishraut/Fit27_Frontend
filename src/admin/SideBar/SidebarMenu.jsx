@@ -40,6 +40,7 @@ const MENU = [
     icon: <FiUsers />,
     children: [
       { title: "Members", path: "/adminDashboard/members" },
+      { title: "Inactive Members", path: "/adminDashboard/inactiveMembers" },
       { title: "Enquiry", path: "/adminDashboard/enquiry" },
       { title: "Guest Pass", path: "/adminDashboard/guestPassReview" },
     ],

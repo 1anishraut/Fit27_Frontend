@@ -181,9 +181,31 @@ export default function EditMember() {
               <h2 className="text-lg font-semibold dark:text-white">
                 General Information
               </h2>
-              <h2>
-                Member Status <span className="text-green-500">{ststus}</span>
-              </h2>
+
+              <div className="flex flex-wrap items-center gap-x-10 gap-y-2 mt-4">
+                {/* MEMBER STATUS */}
+                <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  Member Status <span className="px-1"></span>
+                  <span className="text-green-500 font-semibold uppercase">{ststus}</span>
+                </h2>
+
+                {/* HOLD END DATE */}
+                {formData.holdEndDate && (
+                  <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    Hold Ending on <span className="px-1"></span>
+                    <span className="text-red-500 font-semibold">
+                      {new Date(formData.holdEndDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
+                    </span>
+                  </h2>
+                )}
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
@@ -315,29 +337,39 @@ export default function EditMember() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {/* START DATE */}
                 <div>
                   <label className="text-sm dark:text-white">Start Date</label>
                   <input
                     type="date"
                     name="startedAt"
-                    value={formData.startedAt}
-                    onChange={handleChange}
-                    className={inputClass}
+                    value={formData.startedAt || ""}
+                    disabled
+                    className={`${inputClass} cursor-not-allowed opacity-70`}
                   />
                 </div>
 
+                {/* END DATE */}
                 <div>
                   <label className="text-sm dark:text-white">End Date</label>
                   <input
                     type="date"
                     name="endedAt"
-                    value={formData.endedAt}
-                    onChange={handleChange}
-                    className={inputClass}
+                    value={formData.endedAt || ""}
+                    disabled
+                    className={`${inputClass} cursor-not-allowed opacity-70`}
                   />
                 </div>
 
-                {/* ⭐ HOLD DATE FIELDS */}
+                {/* FULL-WIDTH INFO NOTE */}
+                <div className="md:col-span-2">
+                  <p className="text-xs text-gray-500">
+                    Plan dates are auto-calculated and cannot be edited
+                    manually.
+                  </p>
+                </div>
+
+                {/* HOLD START */}
                 <div>
                   <label className="text-sm dark:text-white">
                     Hold Start Date
@@ -345,15 +377,13 @@ export default function EditMember() {
                   <input
                     type="date"
                     name="holdStartDate"
-                    value={formData.holdStartDate}
-                    min={todayInputDate()} // ❌ no back date
+                    value={formData.holdStartDate || ""}
+                    min={todayInputDate()}
                     onChange={(e) => {
                       const value = e.target.value;
-
                       setFormData((prev) => ({
                         ...prev,
                         holdStartDate: value,
-                        // 🔁 reset end date if start date is cleared
                         holdEndDate: value ? prev.holdEndDate : "",
                       }));
                     }}
@@ -361,6 +391,7 @@ export default function EditMember() {
                   />
                 </div>
 
+                {/* HOLD END */}
                 <div>
                   <label className="text-sm dark:text-white">
                     Hold End Date
@@ -368,9 +399,9 @@ export default function EditMember() {
                   <input
                     type="date"
                     name="holdEndDate"
-                    value={formData.holdEndDate}
-                    disabled={!formData.holdStartDate} // 🚫 disabled until start date
-                    min={formData.holdStartDate || todayInputDate()} // ❌ no back / before start
+                    value={formData.holdEndDate || ""}
+                    disabled={!formData.holdStartDate}
+                    min={formData.holdStartDate || todayInputDate()}
                     onChange={handleChange}
                     className={`${inputClass} ${
                       !formData.holdStartDate
@@ -381,7 +412,7 @@ export default function EditMember() {
                 </div>
               </div>
 
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 mt-3">
                 Note: Hold dates automatically extend end date.
               </p>
             </div>
