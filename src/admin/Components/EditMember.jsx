@@ -154,6 +154,18 @@ export default function EditMember() {
       <div className="p-10 text-gray-800 dark:text-white">Loading user...</div>
     );
 
+    const todayInputDate = () => {
+      const d = new Date();
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    };
+
+
+
   return (
     <div className="p-6 bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       <form onSubmit={handleSubmit}>
@@ -334,7 +346,17 @@ export default function EditMember() {
                     type="date"
                     name="holdStartDate"
                     value={formData.holdStartDate}
-                    onChange={handleChange}
+                    min={todayInputDate()} // ❌ no back date
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setFormData((prev) => ({
+                        ...prev,
+                        holdStartDate: value,
+                        // 🔁 reset end date if start date is cleared
+                        holdEndDate: value ? prev.holdEndDate : "",
+                      }));
+                    }}
                     className={inputClass}
                   />
                 </div>
@@ -347,8 +369,14 @@ export default function EditMember() {
                     type="date"
                     name="holdEndDate"
                     value={formData.holdEndDate}
+                    disabled={!formData.holdStartDate} // 🚫 disabled until start date
+                    min={formData.holdStartDate || todayInputDate()} // ❌ no back / before start
                     onChange={handleChange}
-                    className={inputClass}
+                    className={`${inputClass} ${
+                      !formData.holdStartDate
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   />
                 </div>
               </div>
