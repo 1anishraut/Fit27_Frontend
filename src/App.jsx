@@ -49,6 +49,10 @@ import GuestPass from "./client/GuestPass";
 import GuestPassReview from "./admin/GuestPassReview";
 import AdminCreateEnquiry from "./admin/AdminCreateEnquiry";
 import AdminEnquery from "./client/AdminEnquery";
+import InactiveMemembers from "./admin/InactiveMemembers";
+import Products from "./admin/Products";
+import ProductSettings from "./admin/Components/Products/ProductSettings";
+import CreateNewProduct from "./admin/Components/Products/CreateNewProduct";
 
 
 
@@ -106,6 +110,7 @@ function App() {
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />
+              <Route path="inactiveMembers" element={<InactiveMemembers/>}/>
               <Route path="enquiry" element={<Enquiry/>}/>
               <Route path="replyEnquiry/:id" element={<ReplyEnquiry/>}/>
               <Route path="guestPassReview" element={<GuestPassReview/>}/>
@@ -115,6 +120,9 @@ function App() {
               <Route path="instructors" element={<Instructors />} />
               <Route path="createInstructor" element={<CreateInstructor />} />
               <Route path="editInstructor/:id" element={<EditInstructor />} />
+              <Route path="products" element={<Products/>}/>
+              <Route path="createProduct" element={<CreateNewProduct/>}/>
+              <Route path="productSettings" element={<ProductSettings/>}/>
               <Route path="adminSettings" element={<AdminSettings />} />
             </Route>
           </Routes>

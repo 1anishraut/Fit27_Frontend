@@ -40,7 +40,10 @@ const MENU = [
     icon: <FiUsers />,
     children: [
       { title: "Members", path: "/adminDashboard/members" },
-      { title: "Inactive Members", path: "/adminDashboard/inactiveMembers" },
+      {
+        title: "Inactive Subscription",
+        path: "/adminDashboard/inactiveMembers",
+      },
       { title: "Enquiry", path: "/adminDashboard/enquiry" },
       { title: "Guest Pass", path: "/adminDashboard/guestPassReview" },
     ],
@@ -80,10 +83,17 @@ const MENU = [
       },
     ],
   },
+  {
+    id: "products",
+    title: "Products",
+    icon: <FiBox />,
+    children: [
+      { title: "Products", path: "/adminDashboard/products" },
+      { title: "Product Settings", path: "/adminDashboard/productSettings"},
+    ],
+  },
 
   { id: "orders", title: "Orders", icon: <FiShoppingCart />, path: "/" },
-
-  { id: "products", title: "Products", icon: <FiBox />, path: "/" },
 
   { id: "reports", title: "Reports", icon: <FiBarChart2 />, path: "/" },
 
