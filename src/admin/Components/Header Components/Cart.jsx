@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
 import { FiTrash2, FiUserPlus } from "react-icons/fi";
+import AddCustomer from "./AddCustomer";
+
+const inputClass =
+  "w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
 
 const Cart = () => {
   const [products, setProducts] = useState([]);
@@ -10,19 +14,22 @@ const Cart = () => {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showVariantsModal, setShowVariantsModal] = useState(false);
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
 
-  /* CART */
   const [cartItems, setCartItems] = useState([]);
 
-  /* CUSTOMER */
   const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [customerInfo, setCustomerInfo] = useState(null);
 
-  /* DISCOUNT */
+  const [paymentMode, setPaymentMode] = useState("CASH");
   const [discount, setDiscount] = useState(0);
 
-  /* ----------------------------------
-     FETCH PRODUCTS
-  ---------------------------------- */
+  /* ---------------------------------- FETCH */
+  useEffect(() => {
+    fetchProducts();
+    fetchUsers();
+  }, []);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -30,44 +37,26 @@ const Cart = () => {
         withCredentials: true,
       });
       setProducts(res?.data?.data || []);
-    } catch (err) {
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ----------------------------------
-     FETCH CUSTOMERS
-  ---------------------------------- */
   const fetchUsers = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}/admin/users`, {
-        withCredentials: true,
-      });
-      setUsers(res?.data?.data || []);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await axios.get(`${BASE_URL}/admin/users`, {
+      withCredentials: true,
+    });
+    setUsers(res?.data?.data || []);
   };
 
-  useEffect(() => {
-    fetchProducts();
-    fetchUsers();
-  }, []);
-
-  /* ----------------------------------
-     ADD TO CART
-  ---------------------------------- */
+  /* ---------------------------------- CART */
   const addToCart = (product, variant) => {
     setCartItems((prev) => {
       const index = prev.findIndex((i) => i.variant.SKU === variant.SKU);
-
-      if (index !== -1) {
+      if (index !== -1)
         return prev.map((item, i) =>
           i === index ? { ...item, qty: item.qty + 1 } : item
         );
-      }
 
       return [
         ...prev,
@@ -84,25 +73,93 @@ const Cart = () => {
     setShowVariantsModal(false);
   };
 
-  /* ----------------------------------
-     REMOVE FROM CART
-  ---------------------------------- */
   const removeFromCart = (sku) => {
     setCartItems((prev) => prev.filter((i) => i.variant.SKU !== sku));
   };
 
-  /* ----------------------------------
-     CALCULATIONS
-  ---------------------------------- */
+  /* ---------------------------------- CALC */
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-
   const appliedDiscount = discount > subtotal ? subtotal : discount;
-
   const total = subtotal - appliedDiscount;
+
+  /* ---------------------------------- BUILD ORDER */
+  const buildSelectedProducts = () =>
+    cartItems.map((item) => ({
+      product: item.productId,
+      productName: item.productName,
+      variant: {
+        SKU: item.variant.SKU,
+        size: item.variant.size,
+        color: item.variant.color,
+      },
+      price: item.price,
+      qty: item.qty,
+      total: item.price * item.qty,
+    }));
+
+  /* ---------------------------------- CUSTOMER */
+  const handleCreateCustomer = (data) => {
+    setCustomerInfo({
+      firstName: data.firstName,
+      surName: data.surName,
+      emailId: data.emailId,
+      contact: data.contact,
+      billingAddress: {
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        zip: data.zip,
+      },
+    });
+
+    setSelectedCustomer("");
+    setShowAddCustomer(false);
+  };
+
+  const resolvedCustomer = selectedCustomer
+    ? users.find((u) => u._id === selectedCustomer)
+    : null;
+
+  /* ---------------------------------- PLACE ORDER */
+  const handlePlaceOrder = async () => {
+    try {
+      if (!cartItems.length) return alert("Cart is empty");
+      if (!selectedCustomer && !customerInfo)
+        return alert("Select or add customer");
+
+      const payload = {
+        selectedProducts: buildSelectedProducts(),
+        paymentMode,
+        subtotal,
+        discount,
+        tax: 0,
+        totalAmount: total,
+      };
+
+      if (selectedCustomer) payload.customer = selectedCustomer;
+      if (customerInfo) payload.customerInfo = customerInfo;
+
+      await axios.post(`${BASE_URL}/order/create`, payload, {
+        withCredentials: true,
+      });
+
+      alert("Order placed successfully");
+
+      setCartItems([]);
+      setDiscount(0);
+      setSelectedCustomer("");
+      setCustomerInfo(null);
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.message || "Failed to place order");
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
-      <h1 className="text-xl font-semibold mb-6 dark:text-white">
+      <h1 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
         Point of Sale
       </h1>
 
@@ -120,9 +177,9 @@ const Cart = () => {
                     setSelectedProduct(p);
                     setShowVariantsModal(true);
                   }}
-                  className="cursor-pointer bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg"
+                  className="cursor-pointer bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
                 >
-                  <div className="h-40 bg-gray-100 dark:bg-[#1f1f23] flex items-center justify-center">
+                  <div className="h-40 bg-gray-100 dark:bg-[#181920] flex items-center justify-center">
                     {p.image ? (
                       <img
                         src={`${BASE_URL}/${p.image}`}
@@ -135,7 +192,9 @@ const Cart = () => {
                   </div>
 
                   <div className="p-4">
-                    <h3 className="font-semibold dark:text-white">{p.name}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                      {p.name}
+                    </h3>
                     <p className="text-xs text-gray-500">
                       {p.brand?.name || "-"}
                     </p>
@@ -147,15 +206,18 @@ const Cart = () => {
           )}
         </div>
 
-        {/* RIGHT – UI UNCHANGED */}
+        {/* RIGHT */}
         <div className="col-span-12 lg:col-span-3">
           <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-4 sticky top-20 max-w-sm">
-            {/* SELECT CUSTOMER (same top position as your UI) */}
-            <div className="flex gap-3 " >
+            {/* CUSTOMER SELECT */}
+            <div className="flex gap-3">
               <select
                 value={selectedCustomer}
-                onChange={(e) => setSelectedCustomer(e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm "
+                onChange={(e) => {
+                  setSelectedCustomer(e.target.value);
+                  setCustomerInfo(null);
+                }}
+                className={inputClass}
               >
                 <option value="">Select customer</option>
                 {users.map((u) => (
@@ -164,9 +226,11 @@ const Cart = () => {
                   </option>
                 ))}
               </select>
+
               <button
-              onClick={""}
-               className="px-3 rounded bg-blue-600 text-white">
+                onClick={() => setShowAddCustomer(true)}
+                className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+              >
                 <FiUserPlus />
               </button>
             </div>
@@ -177,14 +241,14 @@ const Cart = () => {
                 Empty Cart
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 mt-4">
                 {cartItems.map((item) => (
                   <div
                     key={item.variant.SKU}
-                    className="border rounded-lg p-3 flex justify-between"
+                    className="bg-gray-50 dark:bg-[#181920] rounded-md p-3 flex justify-between"
                   >
                     <div>
-                      <p className="text-sm font-medium dark:text-white">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {item.productName}
                       </p>
                       <p className="text-xs text-gray-500">
@@ -197,7 +261,7 @@ const Cart = () => {
 
                     <button
                       onClick={() => removeFromCart(item.variant.SKU)}
-                      className="text-red-500"
+                      className="text-red-500 hover:text-red-600"
                     >
                       <FiTrash2 size={14} />
                     </button>
@@ -206,8 +270,8 @@ const Cart = () => {
               </div>
             )}
 
-            {/* SUMMARY – SAME STRUCTURE */}
-            <div className="border-t mt-4 pt-3 space-y-2 text-sm">
+            {/* SUMMARY */}
+            <div className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-3 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toFixed(2)}</span>
@@ -220,7 +284,7 @@ const Cart = () => {
                   min="0"
                   value={discount}
                   onChange={(e) => setDiscount(Number(e.target.value))}
-                  className="w-20 border rounded px-2 py-1 text-sm text-right"
+                  className="w-20 border border-gray-300 dark:border-gray-700 rounded px-2 py-1 text-sm text-right bg-white dark:bg-[#14151c]"
                 />
               </div>
 
@@ -235,9 +299,39 @@ const Cart = () => {
               </div>
             </div>
 
+            {/* CUSTOMER DETAILS */}
+            {(resolvedCustomer || customerInfo) && (
+              <div className="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                <p className="font-medium">Customer</p>
+                <p>
+                  {(resolvedCustomer || customerInfo).firstName}{" "}
+                  {(resolvedCustomer || customerInfo).surName}
+                </p>
+                <p>{(resolvedCustomer || customerInfo).contact}</p>
+                {(resolvedCustomer || customerInfo).emailId && (
+                  <p>{(resolvedCustomer || customerInfo).emailId}</p>
+                )}
+              </div>
+            )}
+
+            {/* PAYMENT */}
+            <div className="mt-3">
+              <select
+                value={paymentMode}
+                onChange={(e) => setPaymentMode(e.target.value)}
+                className={inputClass}
+              >
+                <option value="CASH">Cash</option>
+                <option value="CARD">Card</option>
+                <option value="UPI">UPI</option>
+                <option value="ONLINE">Online</option>
+              </select>
+            </div>
+
             <button
-              disabled={cartItems.length === 0 || !selectedCustomer}
-              className="w-full mt-4 py-2 rounded bg-indigo-600 text-white disabled:opacity-50"
+              onClick={handlePlaceOrder}
+              disabled={!cartItems.length}
+              className="w-full mt-4 py-2 rounded-lg bg-black text-white dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-50"
             >
               PLACE ORDER
             </button>
@@ -245,10 +339,10 @@ const Cart = () => {
         </div>
       </div>
 
-      {/* VARIANT MODAL – unchanged */}
+      {/* VARIANT MODAL */}
       {showVariantsModal && selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-[#111218] max-w-4xl w-full rounded-xl p-6">
+          <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 max-w-4xl w-full rounded-xl p-6">
             <div className="flex justify-between mb-4">
               <h2 className="text-lg font-semibold">
                 {selectedProduct.name} – Variants
@@ -256,30 +350,30 @@ const Cart = () => {
               <button onClick={() => setShowVariantsModal(false)}>✕</button>
             </div>
 
-            <table className="min-w-full text-sm border">
-              <thead className="bg-gray-100">
+            <table className="min-w-full text-sm border border-gray-200 dark:border-gray-700">
+              <thead className="bg-gray-100 dark:bg-[#181920]">
                 <tr>
-                  <th className="px-3 py-2">SKU</th>
-                  <th className="px-3 py-2">Size</th>
-                  <th className="px-3 py-2">Color</th>
-                  <th className="px-3 py-2">Price</th>
-                  <th className="px-3 py-2">Action</th>
+                  <th className="px-3 py-2 text-left">SKU</th>
+                  <th className="px-3 py-2 text-left">Size</th>
+                  <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Price</th>
+                  <th className="px-3 py-2 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {selectedProduct.varients.map((v, i) => (
-                  <tr key={i}>
+                  <tr
+                    key={i}
+                    className="border-t border-gray-200 dark:border-gray-700"
+                  >
                     <td className="px-3 py-2">{v.SKU}</td>
                     <td className="px-3 py-2">{v.size}</td>
                     <td className="px-3 py-2">{v.color}</td>
                     <td className="px-3 py-2">₹{v.sizeSellingPrice}</td>
                     <td className="px-3 py-2">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(selectedProduct, v);
-                        }}
-                        className="px-3 py-1 text-xs bg-black text-white rounded"
+                        onClick={() => addToCart(selectedProduct, v)}
+                        className="px-3 py-1 text-xs rounded bg-black text-white dark:bg-white dark:text-black"
                       >
                         Select
                       </button>
@@ -291,6 +385,12 @@ const Cart = () => {
           </div>
         </div>
       )}
+
+      <AddCustomer
+        open={showAddCustomer}
+        onClose={() => setShowAddCustomer(false)}
+        onCreate={handleCreateCustomer}
+      />
     </div>
   );
 };

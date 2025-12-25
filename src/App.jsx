@@ -54,6 +54,7 @@ import Products from "./admin/Products";
 import ProductSettings from "./admin/Components/Products/ProductSettings";
 import CreateNewProduct from "./admin/Components/Products/CreateNewProduct";
 import Cart from "./admin/Components/Header Components/Cart";
+import OrderHistory from "./admin/Components/Products/OrderHistory";
 
 
 
@@ -95,18 +96,9 @@ function App() {
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="editClasses/:id" element={<EditClasses />} />
-              <Route
-                path="allClassScheduleList"
-                element={<AllClassScheduleList />}
-              />
-              <Route
-                path="createDaysSchedule"
-                element={<CreateDaysSchedule />}
-              />
-              <Route
-                path="createWeeklySchedule"
-                element={<CreateWeeklySchedule />}
-              />
+              <Route path="allClassScheduleList" element={<AllClassScheduleList />}/>
+              <Route path="createDaysSchedule" element={<CreateDaysSchedule />}/>
+              <Route path="createWeeklySchedule" element={<CreateWeeklySchedule />}/>
               <Route path="createEnquiry" element={<AdminCreateEnquiry/>}/>
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
@@ -126,6 +118,7 @@ function App() {
               <Route path="productSettings" element={<ProductSettings/>}/>
               <Route path="cart" element={<Cart/>}/>
               <Route path="adminSettings" element={<AdminSettings />} />
+              <Route path="orderHistory" element={<OrderHistory/>}/>
             </Route>
           </Routes>
         </BrowserRouter>

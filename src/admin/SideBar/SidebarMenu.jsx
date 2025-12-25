@@ -89,11 +89,10 @@ const MENU = [
     icon: <FiBox />,
     children: [
       { title: "Products", path: "/adminDashboard/products" },
-      { title: "Product Settings", path: "/adminDashboard/productSettings"},
+      { title: "Product Settings", path: "/adminDashboard/productSettings" },
+      { title: "Order History", path: "/adminDashboard/orderHistory" },
     ],
   },
-
-  { id: "orders", title: "Orders", icon: <FiShoppingCart />, path: "/" },
 
   { id: "reports", title: "Reports", icon: <FiBarChart2 />, path: "/" },
 
