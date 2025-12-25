@@ -43,7 +43,15 @@ const CreateProduct = () => {
   ]);
 
   /* ---------------- VARIANTS ---------------- */
-  const [variants, setVariants] = useState([{ SKU: "", size: "", color: "" }]);
+  const [variants, setVariants] = useState([
+    {
+      SKU: "",
+      size: "",
+      color: "",
+      sizeCostPrice: "",
+      sizeSellingPrice: "",
+    },
+  ]);
 
   /* ----------------------------------
      FETCH DROPDOWNS
@@ -96,7 +104,16 @@ const CreateProduct = () => {
     setUnits((prev) => prev.filter((_, i) => i !== index));
 
   const addVariant = () =>
-    setVariants((prev) => [...prev, { SKU: "", size: "", color: "" }]);
+    setVariants((prev) => [
+      ...prev,
+      {
+        SKU: "",
+        size: "",
+        color: "",
+        sizeCostPrice: "",
+        sizeSellingPrice: "",
+      },
+    ]);
 
   const removeVariant = (index) =>
     setVariants((prev) => prev.filter((_, i) => i !== index));
@@ -109,15 +126,20 @@ const CreateProduct = () => {
 
     const hasValidUnit = units.some((u) => u.type && u.stock !== "");
 
+    const hasInvalidVariant = variants.some(
+      (v) => !v.SKU || v.sizeCostPrice === "" || v.sizeSellingPrice === ""
+    );
+
     if (
       !form.name ||
       form.sellingPrice === "" ||
       !form.brand ||
       !form.productCategory ||
       !form.location ||
-      !hasValidUnit
+      !hasValidUnit ||
+      hasInvalidVariant
     ) {
-      alert("Please fill all required fields");
+      alert("Please fill all required fields including variant prices");
       return;
     }
 
@@ -130,7 +152,13 @@ const CreateProduct = () => {
         stock: Number(u.stock || 0),
         stockAlert: Number(u.stockAlert || 0),
       })),
-      varients: variants.filter((v) => v.SKU),
+      varients: variants.map((v) => ({
+        SKU: v.SKU,
+        size: v.size,
+        color: v.color,
+        sizeCostPrice: Number(v.sizeCostPrice),
+        sizeSellingPrice: Number(v.sizeSellingPrice),
+      })),
     };
 
     try {
@@ -233,7 +261,7 @@ const CreateProduct = () => {
             <input
               type="number"
               name="costPrice"
-              placeholder="Cost Price"
+              placeholder="Base Cost Price"
               value={form.costPrice}
               onChange={handleChange}
               className={inputClass}
@@ -241,7 +269,7 @@ const CreateProduct = () => {
             <input
               type="number"
               name="sellingPrice"
-              placeholder="Selling Price *"
+              placeholder="Base Selling Price *"
               value={form.sellingPrice}
               onChange={handleChange}
               className={inputClass}
@@ -251,22 +279,24 @@ const CreateProduct = () => {
 
         {/* VARIANTS */}
         <div className="bg-white dark:bg-[#111218] rounded-xl p-6">
-          <h2 className="font-semibold mb-3">Variants (SKU)</h2>
+          <h2 className="font-semibold mb-3">Variants (Size-wise Pricing)</h2>
 
           {variants.map((v, i) => (
-            <div key={i} className="grid md:grid-cols-4 gap-3 mb-3">
+            <div key={i} className="grid md:grid-cols-6 gap-3 mb-3 items-end">
               <input
-                placeholder="SKU"
+                placeholder="SKU *"
                 value={v.SKU}
                 onChange={(e) => handleVariantChange(i, "SKU", e.target.value)}
                 className={inputClass}
               />
+
               <input
                 placeholder="Size"
                 value={v.size}
                 onChange={(e) => handleVariantChange(i, "size", e.target.value)}
                 className={inputClass}
               />
+
               <input
                 placeholder="Color"
                 value={v.color}
@@ -275,6 +305,27 @@ const CreateProduct = () => {
                 }
                 className={inputClass}
               />
+
+              <input
+                type="number"
+                placeholder="Size Cost Price *"
+                value={v.sizeCostPrice}
+                onChange={(e) =>
+                  handleVariantChange(i, "sizeCostPrice", e.target.value)
+                }
+                className={inputClass}
+              />
+
+              <input
+                type="number"
+                placeholder="Size Selling Price *"
+                value={v.sizeSellingPrice}
+                onChange={(e) =>
+                  handleVariantChange(i, "sizeSellingPrice", e.target.value)
+                }
+                className={inputClass}
+              />
+
               <button
                 type="button"
                 onClick={() => removeVariant(i)}

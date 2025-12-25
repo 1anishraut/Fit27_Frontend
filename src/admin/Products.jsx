@@ -26,7 +26,6 @@ const Products = () => {
       const data = res?.data?.data || [];
       setProducts(data);
 
-      /* extract all sizes */
       const sizes = [
         ...new Set(
           data
@@ -69,16 +68,11 @@ const Products = () => {
     }
   };
 
-  /* ----------------------------------
-     HANDLE SKU INPUT (300ms debounce)
-  ---------------------------------- */
   const handleSkuChange = (e) => {
     const value = e.target.value;
     setSkuSearch(value);
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(() => {
       searchBySKU(value.trim());
@@ -105,7 +99,7 @@ const Products = () => {
         </button>
       </div>
 
-      {/* 🔍 SKU FILTER */}
+      {/* SKU FILTER */}
       <div className="mb-4 bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Search by SKU
@@ -157,6 +151,7 @@ const Products = () => {
                 <tr>
                   <th className="px-4 py-3 text-left">Name</th>
                   <th className="px-4 py-3 text-left">Sizes</th>
+                  <th className="px-4 py-3 text-left">Stock</th>
                   <th className="px-4 py-3 text-left">Brand</th>
                   <th className="px-4 py-3 text-left">Price</th>
                   <th className="px-4 py-3 text-left">Status</th>
@@ -165,54 +160,77 @@ const Products = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {products.map((p) => (
-                  <tr
-                    key={p._id}
-                    className="hover:bg-gray-50 dark:hover:bg-[#1f1f23]"
-                  >
-                    <td className="px-4 py-3 font-medium">{p.name}</td>
+                {products.map((p) => {
+                  const totalStock = (p.unit || []).reduce(
+                    (sum, u) => sum + (u.stock || 0),
+                    0
+                  );
 
-                    <td className="px-4 py-3">
-                      {p.varients?.length ? (
-                        <div className="flex flex-wrap gap-1">
-                          {[
-                            ...new Set(
-                              p.varients.map((v) => v.size).filter(Boolean)
-                            ),
-                          ].map((size) => (
-                            <span
-                              key={size}
-                              className="px-2 py-0.5 text-xs rounded bg-gray-200 dark:bg-[#2a2b31]"
-                            >
-                              {size}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
+                  const isLowStock = (p.unit || []).some(
+                    (u) => u.stockAlert > 0 && u.stock <= u.stockAlert
+                  );
 
-                    <td className="px-4 py-3">{p.brand?.name || "-"}</td>
-                    <td className="px-4 py-3">₹{p.sellingPrice}</td>
+                  return (
+                    <tr
+                      key={p._id}
+                      className="hover:bg-gray-50 dark:hover:bg-[#1f1f23]"
+                    >
+                      <td className="px-4 py-3 font-medium">{p.name}</td>
 
-                    <td className="px-4 py-3">
-                      {p.status === "active" ? (
-                        <span className="px-2 py-1 text-xs rounded bg-green-500 text-white">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 text-xs rounded bg-red-500 text-white">
-                          Inactive
-                        </span>
-                      )}
-                    </td>
+                      <td className="px-4 py-3">
+                        {p.varients?.length ? (
+                          <div className="flex flex-wrap gap-1">
+                            {[
+                              ...new Set(
+                                p.varients.map((v) => v.size).filter(Boolean)
+                              ),
+                            ].map((size) => (
+                              <span
+                                key={size}
+                                className="px-2 py-0.5 text-xs rounded bg-gray-200 dark:bg-[#2a2b31]"
+                              >
+                                {size}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
 
-                    <td className="px-4 py-3 text-gray-600">
-                      {new Date(p.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
+                      {/* ✅ STOCK (UI SAME, ONLY COLOR CHANGE) */}
+                      <td
+                        className={`px-4 py-3 font-medium ${
+                          isLowStock
+                            ? "text-red-600 dark:text-red-500"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                      >
+                        {totalStock}
+                      </td>
+
+                      <td className="px-4 py-3">{p.brand?.name || "-"}</td>
+
+                      <td className="px-4 py-3">₹{p.sellingPrice}</td>
+
+                      <td className="px-4 py-3">
+                        {p.status === "active" ? (
+                          <span className="px-2 py-1 text-xs rounded bg-green-500 text-white">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs rounded bg-red-500 text-white">
+                            Inactive
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                        {new Date(p.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
