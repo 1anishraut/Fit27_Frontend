@@ -107,7 +107,6 @@ const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    /* ✅ CORRECT VALIDATION */
     const hasValidUnit = units.some((u) => u.type && u.stock !== "");
 
     if (
