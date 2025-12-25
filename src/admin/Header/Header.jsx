@@ -11,6 +11,7 @@ import {
   FiSun,
   FiMoon,
 } from "react-icons/fi";
+import { LuShoppingCart } from "react-icons/lu";
 import { useSelector } from "react-redux";
 import { BASE_URL } from "../../Utils/Constants";
 import UserMenu from "./UserMenu";
@@ -103,6 +104,14 @@ export default function Header({ collapsed, setCollapsed, theme, setTheme }) {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/adminDashboard/cart")}
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"
+            title="Cart"
+          >
+            <LuShoppingCart className="text-gray-700 dark:text-gray-200" />
+          </button>
+
           <button
             onClick={() => setSearchOpen((s) => !s)}
             className="p-2 rounded hover:bg-gray-100 dark:hover:bg-[#1f1f23]"

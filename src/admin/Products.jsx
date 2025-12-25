@@ -105,34 +105,36 @@ const Products = () => {
           Search by SKU
         </label>
 
-        <input
-          type="text"
-          value={skuSearch}
-          onChange={handleSkuChange}
-          placeholder="Type SKU (e.g. ABC123)"
-          className="w-full md:w-96 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-        />
-      </div>
+        <div className="flex justify-between mt-6">
+          <input
+            type="text"
+            value={skuSearch}
+            onChange={handleSkuChange}
+            placeholder="Type SKU (e.g. ABC123)"
+            className="w-full md:w-96 border border-gray-300 dark:border-gray-700 rounded-md px-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+          />
 
-      {/* AVAILABLE SIZES */}
-      {allSizes.length > 0 && (
-        <div className="mb-6 bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Available Sizes
-          </p>
+          {/* AVAILABLE SIZES */}
+          {allSizes.length > 0 && (
+            <div className=" bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Available Sizes
+              </p>
 
-          <div className="flex flex-wrap gap-2">
-            {allSizes.map((size) => (
-              <span
-                key={size}
-                className="px-3 py-1 text-xs rounded-full bg-black text-white dark:bg-white dark:text-black"
-              >
-                {size}
-              </span>
-            ))}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {allSizes.map((size) => (
+                  <span
+                    key={size}
+                    className="px-3 py-1 text-xs rounded-full bg-black text-white dark:bg-white dark:text-black"
+                  >
+                    {size}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* TABLE */}
       <div className="bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">

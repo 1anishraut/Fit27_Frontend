@@ -53,6 +53,7 @@ import InactiveMemembers from "./admin/InactiveMemembers";
 import Products from "./admin/Products";
 import ProductSettings from "./admin/Components/Products/ProductSettings";
 import CreateNewProduct from "./admin/Components/Products/CreateNewProduct";
+import Cart from "./admin/Components/Header Components/Cart";
 
 
 
@@ -123,6 +124,7 @@ function App() {
               <Route path="products" element={<Products/>}/>
               <Route path="createProduct" element={<CreateNewProduct/>}/>
               <Route path="productSettings" element={<ProductSettings/>}/>
+              <Route path="cart" element={<Cart/>}/>
               <Route path="adminSettings" element={<AdminSettings />} />
             </Route>
           </Routes>
