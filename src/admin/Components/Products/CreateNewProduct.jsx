@@ -23,6 +23,8 @@ const CreateProduct = () => {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+
 
   /* ---------------- FORM ---------------- */
   const [form, setForm] = useState({
@@ -34,7 +36,7 @@ const CreateProduct = () => {
     costPrice: "",
     sellingPrice: "",
     status: "active",
-    image: "",
+    // image: "",
   });
 
   /* ---------------- UNITS ---------------- */
@@ -124,47 +126,68 @@ const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const hasValidUnit = units.some((u) => u.type && u.stock !== "");
-
-    const hasInvalidVariant = variants.some(
-      (v) => !v.SKU || v.sizeCostPrice === "" || v.sizeSellingPrice === ""
-    );
-
-    if (
-      !form.name ||
-      form.sellingPrice === "" ||
-      !form.brand ||
-      !form.productCategory ||
-      !form.location ||
-      !hasValidUnit ||
-      hasInvalidVariant
-    ) {
-      alert("Please fill all required fields including variant prices");
+    const validUnits = units.filter((u) => u.type && u.stock !== "");
+    if (validUnits.length === 0) {
+      alert("At least one unit with stock is required");
       return;
     }
 
-    const payload = {
-      ...form,
-      costPrice: Number(form.costPrice || 0),
-      sellingPrice: Number(form.sellingPrice),
-      unit: units.map((u) => ({
-        type: u.type,
-        stock: Number(u.stock || 0),
-        stockAlert: Number(u.stockAlert || 0),
-      })),
-      varients: variants.map((v) => ({
-        SKU: v.SKU,
-        size: v.size,
-        color: v.color,
-        sizeCostPrice: Number(v.sizeCostPrice),
-        sizeSellingPrice: Number(v.sizeSellingPrice),
-      })),
-    };
+    const activeVariants = variants.filter((v) => v.SKU);
+
+    for (const v of activeVariants) {
+      if (v.sizeCostPrice === "" || v.sizeSellingPrice === "") {
+        alert("Variant prices are required when SKU is filled");
+        return;
+      }
+    }
+
+    if (!form.name || !form.brand || !form.productCategory || !form.location) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const formData = new FormData();
+
+    Object.entries(form).forEach(([key, val]) => {
+      if (val !== "" && val !== null && val !== undefined) {
+        formData.append(key, val);
+      }
+    });
+
+    formData.append(
+      "unit",
+      JSON.stringify(
+        validUnits.map((u) => ({
+          type: u.type,
+          stock: Number(u.stock || 0),
+          stockAlert: Number(u.stockAlert || 0),
+        }))
+      )
+    );
+
+    formData.append(
+      "varients",
+      JSON.stringify(
+        activeVariants.map((v) => ({
+          SKU: v.SKU,
+          size: v.size,
+          color: v.color,
+          sizeCostPrice: Number(v.sizeCostPrice),
+          sizeSellingPrice: Number(v.sizeSellingPrice),
+        }))
+      )
+    );
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
     try {
       setLoading(true);
-      await axios.post(`${BASE_URL}/product/create`, payload, {
+
+      await axios.post(`${BASE_URL}/product/create`, formData, {
         withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("Product created successfully");
@@ -176,6 +199,7 @@ const CreateProduct = () => {
       setLoading(false);
     }
   };
+
 
   /* ----------------------------------
      UI
@@ -211,6 +235,13 @@ const CreateProduct = () => {
             value={form.description}
             onChange={handleChange}
             className={`${inputClass} h-24`}
+          />
+          {/* 🔥 IMAGE UPLOAD (NEW) */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files[0])}
+            className={inputClass}
           />
 
           <div className="grid md:grid-cols-3 gap-4">
