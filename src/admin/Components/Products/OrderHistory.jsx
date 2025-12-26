@@ -87,7 +87,7 @@ const OrderHistory = () => {
           <div className="p-6 text-sm text-gray-500">No orders found</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+            <table className="w-full table-fixed text-sm">
               <thead className="bg-gray-100 dark:bg-[#181920] text-gray-700 dark:text-gray-300">
                 <tr>
                   {[
@@ -172,8 +172,8 @@ const OrderHistory = () => {
                       </button>
                       <button
                         onClick={(e) => handleDeleteOrder(order._id, e)}
-                        // disabled={order.status === "PAID"} 
-                        className={`ml-4 px-3 py-1 text-xs rounded text-white ${
+                        // disabled={order.status === "PAID"}
+                        className={`ml-4 px-3 py-1 text-xs rounded text-white bg-red-400 hover:bg-red-600 ${
                           order.status === "PAID"
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-red-500 hover:bg-red-600"

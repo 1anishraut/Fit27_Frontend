@@ -25,7 +25,6 @@ const CreateProduct = () => {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
 
-
   /* ---------------- FORM ---------------- */
   const [form, setForm] = useState({
     name: "",
@@ -39,17 +38,15 @@ const CreateProduct = () => {
     // image: "",
   });
 
-  /* ---------------- UNITS ---------------- */
-  const [units, setUnits] = useState([
-    { type: "Piece", stock: "", stockAlert: "" },
-  ]);
-
   /* ---------------- VARIANTS ---------------- */
   const [variants, setVariants] = useState([
     {
       SKU: "",
       size: "",
       color: "",
+      type: "Piece", // ✅ NEW
+      stock: "", // ✅ NEW
+      stockAlert: "", // ✅ NEW
       sizeCostPrice: "",
       sizeSellingPrice: "",
     },
@@ -87,23 +84,12 @@ const CreateProduct = () => {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleUnitChange = (index, field, value) => {
-    const copy = [...units];
-    copy[index][field] = value;
-    setUnits(copy);
-  };
-
-  const handleVariantChange = (index, field, value) => {
+  const handleVariantChange = (i, field, value) => {
     const copy = [...variants];
-    copy[index][field] = value;
+    copy[i][field] =
+      field === "SKU" || field === "size" ? value.toUpperCase() : value;
     setVariants(copy);
   };
-
-  const addUnit = () =>
-    setUnits((prev) => [...prev, { type: "Piece", stock: "", stockAlert: "" }]);
-
-  const removeUnit = (index) =>
-    setUnits((prev) => prev.filter((_, i) => i !== index));
 
   const addVariant = () =>
     setVariants((prev) => [
@@ -126,17 +112,21 @@ const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validUnits = units.filter((u) => u.type && u.stock !== "");
-    if (validUnits.length === 0) {
-      alert("At least one unit with stock is required");
+    const activeVariants = variants.filter((v) => v.SKU);
+
+    if (activeVariants.length === 0) {
+      alert("At least one variant is required");
       return;
     }
 
-    const activeVariants = variants.filter((v) => v.SKU);
-
     for (const v of activeVariants) {
-      if (v.sizeCostPrice === "" || v.sizeSellingPrice === "") {
-        alert("Variant prices are required when SKU is filled");
+      if (
+        v.stock === "" ||
+        v.type === "" ||
+        v.sizeCostPrice === "" ||
+        v.sizeSellingPrice === ""
+      ) {
+        alert("Variant stock, unit type & prices are required");
         return;
       }
     }
@@ -155,23 +145,15 @@ const CreateProduct = () => {
     });
 
     formData.append(
-      "unit",
-      JSON.stringify(
-        validUnits.map((u) => ({
-          type: u.type,
-          stock: Number(u.stock || 0),
-          stockAlert: Number(u.stockAlert || 0),
-        }))
-      )
-    );
-
-    formData.append(
       "varients",
       JSON.stringify(
         activeVariants.map((v) => ({
           SKU: v.SKU,
           size: v.size,
           color: v.color,
+          type: v.type,
+          stock: Number(v.stock),
+          stockAlert: Number(v.stockAlert || 0),
           sizeCostPrice: Number(v.sizeCostPrice),
           sizeSellingPrice: Number(v.sizeSellingPrice),
         }))
@@ -199,7 +181,6 @@ const CreateProduct = () => {
       setLoading(false);
     }
   };
-
 
   /* ----------------------------------
      UI
@@ -313,7 +294,7 @@ const CreateProduct = () => {
           <h2 className="font-semibold mb-3">Variants (Size-wise Pricing)</h2>
 
           {variants.map((v, i) => (
-            <div key={i} className="grid md:grid-cols-6 gap-3 mb-3 items-end">
+            <div key={i} className="grid md:grid-cols-5 gap-3 mb-3 items-end">
               <input
                 placeholder="SKU *"
                 value={v.SKU}
@@ -324,7 +305,9 @@ const CreateProduct = () => {
               <input
                 placeholder="Size"
                 value={v.size}
-                onChange={(e) => handleVariantChange(i, "size", e.target.value)}
+                onChange={(e) =>
+                  handleVariantChange(i, "size", e.target.value.toUpperCase())
+                }
                 className={inputClass}
               />
 
@@ -356,12 +339,43 @@ const CreateProduct = () => {
                 }
                 className={inputClass}
               />
+              <select
+                value={v.type}
+                onChange={(e) => handleVariantChange(i, "type", e.target.value)}
+                className={selectClass}
+              >
+                {UNIT_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                placeholder="Stock *"
+                value={v.stock}
+                onChange={(e) =>
+                  handleVariantChange(i, "stock", e.target.value)
+                }
+                className={inputClass}
+              />
+
+              <input
+                type="number"
+                placeholder="Stock Alert"
+                value={v.stockAlert}
+                onChange={(e) =>
+                  handleVariantChange(i, "stockAlert", e.target.value)
+                }
+                className={inputClass}
+              />
 
               <button
                 type="button"
                 onClick={() => removeVariant(i)}
                 disabled={variants.length === 1}
-                className="text-red-500 text-sm"
+                className="text-red-500 text-sm border rounded-2xl py-1 mx-6 hover:bg-red-400 hover:text-white transition-all duration-300"
               >
                 Remove
               </button>
@@ -374,60 +388,6 @@ const CreateProduct = () => {
             className="text-blue-600 text-sm"
           >
             + Add Variant
-          </button>
-        </div>
-
-        {/* UNITS */}
-        <div className="bg-white dark:bg-[#111218] rounded-xl p-6">
-          <h2 className="font-semibold mb-3">Units & Stock</h2>
-
-          {units.map((u, i) => (
-            <div key={i} className="grid md:grid-cols-4 gap-3 mb-3">
-              <select
-                value={u.type}
-                onChange={(e) => handleUnitChange(i, "type", e.target.value)}
-                className={selectClass}
-              >
-                {UNIT_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-
-              <input
-                type="number"
-                placeholder="Stock *"
-                value={u.stock}
-                onChange={(e) => handleUnitChange(i, "stock", e.target.value)}
-                className={inputClass}
-              />
-
-              <input
-                type="number"
-                placeholder="Stock Alert"
-                value={u.stockAlert}
-                onChange={(e) =>
-                  handleUnitChange(i, "stockAlert", e.target.value)
-                }
-                className={inputClass}
-              />
-
-              <button
-                type="button"
-                onClick={() => removeUnit(i)}
-                disabled={units.length === 1}
-                className="text-red-500 text-sm"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addUnit}
-            className="text-blue-600 text-sm"
-          >
-            + Add Unit
           </button>
         </div>
 
