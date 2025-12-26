@@ -4,7 +4,6 @@ import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
-
 const Products = () => {
   const navigate = useNavigate();
 
@@ -103,7 +102,6 @@ const Products = () => {
       alert("Failed to delete product");
     }
   };
-
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">

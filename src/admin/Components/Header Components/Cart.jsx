@@ -25,7 +25,9 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [skuSearch, setSkuSearch] = useState("");
+  // const [skuSearch, setSkuSearch] = useState("");
+  const [searchText, setSearchText] = useState("");
+
   const [searching, setSearching] = useState(false);
 
   /* ---------------------------------- FETCH */
@@ -55,25 +57,31 @@ const Cart = () => {
       setLoading(false);
     }
   };
-  const searchBySKU = async (sku, locationId) => {
-    if (!sku || !locationId) return;
+ const searchProducts = async (text, locationId) => {
+   const q = text.trim();
+   if (!q || !locationId) return;
 
-    try {
-      setSearching(true);
+   try {
+     setSearching(true);
 
-      const res = await axios.get(`${BASE_URL}/product/search`, {
-        withCredentials: true,
-        params: {
-          sku,
-          location: locationId,
-        },
-      });
+     const res = await axios.get(`${BASE_URL}/product/search`, {
+       withCredentials: true,
+       params: {
+         sku: q,
+         name: q,
+         location: locationId,
+       },
+     });
 
-      setProducts(res?.data?.data || []);
-    } finally {
-      setSearching(false);
-    }
-  };
+     setProducts(res?.data?.data || []);
+   } catch (err) {
+     console.error("Search failed", err);
+   } finally {
+     setSearching(false);
+   }
+ };
+
+
 
   const fetchUsers = async () => {
     const res = await axios.get(`${BASE_URL}/admin/users`, {
@@ -202,15 +210,16 @@ const Cart = () => {
     if (!selectedLocation) return;
 
     const delay = setTimeout(() => {
-      if (skuSearch.trim()) {
-        searchBySKU(skuSearch.trim(), selectedLocation);
+      if (searchText.trim()) {
+        searchProducts(searchText.trim(), selectedLocation);
       } else {
         fetchProducts(selectedLocation);
       }
-    }, 400); // debounce delay
+    }, 400);
 
     return () => clearTimeout(delay);
-  }, [skuSearch, selectedLocation]);
+  }, [searchText, selectedLocation]);
+
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
@@ -223,14 +232,13 @@ const Cart = () => {
           <div className="max-w-md ">
             <input
               type="text"
-              value={skuSearch}
-              onChange={(e) => setSkuSearch(e.target.value)}
-              placeholder="Search by SKU ..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search by SKU or Product Name..."
               className={inputClass}
             />
-            {searching && (
-              <p className="text-xs text-gray-500">Searching…</p>
-            )}
+
+            {searching && <p className="text-xs text-gray-500">Searching…</p>}
           </div>
         )}
 
@@ -248,9 +256,10 @@ const Cart = () => {
             setSelectedLocation(locId);
             setCartItems([]); // 🔐 prevent mixed-location cart
             setProducts([]);
-            setSkuSearch("");
+            // setSkuSearch("");
+            setSearchText("");
             if (locId) {
-              fetchProducts(locId);
+              // fetchProducts(locId);
             }
           }}
           className={inputClass + " max-w-sm "}
