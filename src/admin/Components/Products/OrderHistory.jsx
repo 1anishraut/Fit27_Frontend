@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
+import { RiMobileDownloadLine } from "react-icons/ri";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -41,6 +42,10 @@ const OrderHistory = () => {
     if (order.customerInfo) return "Walk-in";
     return "-";
   };
+const handleDownloadInvoice = (orderId, e) => {
+  e.stopPropagation(); 
+  window.open(`${BASE_URL}/order/${orderId}/invoice`, "_blank");
+};
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
@@ -66,6 +71,7 @@ const OrderHistory = () => {
                     "Payment",
                     "Total",
                     "Status",
+                    "Invoice",
                   ].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-medium">
                       {h}
@@ -127,6 +133,14 @@ const OrderHistory = () => {
                           Cancelled
                         </span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={(e) => handleDownloadInvoice(order._id, e)}
+                        className="px-3 py-1 text-xs rounded bg-black text-white dark:bg-white dark:text-black hover:opacity-90"
+                      >
+                        <RiMobileDownloadLine />
+                      </button>
                     </td>
                   </tr>
                 ))}
