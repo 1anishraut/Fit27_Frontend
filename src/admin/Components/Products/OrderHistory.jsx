@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
-import { RiMobileDownloadLine } from "react-icons/ri";
+// import { RiMobileDownloadLine } from "react-icons/ri";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -42,10 +42,37 @@ const OrderHistory = () => {
     if (order.customerInfo) return "Walk-in";
     return "-";
   };
-const handleDownloadInvoice = (orderId, e) => {
-  e.stopPropagation(); 
-  window.open(`${BASE_URL}/order/${orderId}/invoice`, "_blank");
-};
+  const handleDownloadInvoice = (orderId, e) => {
+    e.stopPropagation();
+    window.open(`${BASE_URL}/order/${orderId}/invoice`, "_blank");
+  };
+  const handleDeleteOrder = async (orderId, e) => {
+    e.stopPropagation(); // prevent row click
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this order?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/order/delete/${orderId}`, {
+        withCredentials: true,
+      });
+
+      // remove from UI instantly (no refetch needed)
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+
+      // close modal if same order is open
+      if (selectedOrder?._id === orderId) {
+        setSelectedOrder(null);
+      }
+
+      alert("Order deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.message || "Failed to delete order");
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
@@ -71,7 +98,8 @@ const handleDownloadInvoice = (orderId, e) => {
                     "Payment",
                     "Total",
                     "Status",
-                    "Invoice",
+                    // "Invoice",
+                    "Actions",
                   ].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-medium">
                       {h}
@@ -139,7 +167,19 @@ const handleDownloadInvoice = (orderId, e) => {
                         onClick={(e) => handleDownloadInvoice(order._id, e)}
                         className="px-3 py-1 text-xs rounded bg-black text-white dark:bg-white dark:text-black hover:opacity-90"
                       >
-                        <RiMobileDownloadLine />
+                        {/* <RiMobileDownloadLine /> */}
+                        Download
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteOrder(order._id, e)}
+                        // disabled={order.status === "PAID"} 
+                        className={`ml-4 px-3 py-1 text-xs rounded text-white ${
+                          order.status === "PAID"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-500 hover:bg-red-600"
+                        }`}
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>
