@@ -23,22 +23,55 @@ const Cart = () => {
 
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [discount, setDiscount] = useState(0);
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [skuSearch, setSkuSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
   /* ---------------------------------- FETCH */
   useEffect(() => {
-    fetchProducts();
+    fetchLocations();
+    // fetchProducts();
     fetchUsers();
   }, []);
+  const fetchLocations = async () => {
+    const res = await axios.get(`${BASE_URL}/location/all`, {
+      withCredentials: true,
+    });
+    setLocations(res?.data?.data || []);
+  };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (locationId) => {
     try {
       setLoading(true);
+
       const res = await axios.get(`${BASE_URL}/product/all`, {
         withCredentials: true,
+        params: locationId ? { location: locationId } : {},
       });
+
       setProducts(res?.data?.data || []);
     } finally {
       setLoading(false);
+    }
+  };
+  const searchBySKU = async (sku, locationId) => {
+    if (!sku || !locationId) return;
+
+    try {
+      setSearching(true);
+
+      const res = await axios.get(`${BASE_URL}/product/search`, {
+        withCredentials: true,
+        params: {
+          sku,
+          location: locationId,
+        },
+      });
+
+      setProducts(res?.data?.data || []);
+    } finally {
+      setSearching(false);
     }
   };
 
@@ -162,16 +195,78 @@ const Cart = () => {
       alert(err?.response?.data?.message || "Failed to place order");
     }
   };
+  /* ----------------------------------
+   SKU SEARCH DEBOUNCE (STEP 3)
+---------------------------------- */
+  useEffect(() => {
+    if (!selectedLocation) return;
 
+    const delay = setTimeout(() => {
+      if (skuSearch.trim()) {
+        searchBySKU(skuSearch.trim(), selectedLocation);
+      } else {
+        fetchProducts(selectedLocation);
+      }
+    }, 400); // debounce delay
+
+    return () => clearTimeout(delay);
+  }, [skuSearch, selectedLocation]);
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
-      <h1 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
-        Point of Sale
-      </h1>
+      <div className="flex items-center justify-between  bg-white dark:bg-[#111218] border border-gray-200 dark:border-gray-700 rounded-xl px-6 py-2 mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Point of Sale
+        </h1>
+        {/* SKU SEARCH */}
+        {selectedLocation && (
+          <div className="max-w-md ">
+            <input
+              type="text"
+              value={skuSearch}
+              onChange={(e) => setSkuSearch(e.target.value)}
+              placeholder="Search by SKU ..."
+              className={inputClass}
+            />
+            {searching && (
+              <p className="text-xs text-gray-500">Searching…</p>
+            )}
+          </div>
+        )}
+
+        {!selectedLocation && (
+          <p className="text-sm text-gray-500 ">
+            Select a location to view products
+          </p>
+        )}
+
+        <select
+          value={selectedLocation}
+          onChange={(e) => {
+            const locId = e.target.value;
+
+            setSelectedLocation(locId);
+            setCartItems([]); // 🔐 prevent mixed-location cart
+            setProducts([]);
+            setSkuSearch("");
+            if (locId) {
+              fetchProducts(locId);
+            }
+          }}
+          className={inputClass + " max-w-sm "}
+        >
+          <option value="">Select location</option>
+          {locations.map((loc) => (
+            <option key={loc._id} value={loc._id}>
+              {loc.locationName}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="grid grid-cols-12 gap-6">
         {/* LEFT */}
+
         <div className="col-span-12 lg:col-span-9">
           {loading ? (
             <p className="text-sm text-gray-500">Loading products...</p>
@@ -181,6 +276,10 @@ const Cart = () => {
                 <div
                   key={p._id}
                   onClick={() => {
+                    if (!selectedLocation) {
+                      alert("Please select a location first");
+                      return;
+                    }
                     setSelectedProduct(p);
                     setShowVariantsModal(true);
                   }}
