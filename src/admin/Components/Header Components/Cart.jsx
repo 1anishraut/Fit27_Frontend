@@ -132,21 +132,27 @@ const Cart = () => {
       const payload = {
         selectedProducts: buildSelectedProducts(),
         paymentMode,
-        subtotal,
         discount,
         tax: 0,
-        totalAmount: total,
       };
 
       if (selectedCustomer) payload.customer = selectedCustomer;
       if (customerInfo) payload.customerInfo = customerInfo;
 
-      await axios.post(`${BASE_URL}/order/create`, payload, {
+      const res = await axios.post(`${BASE_URL}/order/create`, payload, {
         withCredentials: true,
       });
 
+      const orderId = res?.data?.data?._id;
+
       alert("Order placed successfully");
 
+      /* ✅ OPEN INVOICE PDF */
+      if (orderId) {
+        window.open(`${BASE_URL}/order/${orderId}/invoice`, "_blank");
+      }
+
+      /* RESET STATE */
       setCartItems([]);
       setDiscount(0);
       setSelectedCustomer("");
@@ -156,6 +162,7 @@ const Cart = () => {
       alert(err?.response?.data?.message || "Failed to place order");
     }
   };
+
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">

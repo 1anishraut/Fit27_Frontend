@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../Utils/Constants";
+import { RiDeleteBin6Line } from "react-icons/ri";
+
 
 const Products = () => {
   const navigate = useNavigate();
@@ -83,6 +85,26 @@ const Products = () => {
     fetchProducts();
   }, []);
 
+  const handleDeleteProduct = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/product/delete/${id}`, {
+        withCredentials: true,
+      });
+
+      // remove deleted product from UI instantly
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete product");
+    }
+  };
+
+
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen">
       {/* HEADER */}
@@ -105,13 +127,13 @@ const Products = () => {
           Search by SKU
         </label>
 
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-6 ">
           <input
             type="text"
             value={skuSearch}
             onChange={handleSkuChange}
             placeholder="Type SKU (e.g. ABC123)"
-            className="w-full md:w-96 border border-gray-300 dark:border-gray-700 rounded-md px-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full md:w-96 border border-gray-300 dark:border-gray-700 rounded-md px-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white my-3"
           />
 
           {/* AVAILABLE SIZES */}
@@ -158,6 +180,7 @@ const Products = () => {
                   <th className="px-4 py-3 text-left">Price</th>
                   <th className="px-4 py-3 text-left">Status</th>
                   <th className="px-4 py-3 text-left">Created</th>
+                  <th className="px-4 py-3 text-center">Actions</th>
                 </tr>
               </thead>
 
@@ -229,6 +252,15 @@ const Products = () => {
 
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
                         {new Date(p.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleDeleteProduct(p._id)}
+                          className="text-red-600 hover:text-red-700 transition"
+                          title="Delete product"
+                        >
+                          <RiDeleteBin6Line size={18} />
+                        </button>
                       </td>
                     </tr>
                   );
