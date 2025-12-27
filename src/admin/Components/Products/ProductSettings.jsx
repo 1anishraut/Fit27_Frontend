@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../../../Utils/Constants";
+import { RiDeleteBin6Line } from "react-icons/ri";
+
 
 const inputClass =
   "w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-white dark:bg-[#14151c] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white";
@@ -81,6 +83,37 @@ const ProductSettings = () => {
       alert(err?.response?.data?.message || "Failed to create category");
     }
   };
+  /* ----------------------------------
+   DELETE BRAND
+---------------------------------- */
+  const deleteBrand = async (id) => {
+    if (!window.confirm("Delete this brand?")) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/product-brand/delete/${id}`, {
+        withCredentials: true,
+      });
+      fetchData();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to delete brand");
+    }
+  };
+
+  /* ----------------------------------
+   DELETE CATEGORY
+---------------------------------- */
+  const deleteCategory = async (id) => {
+    if (!window.confirm("Delete this category?")) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/product-category/delete/${id}`, {
+        withCredentials: true,
+      });
+      fetchData();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to delete category");
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-[#09090B] min-h-screen space-y-6">
@@ -124,6 +157,14 @@ const ProductSettings = () => {
                   <span className="text-gray-800 dark:text-gray-200">
                     {b.name}
                   </span>
+
+                  <button
+                    onClick={() => deleteBrand(b._id)}
+                    className="text-red-600 hover:text-red-800"
+                    title="Delete brand"
+                  >
+                    <RiDeleteBin6Line size={18} />
+                  </button>
                 </li>
               ))
             )}
@@ -182,18 +223,31 @@ const ProductSettings = () => {
               <p className="py-3 text-gray-500">No categories found</p>
             ) : (
               categories.map((c) => (
-                <div key={c._id} className="py-3">
-                  <p className="text-gray-900 dark:text-gray-100 font-medium">
-                    {c.name}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    HSN: {c.hsnCode}
-                  </p>
-                  {c.description && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {c.description}
+                <div
+                  key={c._id}
+                  className="py-3 flex justify-between items-start gap-4"
+                >
+                  <div>
+                    <p className="text-gray-900 dark:text-gray-100 font-medium">
+                      {c.name}
                     </p>
-                  )}
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      HSN: {c.hsnCode}
+                    </p>
+                    {c.description && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {c.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => deleteCategory(c._id)}
+                    className="text-red-600 hover:text-red-800 mt-1"
+                    title="Delete category"
+                  >
+                    <RiDeleteBin6Line size={18} />
+                  </button>
                 </div>
               ))
             )}

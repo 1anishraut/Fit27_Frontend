@@ -55,6 +55,7 @@ import ProductSettings from "./admin/Components/Products/ProductSettings";
 import CreateNewProduct from "./admin/Components/Products/CreateNewProduct";
 import Cart from "./admin/Components/Header Components/Cart";
 import OrderHistory from "./admin/Components/Products/OrderHistory";
+import UserSignup from "./client/UserSignup";
 
 
 
@@ -76,16 +77,19 @@ function App() {
             </Route>
             {/* -------- Client Routes -------- */}
             <Route path="/login" element={<SuperAdminLogin />} />
+            {/* <Route path="/signup" element={<UserSignup/>}/> */}
+            <Route path="/signup/:slug" element={<UserSignup />} />
+
             <Route path="/userDashboard" element={<UserLayout />}>
               <Route path="userAllDetails" element={<UserDashboard />} />
-              <Route path="myCard" element={<MemberCard/>}/>
-              <Route path="bookClass" element={<BookClass/>}/>
-              <Route path="bookedClasses" element={<BookedClass/>}/>
-              <Route path="userEnquery" element={<UserEnquery/>}/>
-              <Route path="adminEnquiries" element={<AdminEnquery/>}/>
-              <Route path="createUserEnquery" element={<CreateUserEnquery/>}/>
-              <Route path="guestPass" element={<GuestPass/>}/>
-              <Route path="checkInHistory" element={<CheckInHistory/>}/>
+              <Route path="myCard" element={<MemberCard />} />
+              <Route path="bookClass" element={<BookClass />} />
+              <Route path="bookedClasses" element={<BookedClass />} />
+              <Route path="userEnquery" element={<UserEnquery />} />
+              <Route path="adminEnquiries" element={<AdminEnquery />} />
+              <Route path="createUserEnquery" element={<CreateUserEnquery />} />
+              <Route path="guestPass" element={<GuestPass />} />
+              <Route path="checkInHistory" element={<CheckInHistory />} />
             </Route>
 
             {/* -------- Admin Routes -------- */}
@@ -96,29 +100,38 @@ function App() {
               <Route path="classes" element={<Classes />} />
               <Route path="createClasses" element={<CreateClasses />} />
               <Route path="editClasses/:id" element={<EditClasses />} />
-              <Route path="allClassScheduleList" element={<AllClassScheduleList />}/>
-              <Route path="createDaysSchedule" element={<CreateDaysSchedule />}/>
-              <Route path="createWeeklySchedule" element={<CreateWeeklySchedule />}/>
-              <Route path="createEnquiry" element={<AdminCreateEnquiry/>}/>
+              <Route
+                path="allClassScheduleList"
+                element={<AllClassScheduleList />}
+              />
+              <Route
+                path="createDaysSchedule"
+                element={<CreateDaysSchedule />}
+              />
+              <Route
+                path="createWeeklySchedule"
+                element={<CreateWeeklySchedule />}
+              />
+              <Route path="createEnquiry" element={<AdminCreateEnquiry />} />
               <Route path="members" element={<Members />} />
               <Route path="createMember" element={<CreateMembers />} />
               <Route path="editMember/:id" element={<EditMember />} />
-              <Route path="inactiveMembers" element={<InactiveMemembers/>}/>
-              <Route path="enquiry" element={<Enquiry/>}/>
-              <Route path="replyEnquiry/:id" element={<ReplyEnquiry/>}/>
-              <Route path="guestPassReview" element={<GuestPassReview/>}/>
+              <Route path="inactiveMembers" element={<InactiveMemembers />} />
+              <Route path="enquiry" element={<Enquiry />} />
+              <Route path="replyEnquiry/:id" element={<ReplyEnquiry />} />
+              <Route path="guestPassReview" element={<GuestPassReview />} />
               <Route path="adminPlans" element={<AdminPlans />} />
               <Route path="createPlan" element={<CreatePlans />} />
               <Route path="editPlan/:id" element={<EditPlan />} />
               <Route path="instructors" element={<Instructors />} />
               <Route path="createInstructor" element={<CreateInstructor />} />
               <Route path="editInstructor/:id" element={<EditInstructor />} />
-              <Route path="products" element={<Products/>}/>
-              <Route path="createProduct" element={<CreateNewProduct/>}/>
-              <Route path="productSettings" element={<ProductSettings/>}/>
-              <Route path="cart" element={<Cart/>}/>
+              <Route path="products" element={<Products />} />
+              <Route path="createProduct" element={<CreateNewProduct />} />
+              <Route path="productSettings" element={<ProductSettings />} />
+              <Route path="cart" element={<Cart />} />
               <Route path="adminSettings" element={<AdminSettings />} />
-              <Route path="orderHistory" element={<OrderHistory/>}/>
+              <Route path="orderHistory" element={<OrderHistory />} />
             </Route>
           </Routes>
         </BrowserRouter>
