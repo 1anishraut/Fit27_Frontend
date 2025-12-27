@@ -61,7 +61,7 @@ const PlansSection = ({ onSelectPlan }) => {
               </h3>
 
               <div className="mt-3 flex items-end gap-1">
-                <span className="text-3xl font-bold text-blue-600">
+                <span className="text-3xl font-bold text-[#FF6900]">
                   ₹{plan.planPrice}
                 </span>
                 <span className="text-sm text-gray-500">
@@ -109,7 +109,7 @@ const PlansSection = ({ onSelectPlan }) => {
             <div className="p-6 border-t">
               <button
                 onClick={() => onSelectPlan(plan)}
-                className="w-full py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="w-full py-2 rounded-md bg-[#FF6900] text-white hover:bg-[#F54900] transition"
               >
                 Select Plan
               </button>
