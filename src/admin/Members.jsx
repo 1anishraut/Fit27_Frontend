@@ -19,6 +19,10 @@ export default function Members() {
   const [toggleMap, setToggleMap] = useState({});
 
   const menuRef = useRef(null);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef(null);
+
 
   /* CLOSE DROPDOWN WHEN CLICK OUTSIDE */
   useEffect(() => {
@@ -87,13 +91,59 @@ export default function Members() {
       : user.selectedPlan;
   };
 
+
+  const handleSearch = (value) => {
+    setSearch(value);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!value.trim()) {
+      fetchMembers();
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        setSearching(true);
+
+        const query = value.trim().toUpperCase(); // ✅ FIX
+
+        const res = await axios.get(
+          `${BASE_URL}/user/lookup?q=${encodeURIComponent(query)}`,
+          { withCredentials: true }
+        );
+
+        setMembers(res.data?.data || []);
+      } catch (err) {
+        console.error("Search failed:", err);
+        setMembers([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 400);
+  };
+
+
+
   return (
     <div className="p-6 min-h-screen bg-[#F2F0EF] dark:bg-[#09090B] transition-all">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-4">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
           Members Overview
         </h1>
+
+        {/* SEARCH */}
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Search by Member ID or Name..."
+          className="w-72 px-3 py-2 text-sm rounded-lg border border-gray-300 
+               dark:border-gray-700 bg-white dark:bg-[#0D0D0F]
+               text-gray-900 dark:text-gray-200
+               focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
         <button
           onClick={() => navigate("/adminDashboard/createMember")}

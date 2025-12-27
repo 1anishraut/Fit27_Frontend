@@ -22,6 +22,7 @@ export default function EditMember() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [existingAvatar, setExistingAvatar] = useState("");
   const [formData, setFormData] = useState(null);
+  const [approving, setApproving] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ststus, setStatus]= useState("");
@@ -65,6 +66,7 @@ export default function EditMember() {
         specialNote: u.specialNote || "",
         startedAt: toInputDate(u.startedAt),
         endedAt: toInputDate(u.endedAt),
+        approval: u.approval ?? false,
 
         // ⭐ NEW HOLD FIELDS
         holdStartDate: toInputDate(u.holdStartDate),
@@ -164,6 +166,37 @@ export default function EditMember() {
       return `${year}-${month}-${day}`;
     };
 
+const handleApprovalToggle = async () => {
+  const nextValue = !formData.approval;
+
+  const confirmMsg = nextValue
+    ? "Approve this member?"
+    : "Revoke approval for this member?";
+
+  if (!window.confirm(confirmMsg)) return;
+
+  try {
+    setApproving(true);
+
+    await axios.patch(
+      `${BASE_URL}/user/updateById/${id}`,
+      { approval: nextValue },
+      { withCredentials: true }
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      approval: nextValue,
+    }));
+
+    alert(nextValue ? "Member approved successfully" : "Approval revoked");
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.message || "Approval update failed");
+  } finally {
+    setApproving(false);
+  }
+};
 
 
   return (
@@ -186,7 +219,9 @@ export default function EditMember() {
                 {/* MEMBER STATUS */}
                 <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200">
                   Member Status <span className="px-1"></span>
-                  <span className="text-green-500 font-semibold uppercase">{ststus}</span>
+                  <span className="text-green-500 font-semibold uppercase">
+                    {ststus}
+                  </span>
                 </h2>
 
                 {/* HOLD END DATE */}
@@ -205,6 +240,36 @@ export default function EditMember() {
                     </span>
                   </h2>
                 )}
+                {/* Approval Toggle  */}
+                {/* APPROVAL TOGGLE */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    Approval
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handleApprovalToggle}
+                    disabled={approving}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition
+      ${formData.approval ? "bg-green-600" : "bg-gray-400"}
+    `}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition
+        ${formData.approval ? "translate-x-6" : "translate-x-1"}
+      `}
+                    />
+                  </button>
+
+                  <span
+                    className={`text-xs font-semibold ${
+                      formData.approval ? "text-green-600" : "text-yellow-600"
+                    }`}
+                  >
+                    {formData.approval ? "Approved" : "Pending"}
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
